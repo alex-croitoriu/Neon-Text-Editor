@@ -1,2 +1,2 @@
 all:
-	g++ -Isrc/include -c main.cpp -o main.exe
+	g++ main.cpp -o main.exe -Isrc/include -Lsrc/lib -lsfml-graphics -lsfml-window -lsfml-system

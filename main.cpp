@@ -6,11 +6,7 @@
 
 using namespace std;
 
-const int C = 500;
-
 int pos;
-int charSize[C][C];
-int charHeight[C][C];
 
 void modify(char ch , string &s)
 {
@@ -36,145 +32,114 @@ int main()
 
     const int DIM = 1000;
     const int unit = 100;
-    const int fontUnit = 10;
-    
-    string s, sRaw = "|", t;
-    
-    int fontSize = 50;
-    int offset = 0;
-    int textOffset = 15;
-
     sf::RenderWindow window(sf::VideoMode(DIM , DIM), "Text Editor");
     sf::View view;
 
-    sf::RectangleShape button1(sf::Vector2f(50.f , 25.f));
-    sf::RectangleShape button2(sf::Vector2f(50.f , 25.f));
-    sf::RectangleShape button3(sf::Vector2f(50.f , 25.f));
-
-    button1.setPosition(0 , 0);
-    button2.setPosition(50 , 0);
-    button3.setPosition(100, 0);
-
-    button1.setFillColor(sf::Color::Blue);
-    button2.setFillColor(sf::Color::Green);
-    button3.setFillColor(sf::Color::Magenta);
-    
-    sf::Event event;
+    string s , sRaw = "|", t;
+    int fontSize = 50;
+    bool ctrl = 0;
+    bool plus = 0;
+    bool minus = 0;
+    bool sKey = 0;
+    int offset = 0;
+    ///1 - 0 26 - 35
+    ///a - z 0 - 25
+    /// enter - 36
+    /// caps - 76
+    /// shift - 128
+    ///ctrl - 37
+    ///< - 71 > - 72
+   // return 0;
     sf::Text text;
     sf::Font font;
-
-    font.loadFromFile("arial.ttf");
-    text.setFont(font);
-    text.setFillColor(sf::Color::Red);
-
-    for (int fnt = fontSize ; fnt < C ; fnt += fontUnit)
-    {
-        for (int i = 0; i <= 255; i++)
-        {
-            t = (char)i;
-            text.setString(t);
-            text.setCharacterSize(fnt);
-            int sz1 = text.getLocalBounds().width;
-            t += (char)i;
-            text.setString(t);
-            int sz2 = text.getLocalBounds().width - sz1;
-            charSize[fnt][i] = max(sz2, sz1);
-            charHeight[fnt][i] = text.getLocalBounds().height;
-        }
-    }
-
-    int nr = 0;
+    // font.loadFromFile("arial.ttf");
+    // text.setFont(font);
+    // text.setFillColor(sf::Color::Red);
+    sf::Event event;
 
     while (window.isOpen())
     {
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
-                window.close();
-
-            if (event.type == sf::Event::MouseButtonPressed)
-            {
-                int key = event.key.code;
-                sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-              
-                if (key == 0 && button1.getGlobalBounds().contains(window.mapPixelToCoords(localPosition))) ///font++
-                {
-                    fontSize += fontUnit;
-                }
-
-                if (key == 0 && button2.getGlobalBounds().contains(window.mapPixelToCoords(localPosition))) ///font--
-                {
-                    fontSize -= fontUnit;
-                }
-
-                if (key == 0 && button3.getGlobalBounds().contains(window.mapPixelToCoords(localPosition))) ///save
-                {
-                    fptr = fopen("text.txt", "w");
-
-                    for (auto i : sRaw)
-                        if(i != '|')
-                             fprintf(fptr, "%c", i);
-
-                    fclose(fptr);
-                }
-            }
-
-            if (event.type == sf::Event::MouseWheelMoved)
-            {
-                int direction = event.mouseWheel.delta;
-
-                if (direction == +1) offset -= unit;
-                if (direction == -1) offset += unit;
-                
-                break;
-            }
+                window.close(); 
 
             if (event.type == sf::Event::KeyPressed)
             {
-                // cerr << event.key.code << ' ';
-                int key = event.key.code;
-
-                if (key == 74) offset += unit;
-                else if (key == 73) offset -= unit;
-                else if (key == 71) if (pos) swap(sRaw[pos], sRaw[pos - 1]), pos--;
-                else if (key == 72) if (pos + 1 < sRaw.size()) swap(sRaw[pos], sRaw[pos + 1]), pos++;
+                cerr << event.key.code << ' ';
+                if (event.key.code == 37) ctrl = 1;
+                if (event.key.code == 55) plus = 1;
+                if (event.key.code == 56) minus = 1;
+                if (event.key.code == 74) offset += unit;
+                if (event.key.code == 73) offset -= unit;
+                if (event.key.code == 18) sKey = 1;
+                if (event.key.code == 71)
+                {
+                    if (pos) swap(sRaw[pos], sRaw[pos - 1]) , pos--;
+                }
+                if (event.key.code == 72)
+                {
+                    if(pos + 1 < sRaw.size()) swap(sRaw[pos] , sRaw[pos + 1]) , pos++;
+                }
 
                 break;
             }
 
             if (event.type == sf::Event::KeyReleased)
             {
-                int key = event.key.code;
+                if (event.key.code == 37) ctrl = 0;
+                if (event.key.code == 55) plus = 0;
+                if (event.key.code == 56) minus = 0;
+                if (event.key.code == 18) sKey = 0;
                 break;
             }
 
             if (event.type == sf::Event::TextEntered)
             {
+                if (ctrl == 1) break;
                 int ch = event.text.unicode;
-                modify(ch, sRaw);
 
+              //  std::cout << ch << '\n';
+              //  modify(ch , s);
+                modify(ch , sRaw);
                 break;
             }
         }
 
+        fontSize += (plus & ctrl) * 1; ///font++
+        fontSize -= (minus & ctrl) * 1;///font--
+        fontSize = max(1, fontSize);
+        text.setString(s);
         text.setCharacterSize(fontSize);
+
+        if (ctrl == 1 && sKey == 1) ///save
+        {
+            fptr = fopen("text.txt", "w");
+
+            for (auto i : sRaw)
+                fprintf(fptr, "%c", i);
+
+            fclose(fptr);
+        }
+
         int W = text.getLocalBounds().width;
 
         //if (W >= DIM || minus == 1 && ctrl == 1)
         {
             s.clear();
-            int currWidth = 0;
+            t.clear();
 
             for (auto i : sRaw)
             {
                 s += i;
-                currWidth += charSize[fontSize][i];
-
-                if (currWidth >= DIM)
+                t += i;
+                text.setString(t);
+                if (text.getLocalBounds().width >= DIM)
                 {
                     s.back() = 10;
                     s += i;
-                    currWidth = charSize[fontSize][i];
+                    t.clear();
+                    t += i;
                 }
             }
 
@@ -184,14 +149,9 @@ int main()
 
         view.reset(sf::FloatRect(0 , 0 + offset , DIM , DIM));
         window.setView(view);
-        textOffset = charHeight[fontSize]['a'] + 30;
-        text.setPosition(0, textOffset);
 
         window.clear();
         window.draw(text);
-        window.draw(button1);
-        window.draw(button2);
-        window.draw(button3);
         window.display();
     }
 
