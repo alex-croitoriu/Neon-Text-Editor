@@ -461,6 +461,180 @@ namespace String
     }
 }
 
+namespace Windows
+{
+    string getPathFromUser(string name)///ia path-ul introdus de catre utilizator pentru a salva fisierul
+    {
+        const int DIM = 200;
+        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
+        sf::Image mainIcon;
+        mainIcon.loadFromFile("main icon.png");
+        window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
+
+        sf::Event event;
+        sf::Text text, pth;
+        sf::Font font;
+
+        font.loadFromFile("arial.ttf");
+
+        text.setFont(font);
+        text.setFillColor(sf::Color::Black);
+        text.setString("EnterPath: ");
+
+        pth.setFont(font);
+        pth.setFillColor(sf::Color::Green);
+        pth.setString("");
+        pth.setPosition(150, 0);
+
+        string path;
+
+        while (window.isOpen())
+        {
+            while (window.pollEvent(event))
+            {
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    //cerr << event.key.code << ' ';
+                    int key = event.key.code;
+
+                    if (key == 58 || key == 36)
+                    {
+                        window.close();
+                    }
+
+                    break;
+                }
+                if (event.type == sf::Event::TextEntered)
+                {
+                    int ch = event.text.unicode;
+
+                    if (ch == 8)
+                    {
+                        if (path.size())
+                            path.pop_back();
+                    }
+                    else path += ch;
+
+                    break;
+                }
+            }
+
+            pth.setString(path);
+            window.clear(sf::Color::White);
+            window.draw(text);
+            window.draw(pth);
+            window.display();
+        }
+
+        return path;
+    }
+
+    string getStringFromUser(string name)///citeste cuvantul pe care vrea user-ul sa-l caute
+    {
+        const int DIM = 200;
+        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10) , name);
+        sf::Image mainIcon;
+        mainIcon.loadFromFile("main icon.png");
+        window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
+
+        sf::Event event;
+        sf::Text text, pth;
+        sf::Font font;
+
+        font.loadFromFile("arial.ttf");
+
+        text.setFont(font);
+        text.setFillColor(sf::Color::Black);
+        text.setString("Enter keyword: ");
+
+        pth.setFont(font);
+        pth.setFillColor(sf::Color::Green);
+        pth.setString("");
+        pth.setPosition(210, 0);
+
+        string path;
+
+        while (window.isOpen())
+        {
+            while (window.pollEvent(event))
+            {
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    //cerr << event.key.code << ' ';
+                    int key = event.key.code;
+
+                    if (key == 58 || key == 36)
+                    {
+                        window.close();
+                    }
+
+                    break;
+                }
+                if (event.type == sf::Event::TextEntered)
+                {
+                    int ch = event.text.unicode;
+
+                    if (ch == 8)
+                    {
+                        if (path.size())
+                            path.pop_back();
+                    }
+                    else path += ch;
+
+                    break;
+                }
+            }
+
+            pth.setString(path);
+            window.clear(sf::Color::White);
+            window.draw(text);
+            window.draw(pth);
+            window.display();
+        }
+
+        return path;
+    }
+
+    void throwMessage(string message)///ia path-ul introdus de catre utilizator pentru a salva fisierul
+    {
+        const int DIM = 200;
+        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), "");
+
+        sf::Event event;
+        sf::Text text;
+        sf::Font font;
+
+        font.loadFromFile("arial.ttf");
+
+        text.setFont(font);
+        text.setFillColor(sf::Color::Black);
+        text.setString(message);
+
+        while (window.isOpen())
+        {
+            while (window.pollEvent(event))
+            {
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    //cerr << event.key.code << ' ';
+                    int key = event.key.code;
+
+                    if (key == 58 || key == 36)
+                    {
+                        window.close();
+                    }
+
+                    break;
+                }
+            }
+
+            window.clear(sf::Color::White);
+            window.draw(text);
+            window.display();
+        }
+    }
+}
+
 bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
 {
     int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
@@ -758,7 +932,15 @@ int main()
                 }
                 else if (key == 87)
                 {
-                    FILE* fptr = fopen("text.txt", "r");
+                    string path = Windows::getPathFromUser("Open File");
+                    FILE* fptr = fopen(path.c_str(), "r");
+                    
+                    if (fptr == NULL)
+                    {
+                        Windows::throwMessage("Wrong Path!");
+                        break;
+                    }
+
                     char ch;
                     int nr = 0;
 
@@ -781,6 +963,51 @@ int main()
                     renderAgain = 1;
                     cerr << "done" << ' ' << nr << '\n';
                     //return 0;
+                }
+                else if (key == 88)
+                {
+                    string path = Windows::getPathFromUser("Save As");
+                    FILE* fptr = fopen(path.c_str(), "w");
+                    
+                    if (fptr == NULL)
+                    {
+                        Windows::throwMessage("Wrong Path!");
+                        break;
+                    }
+
+                    int posCursor = String::findCursorPosition(S);
+
+                    for (int i = 1; i <= String::len(S); i++)
+                    {
+                        char ch = String::get(i, S);
+                        if(posCursor != i) fprintf(fptr , "%c" , ch);
+                    }
+
+                    fclose(fptr);
+
+                    break;
+                }
+                else if (key == 89)
+                {
+                    string word = Windows::getStringFromUser("Find");
+                    string s = String::constructString(S);
+                    
+                    int pos = -1;
+                    int matchings = 0;
+
+                    while ((pos = s.find(word, pos + 1)) < s.size())
+                    {
+                        matchings++;
+
+                        for (int i = pos; i <= pos + word.size() - 1; i++)
+                        {
+
+                        }
+
+                        pos += word.size() - 1;
+                    }
+
+                    Windows::throwMessage("There are " + to_string(matchings) + " matchings!");
                 }
                 else if (key == 85)
                 {
