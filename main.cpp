@@ -735,6 +735,45 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     text2.display();
 }
 
+class Button
+{
+public:
+    sf::RectangleShape container;
+    sf::Text content;
+    sf::Texture texture;
+    Button(string &content, sf::Font &font, sf::Vector2f &size, sf::Vector2f &position)
+    {
+        this->container.setSize(size);
+        this->container.setPosition(position);
+        this->content.setString(content);
+        this->content.setPosition
+        (
+            container.getPosition().x, 
+            container.getPosition().y
+        );
+        this->container.setFillColor(sf::Color::Red);
+
+        this->content.setFont(font);
+
+        this->content.setCharacterSize(14);
+        this->content.setStyle(sf::Text::Bold);
+        this->content.setFillColor(sf::Color::Black);
+    }
+    void setTexture(const sf::Texture *texture)
+    {
+        this->container.setTexture(texture);
+    }
+    sf::FloatRect getGlobalBounds() 
+    {
+        return container.getGlobalBounds();
+    }
+    bool isInside(sf::RenderWindow &window)
+    {
+        sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+        return this->getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
+    }
+};
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Text Editor");
@@ -747,6 +786,31 @@ int main()
     sf::Event event;
     sf::Text text;
     sf::Font font;
+
+    string contents[] = {"", "", "Open", "Save", "Save as", "Find"};
+
+    sf::Vector2f positions[6];
+
+    for (int i = 0; i < 6; i++)
+    {
+        positions[i] = sf::Vector2f(i * 100, 0);
+    }
+    
+    sf::Vector2f size(75.0, 30.0);
+    
+    Button *buttons[6];
+
+    for (int i = 0; i < 6; i++)
+    {
+        buttons[i] = new Button(contents[i], font, size, positions[i]);
+    }
+
+    sf::Texture zoomIn, zoomOut;
+    zoomIn.loadFromFile("assets/images/plus.png");
+    zoomOut.loadFromFile("assets/images/minus.png");
+
+    buttons[0]->setTexture(&zoomIn);
+    buttons[1]->setTexture(&zoomOut);
 
     font.loadFromFile("assets/fonts/cour.ttf");
     text.setFont(font);
@@ -802,7 +866,127 @@ int main()
                 int key = event.key.code;
                 sf::Vector2i localPosition = sf::Mouse::getPosition(window);
 
-                if (key == 0) ///click random pe ecran ca sa schimbi unde e cursorul
+                if (key == 0 && buttons[2]->isInside(window))
+                {
+                    path = Windows::getPathFromUser("Open File");
+                    FILE* fptr = fopen(path.c_str(), "r");
+                    
+                    if (fptr == NULL)
+                    {
+                        Windows::throwMessage("Wrong Path!");
+                        break;
+                    }
+
+                    char ch;
+                    int nr = 0;
+
+                    for (int i = String::len(S); i >= 1; i--)
+                        String::del(i, S);
+
+                    S = new String::Treap(cursorChar, 1);
+
+                    while ((ch = fgetc(fptr)) != EOF)
+                    {
+                        int posCursor = String::findCursorPosition(S);
+                        String::insert(posCursor, S, ch);
+                        nr++;
+                        //cerr << ch << '\n';
+                    }
+
+                    int posCursor = String::findCursorPosition(S);
+                    String::del(posCursor, S);
+                    String::insert(1, S);
+                    renderAgain = 1;
+                    cerr << "done" << ' ' << nr << '\n';
+                }
+                else if (key == 0 && buttons[4]->isInside(window))
+                {
+                    path = Windows::getPathFromUser("Save As");
+                    FILE* fptr = fopen(path.c_str(), "w");
+                    
+                    if (fptr == NULL)
+                    {
+                        Windows::throwMessage("Wrong Path!");
+                        break;
+                    }
+
+                    int posCursor = String::findCursorPosition(S);
+
+                    for (int i = 1; i <= String::len(S); i++)
+                    {
+                        char ch = String::get(i, S);
+                        if(posCursor != i) fprintf(fptr , "%c" , ch);
+                    }
+
+                    fclose(fptr);
+
+                    break;
+                }
+                else if (key == 0 && buttons[5]->isInside(window))
+                {
+                    string word = Windows::getStringFromUser("Find");
+                    string s = String::constructString(S);
+                    
+                    int pos = -1;
+                    int matchings = 0;
+
+                    while ((pos = s.find(word, pos + 1)) < s.size())
+                    {
+                        matchings++;
+
+                        for (int i = pos; i <= pos + word.size() - 1; i++)
+                        {
+                            
+                        }
+
+                        pos += word.size() - 1;
+                    }
+
+                    Windows::throwMessage("There are " + to_string(matchings) + " matchings!");
+                }
+                else if (key == 0 && buttons[0]->isInside(window))
+                {
+                    fontSize += fontUnit;
+                    fontSize = min(fontSize, C - fontUnit);
+                    String::updateWidth(S);
+                    globalHeightLine = fontSize + 5;
+                    fontChanged = 1;
+                }
+                else if (key == 0 && buttons[1]->isInside(window))
+                {
+                    fontChanged = 1;
+                    fontSize -= fontUnit;
+                    fontSize = max(fontUnit, fontSize);
+                    String::updateWidth(S);
+                    globalHeightLine = fontSize + 5;
+                }
+                else  if (key == 0 && buttons[3]->isInside(window))
+                {
+                    if (path.size() == 0)
+                    {
+                        path = Windows::getPathFromUser("Save");
+                    }
+
+                    FILE* fptr = fopen(path.c_str(), "w");
+
+                    if (fptr == NULL)
+                    {
+                        Windows::throwMessage("Wrong Path!");
+                        break;
+                    }
+
+                    int posCursor = String::findCursorPosition(S);
+
+                    for (int i = 1; i <= String::len(S); i++)
+                    {
+                        char ch = String::get(i, S);
+                        if (posCursor != i) fprintf(fptr, "%c", ch);
+                    }
+
+                    fclose(fptr);
+                    break;
+                }
+                else if (key == 0) ///click random pe ecran ca sa schimbi unde e cursorul
                 {
                     //cerr << localPosition.x << ' ' << localPosition.y << '\n';
                     //cerr << scrollUnitY << '\n';
@@ -817,9 +1001,16 @@ int main()
                     flag = 1;
                     renderAgain = 1;
 
-                    break;
+                    // break;
                 }
+                else break;
 
+                flag = 1;
+
+                renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
+                renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+
+                break;
             }
 
             if (event.type == sf::Event::KeyPressed)
@@ -883,126 +1074,6 @@ int main()
                         String::del(posCursor, S);
                         String::insert(posCursor + 1, S);
                     }
-                }
-                else if (key == 87)
-                {
-                    path = Windows::getPathFromUser("Open File");
-                    FILE* fptr = fopen(path.c_str(), "r");
-                    
-                    if (fptr == NULL)
-                    {
-                        Windows::throwMessage("Wrong Path!");
-                        break;
-                    }
-
-                    char ch;
-                    int nr = 0;
-
-                    for (int i = String::len(S); i >= 1; i--)
-                        String::del(i, S);
-
-                    S = new String::Treap(cursorChar, 1);
-
-                    while ((ch = fgetc(fptr)) != EOF)
-                    {
-                        int posCursor = String::findCursorPosition(S);
-                        String::insert(posCursor, S, ch);
-                        nr++;
-                        //cerr << ch << '\n';
-                    }
-
-                    int posCursor = String::findCursorPosition(S);
-                    String::del(posCursor, S);
-                    String::insert(1, S);
-                    renderAgain = 1;
-                    cerr << "done" << ' ' << nr << '\n';
-                }
-                else if (key == 88)
-                {
-                    path = Windows::getPathFromUser("Save As");
-                    FILE* fptr = fopen(path.c_str(), "w");
-                    
-                    if (fptr == NULL)
-                    {
-                        Windows::throwMessage("Wrong Path!");
-                        break;
-                    }
-
-                    int posCursor = String::findCursorPosition(S);
-
-                    for (int i = 1; i <= String::len(S); i++)
-                    {
-                        char ch = String::get(i, S);
-                        if(posCursor != i) fprintf(fptr , "%c" , ch);
-                    }
-
-                    fclose(fptr);
-
-                    break;
-                }
-                else if (key == 89)
-                {
-                    string word = Windows::getStringFromUser("Find");
-                    string s = String::constructString(S);
-                    
-                    int pos = -1;
-                    int matchings = 0;
-
-                    while ((pos = s.find(word, pos + 1)) < s.size())
-                    {
-                        matchings++;
-
-                        for (int i = pos; i <= pos + word.size() - 1; i++)
-                        {
-                            
-                        }
-
-                        pos += word.size() - 1;
-                    }
-
-                    Windows::throwMessage("There are " + to_string(matchings) + " matchings!");
-                }
-                else if (key == 85)
-                {
-                    fontSize += fontUnit;
-                    fontSize = min(fontSize, C - fontUnit);
-                    String::updateWidth(S);
-                    globalHeightLine = fontSize + 5;
-                    fontChanged = 1;
-                }
-                else if (key == 86)
-                {
-                    fontChanged = 1;
-                    fontSize -= fontUnit;
-                    fontSize = max(fontUnit, fontSize);
-                    String::updateWidth(S);
-                    globalHeightLine = fontSize + 5;
-                }
-                else  if (key == 90)
-                {
-                    if (path.size() == 0)
-                    {
-                        path = Windows::getPathFromUser("Save");
-                    }
-
-                    FILE* fptr = fopen(path.c_str(), "w");
-
-                    if (fptr == NULL)
-                    {
-                        Windows::throwMessage("Wrong Path!");
-                        break;
-                    }
-
-                    int posCursor = String::findCursorPosition(S);
-
-                    for (int i = 1; i <= String::len(S); i++)
-                    {
-                        char ch = String::get(i, S);
-                        if (posCursor != i) fprintf(fptr, "%c", ch);
-                    }
-
-                    fclose(fptr);
-                    break;
                 }
                 else break;
 
@@ -1126,6 +1197,20 @@ int main()
         window.draw(img1);
         window.draw(text);
         window.draw(img2);
+
+        //         window.draw(button1);
+        // window.draw(button2);
+        // window.draw(button3);
+        // window.draw(button4);
+        // window.draw(button5);
+        // window.draw(button6);
+        // window.draw(button7);
+        // window.draw(button8);
+        for (auto button : buttons)
+        {
+            window.draw(button->container);
+            window.draw(button->content);
+        }
         if (cursorOnScreen) window.draw(cursorBox);
         window.display();
     }
