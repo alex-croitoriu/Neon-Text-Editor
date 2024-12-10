@@ -24,7 +24,7 @@ int navBarOffset = 50;
 int cntRowsOffset = 200;
 int globalHeightLine = fontSize + 5;
 const int HEIGHT = 1000;
-const int WIDTH = 2000;
+const int WIDTH = 1000;
 
 vector < string > renderLines(1000);
 
@@ -748,23 +748,23 @@ public:
         this->container.setSize(size);
         this->container.setPosition(position);
         this->container.setFillColor(sf::Color(0, 0, 0, 0));
+
         this->content.setString(content);
+        this->content.setFont(font);
+        this->content.setCharacterSize(13);
+        this->content.setStyle(sf::Text::Bold);
+        this->content.setFillColor(sf::Color::Black);
 
         sf::Vector2f center(
             ((2 * this->container.getGlobalBounds().left + this->container.getGlobalBounds().width) / 2.0),
             ((2 * this->container.getGlobalBounds().top + this->container.getGlobalBounds().height) / 2.0)
         );
+
         this->content.setPosition
         (
-            center.x - this->content.getGlobalBounds() / 2.0,
-            center.y - this->content.getGlobalBounds() / 2.0
+            center.x - this->content.getLocalBounds().width / 2.0,
+            center.y - this->content.getLocalBounds().height / 2.0
         );
-
-        this->content.setFont(font);
-
-        this->content.setCharacterSize(14);
-        this->content.setStyle(sf::Text::Bold);
-        this->content.setFillColor(sf::Color::Black);
     }
     void setTexture(const sf::Texture* texture)
     {
@@ -781,7 +781,7 @@ public:
     }
     void setOpacity(bool hover)
     {
-        this->container.setFillColor(sf::Color(0, 0, 0, hover ? 64 : 0));
+        this->container.setFillColor(sf::Color(0, 0, 0, hover ? 32 : 0));
     }
 };
 
@@ -798,16 +798,22 @@ int main()
     sf::Text text;
     sf::Font font;
 
+    font.loadFromFile("assets/fonts/cour.ttf");
+    text.setFont(font);
+    text.setFillColor(sf::Color::Black);
+    text.setCharacterSize(fontSize);
+    text.setStyle(sf::Text::Regular);
+
     string contents[] = {"+", "-", "Open", "Save", "Save as", "Find"};
 
     sf::Vector2f positions[6];
 
     for (int i = 0; i < 6; i++)
     {
-        positions[i] = sf::Vector2f(i * 100, 0);
+        positions[i] = sf::Vector2f(i * 90, 0);
     }
 
-    sf::Vector2f size(75.0, 30.0);
+    sf::Vector2f size(90.0, 30.0);
 
     Button* buttons[6];
 
@@ -822,12 +828,6 @@ int main()
 
     // buttons[0]->setTexture(&zoomIn);
     // buttons[1]->setTexture(&zoomOut);
-
-    font.loadFromFile("assets/fonts/cour.ttf");
-    text.setFont(font);
-    text.setFillColor(sf::Color::Black);
-    text.setCharacterSize(fontSize);
-    text.setStyle(sf::Text::Regular);
 
     String::precalculateCharDim();
 
