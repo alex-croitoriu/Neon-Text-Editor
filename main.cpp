@@ -21,9 +21,10 @@ int charHeight[C][C];
 int fontSize = 60;
 
 int navBarOffset = 50;
+int cntRowsOffset = 200;
 int globalHeightLine = fontSize + 5;
 const int HEIGHT = 1000;
-const int WIDTH = 1000;
+const int WIDTH = 2000;
 
 vector < string > renderLines(1000);
 
@@ -417,8 +418,8 @@ namespace String
         if (String::len(T) + 1 == p1 || String::get(p1, T) == 10) return txt;
         int p2 = String::findNextEndline(p1, T) - 1;
 
-        int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
-        int t2 = String::getLastSeen(p1, p2, Xoffset + WIDTH, T);
+        int t1 = String::getFirstSeen(p1, p2, Xoffset , T);
+        int t2 = String::getLastSeen(p1, p2, Xoffset + WIDTH - cntRowsOffset , T);
 
         if (t1 == -1 || t2 == -1) return txt;
         String::traverseString(t1, t2, T, txt);
@@ -620,13 +621,13 @@ bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
     int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
     bool modif = 0;
 
-    while (currLineWidth <= Xoffset)
+    while (currLineWidth <= Xoffset )
         Xoffset -= scrollUnitX, modif = 1;
 
     if (modif) Xoffset -= scrollUnitX;
     Xoffset = max(0, Xoffset);
 
-    while (currLineWidth > Xoffset + WIDTH)
+    while (currLineWidth >= Xoffset + WIDTH - cntRowsOffset)
         Xoffset += scrollUnitX, modif = 1;
 
     return modif;
@@ -669,18 +670,19 @@ int findLineOnScreen(float y)
 int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
 {
     int l = findLineOnScreen(localPosition.y);
-    int w = localPosition.x;
+    int w = localPosition.x - cntRowsOffset;
 
     //cerr << averageLineHeight << ' ' << l << ' ' << l1 << ' ' << l2 << ' ' << localPosition.y << '\n';
 
     if (l + l1 - 1 > l2) return String::len(S) + 1;
     int p1 = String::findKthLine(l + l1 - 1, S);
+    if (w <= 0) return p1;
 
     if (String::len(S) + 1 == p1) return String::len(S) + 1;
     if (String::get(p1, S) == 10) return p1;
 
     int p2 = String::findNextEndline(p1, S) - 1;
-    int p = String::getFirstSeen(p1, p2, w + Xoffset, S);
+    int p = String::getFirstSeen(p1, p2, w + Xoffset , S);
     // cerr << p << ' ' << p2 << '\n';
     if (p == -1) p = p2;
     return p + 1;
@@ -705,7 +707,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     for (int i = 0; i < L; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset , navBarOffset + lastHeight + globalHeightLine);
         text1.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -720,7 +722,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset , navBarOffset + lastHeight + globalHeightLine);
         text2.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -729,7 +731,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     img2.setTexture(text2.getTexture());
 
     text.setString(txt);
-    text.setPosition(0, navBarOffset + textHeight + globalHeightLine);
+    text.setPosition(cntRowsOffset , navBarOffset + textHeight + globalHeightLine);
 
     text1.display();
     text2.display();
@@ -1168,6 +1170,7 @@ int main()
             {
                 if (cursorLine >= l1 && cursorLine <= l2)
                 {
+                    cerr << "here flag" << '\n';
                     updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset));
                     text.setString(renderLines[cursorLine - l1]);
                 }
@@ -1177,14 +1180,14 @@ int main()
             {
                 int posCursor = String::findCursorPosition(S);
                 int p = String::findPrevEndline(posCursor, S) + 1;
-                int p1 = String::getFirstSeen(p, posCursor, Xoffset, S);
+                int p1 = String::getFirstSeen(p, posCursor, Xoffset , S);
                 int width = String::findWidth(p1, posCursor - 1, S);
 
                 int cursorHeight = globalHeightLine - 2;
                 int cursorWidth = charWidth[fontSize][' '] / 6;
 
                 cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                cursorBox.setPosition(width, text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
+                cursorBox.setPosition(width + cntRowsOffset , text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
 
                 cursorOnScreen = 1;
             }
