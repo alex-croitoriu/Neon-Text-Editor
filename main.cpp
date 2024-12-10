@@ -1,11 +1,11 @@
-#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <stdio.h>
 #include <chrono>
 #include <random>
-#include <mutex>
+#include "precompute.h"
 
 using namespace std;
 
@@ -17,13 +17,13 @@ const int scrollUnit = 10;
 const int timeUnit = 500;
 const char cursorChar = ' ';
 
-int charWidth[C][C], charHeight[C][C];
+int charHeight[C][C];
 int fontSize = 60;
 
 int navBarOffset = 50;
+int globalHeightLine = fontSize + 5;
 const int HEIGHT = 1000;
 const int WIDTH = 1000;
-const int EPSILON = 10;
 
 vector < string > renderLines(1000);
 
@@ -31,32 +31,10 @@ namespace String
 {
     void precalculateCharDim()
     {
-        sf::Text text;
-        sf::Font font;
-
-        font.loadFromFile("assets/fonts/cour.ttf");
-        text.setFont(font);
-
         for (int fnt = fontUnit; fnt < C; fnt += fontUnit) ///precalculeaza width-urile si height-urile caracterilor in functie de marimea fontului 
         {
-            text.setCharacterSize(fnt);
-            text.setString("Êgyjiojj||| ");
-            int H = text.getLocalBounds().height; ///init 10
-            int mx = -1, ch = 0;
-
             for (int i = 0; i <= 255; i++)
-            {
-                string t;
-
-                for (int it = 1; it <= 30; it++)
-                    t += (char)i;
-
-                text.setString(t);
-                charWidth[fnt][i] = ceil(text.getGlobalBounds().width / 30.0);
-                charHeight[fnt][i] = fnt;
-            }
-
-           // charHeight[fnt][0] = H;
+                charHeight[fnt][i] = fnt + 5;
         }
     }
 
@@ -325,7 +303,7 @@ namespace String
     int findCurrentHeight(Treap*& T)
     {
         int lines = findNumberOfEndlines(1, findCursorPosition(T), T) + 1;
-        int globalHeight = lines * charHeight[fontSize][106];
+        int globalHeight = lines * globalHeightLine;
         return globalHeight;
     }
 
@@ -481,7 +459,7 @@ namespace Windows
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
-        text.setString("Enter path: ");
+        text.setString("EnterPath: ");
 
         pth.setFont(font);
         pth.setFillColor(sf::Color::Green);
@@ -657,7 +635,7 @@ bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
 bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
 {
     int globalHeight = String::findCurrentHeight(S);
-    int height = fontSize;
+    int height = fontSize + 5;
     bool modif = 0;
 
     while (globalHeight - height < Yoffset)
@@ -685,8 +663,7 @@ void updateTextLine(int line, vector < string >& renderLines, string L)
 
 int findLineOnScreen(float y)
 {
-    int averageLineHeight = fontSize;
-    return (int) ( (y - navBarOffset) / averageLineHeight) + 1;
+    return (int) ( (y - navBarOffset) / globalHeightLine) + 1;
 }
 
 int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
@@ -723,15 +700,14 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     text1.clear(sf::Color(0, 0, 0, 0));
     text2.clear(sf::Color(0, 0, 0, 0));
 
-    int H = fontSize;
-    int lastHeight = -H;
+    int lastHeight = -globalHeightLine;
 
     for (int i = 0; i < L; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, navBarOffset + lastHeight + H);
+        text.setPosition(0, navBarOffset + lastHeight + globalHeightLine);
         text1.draw(text);
-        lastHeight += H;
+        lastHeight += globalHeightLine;
     }
 
     int textHeight = lastHeight;
@@ -739,21 +715,21 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     if (l1 <= cursorLine && cursorLine <= l2) txt = renderLines[cursorLine - l1];
     else txt = " ";
 
-    lastHeight += H;
+    lastHeight += globalHeightLine;
 
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, navBarOffset + lastHeight + H);
+        text.setPosition(0, navBarOffset + lastHeight + globalHeightLine);
         text2.draw(text);
-        lastHeight += H;
+        lastHeight += globalHeightLine;
     }   
 
     img1.setTexture(text1.getTexture());
     img2.setTexture(text2.getTexture());
 
     text.setString(txt);
-    text.setPosition(0, navBarOffset + textHeight + H);
+    text.setPosition(0, navBarOffset + textHeight + globalHeightLine);
 
     text1.display();
     text2.display();
@@ -779,6 +755,7 @@ int main()
     text.setStyle(sf::Text::Regular);
 
     String::precalculateCharDim();
+   
     String::Treap* S = new String::Treap(cursorChar , 1); ///string doar cu pointer-ul de text
 
     int Yoffset = 0, Xoffset = 0;
@@ -805,6 +782,7 @@ int main()
 
     sf::RectangleShape cursorBox;
 
+    string path = "";
     int Timer = 0;
     bool cursorOnScreen = 0;
 
@@ -868,23 +846,19 @@ int main()
                         String::del(posCursor, S);
                         String::insert(p2 + min(chCurr, chPrev) + 1, S);
                         renderAgain = 1;
-                        //cerr << "flag" << '\n';
                     }
-
-                    //renderAgain = 1;
                 }
                 else if (key == 74) ///down arrow
                 {
                     int posCursor = String::findCursorPosition(S);
                     int p1 = String::findNextEndline(posCursor, S);
                     int p0 = String::findPrevEndline(posCursor, S);
-                    // cerr << "nextEndline: " << p1 << '\n';
+
                     if (p1 <= len(S))
                     {
                         int p2 = String::findNextEndline(p1, S);
                         int chCurr = posCursor - p0 - 1;
                         int chNext = p2 - p1 - 1;
-                        // cerr << chCurr << ' ' << chNext << '\n';
                         String::del(posCursor, S);
                         String::insert(p1 + min(chCurr, chNext) + 1 - 1, S);
                         renderAgain = 1;
@@ -912,7 +886,7 @@ int main()
                 }
                 else if (key == 87)
                 {
-                    string path = Windows::getPathFromUser("Open File");
+                    path = Windows::getPathFromUser("Open File");
                     FILE* fptr = fopen(path.c_str(), "r");
                     
                     if (fptr == NULL)
@@ -942,11 +916,10 @@ int main()
                     String::insert(1, S);
                     renderAgain = 1;
                     cerr << "done" << ' ' << nr << '\n';
-                    //return 0;
                 }
                 else if (key == 88)
                 {
-                    string path = Windows::getPathFromUser("Save As");
+                    path = Windows::getPathFromUser("Save As");
                     FILE* fptr = fopen(path.c_str(), "w");
                     
                     if (fptr == NULL)
@@ -994,6 +967,7 @@ int main()
                     fontSize += fontUnit;
                     fontSize = min(fontSize, C - fontUnit);
                     String::updateWidth(S);
+                    globalHeightLine = fontSize + 5;
                     fontChanged = 1;
                 }
                 else if (key == 86)
@@ -1002,6 +976,33 @@ int main()
                     fontSize -= fontUnit;
                     fontSize = max(fontUnit, fontSize);
                     String::updateWidth(S);
+                    globalHeightLine = fontSize + 5;
+                }
+                else  if (key == 90)
+                {
+                    if (path.size() == 0)
+                    {
+                        path = Windows::getPathFromUser("Save");
+                    }
+
+                    FILE* fptr = fopen(path.c_str(), "w");
+
+                    if (fptr == NULL)
+                    {
+                        Windows::throwMessage("Wrong Path!");
+                        break;
+                    }
+
+                    int posCursor = String::findCursorPosition(S);
+
+                    for (int i = 1; i <= String::len(S); i++)
+                    {
+                        char ch = String::get(i, S);
+                        if (posCursor != i) fprintf(fptr, "%c", ch);
+                    }
+
+                    fclose(fptr);
+                    break;
                 }
                 else break;
 
@@ -1101,8 +1102,11 @@ int main()
                 int p1 = String::getFirstSeen(p, posCursor, Xoffset, S);
                 int width = String::findWidth(p1, posCursor - 1, S);
 
-                cursorBox.setSize(sf::Vector2f(charWidth[fontSize][' '] / 6 , charHeight[fontSize]['|']));
-                cursorBox.setPosition(width , text.getPosition().y);
+                int cursorHeight = globalHeightLine - 2;
+                int cursorWidth = charWidth[fontSize][' '] / 6;
+
+                cursorBox.setSize(sf::Vector2f(cursorWidth , cursorHeight));
+                cursorBox.setPosition(width , text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
 
                 cursorOnScreen = 1;
             }
@@ -1126,5 +1130,6 @@ int main()
         window.display();
     }
 
+
     return 0;
-}   
+}
