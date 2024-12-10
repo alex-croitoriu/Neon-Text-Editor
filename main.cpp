@@ -20,11 +20,12 @@ const char cursorChar = ' ';
 int charWidth[C][C], charHeight[C][C];
 int fontSize = 60;
 
-const int HEIGHT = 600;
-const int WIDTH = 800;
+int navBarOffset = 50;
+const int HEIGHT = 1000;
+const int WIDTH = 1000;
+const int EPSILON = 10;
 
 vector < string > renderLines(1000);
-vector < sf::Text > Text1, Text2;
 
 namespace String
 {
@@ -52,7 +53,7 @@ namespace String
 
                 text.setString(t);
                 charWidth[fnt][i] = ceil(text.getGlobalBounds().width / 30.0);
-                charHeight[fnt][i] = fnt + 5;
+                charHeight[fnt][i] = fnt;
             }
 
            // charHeight[fnt][0] = H;
@@ -656,15 +657,18 @@ bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
 bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
 {
     int globalHeight = String::findCurrentHeight(S);
+    int height = fontSize;
     bool modif = 0;
 
-    while (globalHeight < Yoffset)
+    while (globalHeight - height < Yoffset)
         Yoffset -= scrollUnitY, modif = 1;
 
     //if (modif) Yoffset -= scrollUnitY;
     Yoffset = max(0, Yoffset);
 
-    while (globalHeight > Yoffset + HEIGHT)
+   // cerr << "globalHeight is: " << globalHeight << '\n' << "height is " << height << '\n';
+
+    while (globalHeight > Yoffset + HEIGHT - navBarOffset - height)
         Yoffset += scrollUnitY, modif = 1;
 
     return modif;
@@ -681,8 +685,8 @@ void updateTextLine(int line, vector < string >& renderLines, string L)
 
 int findLineOnScreen(float y)
 {
-    int averageLineHeight = fontSize + 5;
-    return (int) (y / averageLineHeight) + 1;
+    int averageLineHeight = fontSize;
+    return (int) ( (y - navBarOffset) / averageLineHeight) + 1;
 }
 
 int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
@@ -719,13 +723,13 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     text1.clear(sf::Color(0, 0, 0, 0));
     text2.clear(sf::Color(0, 0, 0, 0));
 
-    int H = fontSize + 5;
+    int H = fontSize;
     int lastHeight = -H;
 
     for (int i = 0; i < L; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, lastHeight + H);
+        text.setPosition(0, navBarOffset + lastHeight + H);
         text1.draw(text);
         lastHeight += H;
     }
@@ -740,7 +744,7 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, lastHeight + H);
+        text.setPosition(0, navBarOffset + lastHeight + H);
         text2.draw(text);
         lastHeight += H;
     }   
@@ -749,7 +753,7 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     img2.setTexture(text2.getTexture());
 
     text.setString(txt);
-    text.setPosition(0, textHeight + H);
+    text.setPosition(0, navBarOffset + textHeight + H);
 
     text1.display();
     text2.display();
@@ -930,7 +934,7 @@ int main()
                         int posCursor = String::findCursorPosition(S);
                         String::insert(posCursor, S, ch);
                         nr++;
-                        // cerr << ch << '\n';
+                        //cerr << ch << '\n';
                     }
 
                     int posCursor = String::findCursorPosition(S);
@@ -977,7 +981,7 @@ int main()
 
                         for (int i = pos; i <= pos + word.size() - 1; i++)
                         {
-
+                            
                         }
 
                         pos += word.size() - 1;
@@ -1069,8 +1073,8 @@ int main()
             if (renderAgain == 1)
             {
                // cerr << renderAgain << '\n';
-                l1 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset - 1) / scrollUnitY + 1);
-                l2 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset + HEIGHT - 1) / scrollUnitY);
+                l1 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset - 1 - navBarOffset) / scrollUnitY + 1);
+                l2 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset + HEIGHT - 1 - navBarOffset) / scrollUnitY);
 
                 cerr << l1 << ' ' << l2 << '\n';
 
@@ -1123,4 +1127,4 @@ int main()
     }
 
     return 0;
-}
+}   
