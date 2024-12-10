@@ -14,16 +14,17 @@ mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 const int C = 400;
 const int fontUnit = 10;
 const int scrollUnit = 10;
-const int timeUnit = 2000;
+const int timeUnit = 500;
 const char cursorChar = ' ';
 
 int charWidth[C][C], charHeight[C][C];
-int fontSize = 30;
+int fontSize = 60;
 
-const int HEIGHT = 1000;
-const int WIDTH = 2000;
+const int HEIGHT = 600;
+const int WIDTH = 800;
 
 vector < string > renderLines(1000);
+vector < sf::Text > Text1, Text2;
 
 namespace String
 {
@@ -32,13 +33,13 @@ namespace String
         sf::Text text;
         sf::Font font;
 
-        font.loadFromFile("cour.ttf");
+        font.loadFromFile("assets/fonts/cour.ttf");
         text.setFont(font);
 
         for (int fnt = fontUnit; fnt < C; fnt += fontUnit) ///precalculeaza width-urile si height-urile caracterilor in functie de marimea fontului 
         {
             text.setCharacterSize(fnt);
-            text.setString("Êgyjiojj||| ");
+            text.setString("ÃŠgyjiojj||| ");
             int H = text.getLocalBounds().height; ///init 10
             int mx = -1, ch = 0;
 
@@ -51,10 +52,10 @@ namespace String
 
                 text.setString(t);
                 charWidth[fnt][i] = ceil(text.getGlobalBounds().width / 30.0);
-                charHeight[fnt][i] = text.getGlobalBounds().height;
+                charHeight[fnt][i] = fnt + 5;
             }
 
-            charHeight[fnt][0] = H;
+           // charHeight[fnt][0] = H;
         }
     }
 
@@ -468,23 +469,23 @@ namespace Windows
         const int DIM = 200;
         sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
         sf::Image mainIcon;
-        mainIcon.loadFromFile("main icon.png");
+        mainIcon.loadFromFile("assets/images/main_icon.png");
         window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
         sf::Event event;
         sf::Text text, pth;
         sf::Font font;
 
-        font.loadFromFile("arial.ttf");
+        font.loadFromFile("assets/fonts/cour.ttf");
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
-        text.setString("EnterPath: ");
+        text.setString("Enter path: ");
 
         pth.setFont(font);
         pth.setFillColor(sf::Color::Green);
         pth.setString("");
-        pth.setPosition(150, 0);
+        pth.setPosition(200, 0);
 
         string path;
 
@@ -534,14 +535,14 @@ namespace Windows
         const int DIM = 200;
         sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10) , name);
         sf::Image mainIcon;
-        mainIcon.loadFromFile("main icon.png");
+        mainIcon.loadFromFile("assets/images/main_icon.png");
         window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
         sf::Event event;
         sf::Text text, pth;
         sf::Font font;
 
-        font.loadFromFile("arial.ttf");
+        font.loadFromFile("assets/fonts/cour.ttf");
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
@@ -550,7 +551,7 @@ namespace Windows
         pth.setFont(font);
         pth.setFillColor(sf::Color::Green);
         pth.setString("");
-        pth.setPosition(210, 0);
+        pth.setPosition(250, 0);
 
         string path;
 
@@ -595,7 +596,7 @@ namespace Windows
         return path;
     }
 
-    void throwMessage(string message)///ia path-ul introdus de catre utilizator pentru a salva fisierul
+    void throwMessage(string message)
     {
         const int DIM = 200;
         sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), "");
@@ -604,7 +605,7 @@ namespace Windows
         sf::Text text;
         sf::Font font;
 
-        font.loadFromFile("arial.ttf");
+        font.loadFromFile("assets/fonts/cour.ttf");
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
@@ -660,7 +661,7 @@ bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
     while (globalHeight < Yoffset)
         Yoffset -= scrollUnitY, modif = 1;
 
-    // if (modif) Yoffset -= scrollUnitY;
+    //if (modif) Yoffset -= scrollUnitY;
     Yoffset = max(0, Yoffset);
 
     while (globalHeight > Yoffset + HEIGHT)
@@ -678,11 +679,9 @@ void updateTextLine(int line, vector < string >& renderLines, string L)
     // textLines[line].setString(L);
 }
 
-sf::Font font;
-float averageLineHeight = 0;
-
 int findLineOnScreen(float y)
 {
+    int averageLineHeight = fontSize + 5;
     return (int) (y / averageLineHeight) + 1;
 }
 
@@ -708,73 +707,49 @@ int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollU
 
 string txt1, txt2, txt, all;
 
-void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTexture &text2 , sf::Sprite &img1 , sf::Sprite &img2 , int l1 , int l2 , int cursorLine , int scrollUnitY , sf::Font &font)
+void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTexture &text2 , sf::Sprite &img1 , sf::Sprite &img2 , int l1 , int l2 , int cursorLine , int scrollUnitY)
 {
     txt1.clear(), txt2.clear(), txt.clear();
     all.clear();
-    
     int h1 = 0;
     int L = min(l2 - l1 + 1, cursorLine - l1);
 
-    for (int i = 0; i < L ; i++)
-        txt1 += renderLines[i] + '\n', h1++;
-
-    if (txt1.size()) txt1.pop_back();
-
-    if (l1 <= cursorLine && cursorLine <= l2) txt = renderLines[cursorLine - l1];
-    else txt = "";
-
-    bool empty = 0;
-    if (txt == " ") txt = "|" , empty = 1;
-
-    int h2 = 0;
-
-    for (int i = max(0 , cursorLine - l1 + 1) ; i < sizeRLines; i++)
-        txt2 += renderLines[i] + '\n' , h2++;
-
-    if (txt2.size()) txt2.pop_back();
-
     text.setCharacterSize(fontSize);
 
-    text1.clear(sf::Color(0 , 0 , 0 , 0));
+    text1.clear(sf::Color(0, 0, 0, 0));
     text2.clear(sf::Color(0, 0, 0, 0));
 
-    text.setPosition(0, 0);
-    text.setString(txt1);
-    text1.draw(text);
-    float H1 = text.getLocalBounds().height;
+    int H = fontSize + 5;
+    int lastHeight = -H;
 
-    text.setPosition(0, 0);
-    text.setString(txt2);
-    float H2 = text.getGlobalBounds().height;
-    text2.draw(text);
+    for (int i = 0; i < L; i++)
+    {
+        text.setString(renderLines[i]);
+        text.setPosition(0, lastHeight + H);
+        text1.draw(text);
+        lastHeight += H;
+    }
+
+    int textHeight = lastHeight;
+
+    if (l1 <= cursorLine && cursorLine <= l2) txt = renderLines[cursorLine - l1];
+    else txt = " ";
+
+    lastHeight += H;
+
+    for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
+    {
+        text.setString(renderLines[i]);
+        text.setPosition(0, lastHeight + H);
+        text2.draw(text);
+        lastHeight += H;
+    }   
 
     img1.setTexture(text1.getTexture());
     img2.setTexture(text2.getTexture());
 
-   // float LS = font.getLineSpacing(text.getCharacterSize()) / 2.0;
-    all += txt1;
-    if (txt.size() && all.size()) all += '\n';
-    all += txt;
-
-    text.setString(all);
-    float YH = text.getLocalBounds().height;
-
-    if (txt2.size() && all.size()) all += '\n';
-    all += txt2;
-
-    text.setString(all);
-    float GH = text.getLocalBounds().height;
-    averageLineHeight = GH / (float) (l2 - l1 + 1);
-   
-    text.setPosition(0, 0);
     text.setString(txt);
-    float H = text.getLocalBounds().height;
-    if (empty) txt = " ";
-    text.setString(txt);
-
-    text.setPosition(0, YH - H);
-    img2.setPosition(0, GH - H2);
+    text.setPosition(0, textHeight + H);
 
     text1.display();
     text2.display();
@@ -786,14 +761,14 @@ int main()
     sf::View view;
     sf::Image mainIcon;
 
-    mainIcon.loadFromFile("main icon.png");
+    mainIcon.loadFromFile("assets/images/main_icon.png");
     window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
     sf::Event event;
     sf::Text text;
-    //sf::Font font;
+    sf::Font font;
 
-    font.loadFromFile("cour.ttf");
+    font.loadFromFile("assets/fonts/cour.ttf");
     text.setFont(font);
     text.setFillColor(sf::Color::Black);
     text.setCharacterSize(fontSize);
@@ -889,9 +864,10 @@ int main()
                         String::del(posCursor, S);
                         String::insert(p2 + min(chCurr, chPrev) + 1, S);
                         renderAgain = 1;
+                        //cerr << "flag" << '\n';
                     }
 
-                    renderAgain = 1;
+                    //renderAgain = 1;
                 }
                 else if (key == 74) ///down arrow
                 {
@@ -1092,16 +1068,18 @@ int main()
 
             if (renderAgain == 1)
             {
-                //cerr << renderAgain << '\n';
-                l1 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, Yoffset / scrollUnitY + 1);
-                l2 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset + HEIGHT) / scrollUnitY);
+               // cerr << renderAgain << '\n';
+                l1 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset - 1) / scrollUnitY + 1);
+                l2 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset + HEIGHT - 1) / scrollUnitY);
+
+                cerr << l1 << ' ' << l2 << '\n';
 
                 sizeRLines = 0;
 
                 for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2; i++)
                     updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset));
 
-                updateSmartRender(text, text1, text2, img1, img2, l1, l2, cursorLine, scrollUnitY , font);
+                updateSmartRender(text, text1, text2, img1, img2, l1, l2, cursorLine, scrollUnitY);
             }
             else
             {
@@ -1119,7 +1097,7 @@ int main()
                 int p1 = String::getFirstSeen(p, posCursor, Xoffset, S);
                 int width = String::findWidth(p1, posCursor - 1, S);
 
-                cursorBox.setSize(sf::Vector2f(charWidth[fontSize][' '] / 6 , charHeight[fontSize]['|'] * 1.5));
+                cursorBox.setSize(sf::Vector2f(charWidth[fontSize][' '] / 6 , charHeight[fontSize]['|']));
                 cursorBox.setPosition(width , text.getPosition().y);
 
                 cursorOnScreen = 1;
