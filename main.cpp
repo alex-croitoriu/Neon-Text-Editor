@@ -21,9 +21,10 @@ int charHeight[C][C];
 int fontSize = 60;
 
 int navBarOffset = 50;
+int cntRowsOffset = 200;
 int globalHeightLine = fontSize + 5;
 const int HEIGHT = 1000;
-const int WIDTH = 1000;
+const int WIDTH = 2000;
 
 vector < string > renderLines(1000);
 
@@ -178,7 +179,7 @@ namespace String
         merge(T, t1, t3);
     }
 
-    void insert(int pos, Treap*& T, Treap* S = new Treap(cursorChar , 1))
+    void insert(int pos, Treap*& T, Treap* S = new Treap(cursorChar, 1))
     {
         Treap* t1 = 0, * t2 = 0;
         split(T, t1, t2, pos - 1);
@@ -417,8 +418,8 @@ namespace String
         if (String::len(T) + 1 == p1 || String::get(p1, T) == 10) return txt;
         int p2 = String::findNextEndline(p1, T) - 1;
 
-        int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
-        int t2 = String::getLastSeen(p1, p2, Xoffset + WIDTH, T);
+        int t1 = String::getFirstSeen(p1, p2, Xoffset , T);
+        int t2 = String::getLastSeen(p1, p2, Xoffset + WIDTH - cntRowsOffset , T);
 
         if (t1 == -1 || t2 == -1) return txt;
         String::traverseString(t1, t2, T, txt);
@@ -436,7 +437,7 @@ namespace String
 
         merge(T, t1, t2);
         merge(T, T, t3);
-        
+
         return ans;
     }
 }
@@ -512,7 +513,7 @@ namespace Windows
     string getStringFromUser(string name)///citeste cuvantul pe care vrea user-ul sa-l caute
     {
         const int DIM = 200;
-        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10) , name);
+        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
         sf::Image mainIcon;
         mainIcon.loadFromFile("assets/images/main_icon.png");
         window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
@@ -620,13 +621,13 @@ bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
     int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
     bool modif = 0;
 
-    while (currLineWidth <= Xoffset)
+    while (currLineWidth <= Xoffset )
         Xoffset -= scrollUnitX, modif = 1;
 
     if (modif) Xoffset -= scrollUnitX;
     Xoffset = max(0, Xoffset);
 
-    while (currLineWidth > Xoffset + WIDTH)
+    while (currLineWidth >= Xoffset + WIDTH - cntRowsOffset)
         Xoffset += scrollUnitX, modif = 1;
 
     return modif;
@@ -644,7 +645,7 @@ bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
     //if (modif) Yoffset -= scrollUnitY;
     Yoffset = max(0, Yoffset);
 
-   // cerr << "globalHeight is: " << globalHeight << '\n' << "height is " << height << '\n';
+    // cerr << "globalHeight is: " << globalHeight << '\n' << "height is " << height << '\n';
 
     while (globalHeight > Yoffset + HEIGHT - navBarOffset - height)
         Yoffset += scrollUnitY, modif = 1;
@@ -663,32 +664,33 @@ void updateTextLine(int line, vector < string >& renderLines, string L)
 
 int findLineOnScreen(float y)
 {
-    return (int) ( (y - navBarOffset) / globalHeightLine) + 1;
+    return (int)((y - navBarOffset) / globalHeightLine) + 1;
 }
 
 int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
 {
     int l = findLineOnScreen(localPosition.y);
-    int w = localPosition.x;
+    int w = localPosition.x - cntRowsOffset;
 
     //cerr << averageLineHeight << ' ' << l << ' ' << l1 << ' ' << l2 << ' ' << localPosition.y << '\n';
 
     if (l + l1 - 1 > l2) return String::len(S) + 1;
     int p1 = String::findKthLine(l + l1 - 1, S);
+    if (w <= 0) return p1;
 
     if (String::len(S) + 1 == p1) return String::len(S) + 1;
     if (String::get(p1, S) == 10) return p1;
 
     int p2 = String::findNextEndline(p1, S) - 1;
-    int p = String::getFirstSeen(p1, p2, w + Xoffset, S);
-   // cerr << p << ' ' << p2 << '\n';
+    int p = String::getFirstSeen(p1, p2, w + Xoffset , S);
+    // cerr << p << ' ' << p2 << '\n';
     if (p == -1) p = p2;
     return p + 1;
 }
 
 string txt1, txt2, txt, all;
 
-void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTexture &text2 , sf::Sprite &img1 , sf::Sprite &img2 , int l1 , int l2 , int cursorLine , int scrollUnitY)
+void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTexture& text2, sf::Sprite& img1, sf::Sprite& img2, int l1, int l2, int cursorLine, int scrollUnitY)
 {
     txt1.clear(), txt2.clear(), txt.clear();
     all.clear();
@@ -705,7 +707,7 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     for (int i = 0; i < L; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset , navBarOffset + lastHeight + globalHeightLine);
         text1.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -720,16 +722,16 @@ void updateSmartRender(sf::Text &text , sf::RenderTexture &text1 , sf::RenderTex
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(0, navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset , navBarOffset + lastHeight + globalHeightLine);
         text2.draw(text);
         lastHeight += globalHeightLine;
-    }   
+    }
 
     img1.setTexture(text1.getTexture());
     img2.setTexture(text2.getTexture());
 
     text.setString(txt);
-    text.setPosition(0, navBarOffset + textHeight + globalHeightLine);
+    text.setPosition(cntRowsOffset , navBarOffset + textHeight + globalHeightLine);
 
     text1.display();
     text2.display();
@@ -741,7 +743,7 @@ public:
     sf::RectangleShape container;
     sf::Text content;
     sf::Texture texture;
-    Button(string &content, sf::Font &font, sf::Vector2f &size, sf::Vector2f &position)
+    Button(string& content, sf::Font& font, sf::Vector2f& size, sf::Vector2f& position)
     {
         this->container.setSize(size);
         this->container.setPosition(position);
@@ -764,15 +766,15 @@ public:
         this->content.setStyle(sf::Text::Bold);
         this->content.setFillColor(sf::Color::Black);
     }
-    void setTexture(const sf::Texture *texture)
+    void setTexture(const sf::Texture* texture)
     {
         this->container.setTexture(texture);
     }
-    sf::FloatRect getGlobalBounds() 
+    sf::FloatRect getGlobalBounds()
     {
         return container.getGlobalBounds();
     }
-    bool isInside(sf::RenderWindow &window)
+    bool isInside(sf::RenderWindow& window)
     {
         sf::Vector2i localPosition = sf::Mouse::getPosition(window);
         return this->getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
@@ -804,10 +806,10 @@ int main()
     {
         positions[i] = sf::Vector2f(i * 100, 0);
     }
-    
+
     sf::Vector2f size(75.0, 30.0);
-    
-    Button *buttons[6];
+
+    Button* buttons[6];
 
     for (int i = 0; i < 6; i++)
     {
@@ -828,8 +830,8 @@ int main()
     text.setStyle(sf::Text::Regular);
 
     String::precalculateCharDim();
-   
-    String::Treap* S = new String::Treap(cursorChar , 1); ///string doar cu pointer-ul de text
+
+    String::Treap* S = new String::Treap(cursorChar, 1); ///string doar cu pointer-ul de text
 
     int Yoffset = 0, Xoffset = 0;
     int scrollUnitX = charWidth[fontSize][0], scrollUnitY = charHeight[fontSize]['a'];
@@ -894,7 +896,7 @@ int main()
                 {
                     path = Windows::getPathFromUser("Open File");
                     FILE* fptr = fopen(path.c_str(), "r");
-                    
+
                     if (fptr == NULL)
                     {
                         Windows::throwMessage("Wrong Path!");
@@ -927,7 +929,7 @@ int main()
                 {
                     path = Windows::getPathFromUser("Save As");
                     FILE* fptr = fopen(path.c_str(), "w");
-                    
+
                     if (fptr == NULL)
                     {
                         Windows::throwMessage("Wrong Path!");
@@ -939,7 +941,7 @@ int main()
                     for (int i = 1; i <= String::len(S); i++)
                     {
                         char ch = String::get(i, S);
-                        if(posCursor != i) fprintf(fptr , "%c" , ch);
+                        if (posCursor != i) fprintf(fptr, "%c", ch);
                     }
 
                     fclose(fptr);
@@ -956,7 +958,6 @@ int main()
                     }
 
                     string s = String::constructString(S);
-                    
                     int pos = -1;
                     int matchings = 0;
 
@@ -966,13 +967,14 @@ int main()
 
                         for (int i = pos; i <= pos + word.size() - 1; i++)
                         {
-                            
+
                         }
 
                         pos += word.size() - 1;
                     }
 
                     Windows::throwMessage("There are " + to_string(matchings) + " matchings!");
+                    break;
                 }
                 else if (key == 0 && buttons[0]->isInside(window))
                 {
@@ -1018,8 +1020,6 @@ int main()
                 }
                 else if (key == 0) ///click random pe ecran ca sa schimbi unde e cursorul
                 {
-                    //cerr << localPosition.x << ' ' << localPosition.y << '\n';
-                    //cerr << scrollUnitY << '\n';
                     int newPosCursor = moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
                     cerr << "newpos: " << newPosCursor << '\n';
                     int posCursor = String::findCursorPosition(S);
@@ -1031,7 +1031,7 @@ int main()
                     flag = 1;
                     renderAgain = 1;
 
-                    // break;
+                    break;
                 }
                 else break;
 
@@ -1174,9 +1174,12 @@ int main()
 
             if (renderAgain == 1)
             {
-               // cerr << renderAgain << '\n';
-                l1 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset - 1 - navBarOffset) / scrollUnitY + 1);
-                l2 = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, (Yoffset + HEIGHT - 1 - navBarOffset) / scrollUnitY);
+                // cerr << renderAgain << '\n';
+
+                int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
+
+                l1 = min(numberOfLines , max(1 , (Yoffset - 1 - navBarOffset) / scrollUnitY + 1));
+                l2 = min(numberOfLines , max(1 , (Yoffset - 1 + HEIGHT - navBarOffset) / scrollUnitY));
 
                 cerr << l1 << ' ' << l2 << '\n';
 
@@ -1191,6 +1194,7 @@ int main()
             {
                 if (cursorLine >= l1 && cursorLine <= l2)
                 {
+                    cerr << "here flag" << '\n';
                     updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset));
                     text.setString(renderLines[cursorLine - l1]);
                 }
@@ -1199,15 +1203,15 @@ int main()
             if (cursorLine >= l1 && cursorLine <= l2)
             {
                 int posCursor = String::findCursorPosition(S);
-                int p = String::findPrevEndline(posCursor , S) + 1;
-                int p1 = String::getFirstSeen(p, posCursor, Xoffset, S);
+                int p = String::findPrevEndline(posCursor, S) + 1;
+                int p1 = String::getFirstSeen(p, posCursor, Xoffset , S);
                 int width = String::findWidth(p1, posCursor - 1, S);
 
                 int cursorHeight = globalHeightLine - 2;
                 int cursorWidth = charWidth[fontSize][' '] / 6;
 
-                cursorBox.setSize(sf::Vector2f(cursorWidth , cursorHeight));
-                cursorBox.setPosition(width , text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
+                cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
+                cursorBox.setPosition(width + cntRowsOffset , text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
 
                 cursorOnScreen = 1;
             }
@@ -1228,14 +1232,6 @@ int main()
         window.draw(text);
         window.draw(img2);
 
-        //         window.draw(button1);
-        // window.draw(button2);
-        // window.draw(button3);
-        // window.draw(button4);
-        // window.draw(button5);
-        // window.draw(button6);
-        // window.draw(button7);
-        // window.draw(button8);
         for (auto button : buttons)
         {
             window.draw(button->container);
