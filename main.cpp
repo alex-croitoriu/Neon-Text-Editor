@@ -745,13 +745,18 @@ public:
     {
         this->container.setSize(size);
         this->container.setPosition(position);
+        this->container.setFillColor(sf::Color(0, 0, 0, 0));
         this->content.setString(content);
+
+        sf::Vector2f center(
+            ((2 * this->container.getGlobalBounds().left + this->container.getGlobalBounds().width) / 2.0),
+            ((2 * this->container.getGlobalBounds().top + this->container.getGlobalBounds().height) / 2.0)
+        );
         this->content.setPosition
         (
-            container.getPosition().x, 
-            container.getPosition().y
+            center.x - this->content.getGlobalBounds() / 2.0,
+            center.y - this->content.getGlobalBounds() / 2.0
         );
-        this->container.setFillColor(sf::Color::Red);
 
         this->content.setFont(font);
 
@@ -772,6 +777,10 @@ public:
         sf::Vector2i localPosition = sf::Mouse::getPosition(window);
         return this->getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
     }
+    void setOpacity(bool hover)
+    {
+        this->container.setFillColor(sf::Color(0, 0, 0, hover ? 64 : 0));
+    }
 };
 
 int main()
@@ -787,7 +796,7 @@ int main()
     sf::Text text;
     sf::Font font;
 
-    string contents[] = {"", "", "Open", "Save", "Save as", "Find"};
+    string contents[] = {"+", "-", "Open", "Save", "Save as", "Find"};
 
     sf::Vector2f positions[6];
 
@@ -805,12 +814,12 @@ int main()
         buttons[i] = new Button(contents[i], font, size, positions[i]);
     }
 
-    sf::Texture zoomIn, zoomOut;
-    zoomIn.loadFromFile("assets/images/plus.png");
-    zoomOut.loadFromFile("assets/images/minus.png");
+    // sf::Texture zoomIn, zoomOut;
+    // zoomIn.loadFromFile("assets/images/plus.png");
+    // zoomOut.loadFromFile("assets/images/minus.png");
 
-    buttons[0]->setTexture(&zoomIn);
-    buttons[1]->setTexture(&zoomOut);
+    // buttons[0]->setTexture(&zoomIn);
+    // buttons[1]->setTexture(&zoomOut);
 
     font.loadFromFile("assets/fonts/cour.ttf");
     text.setFont(font);
@@ -858,6 +867,21 @@ int main()
 
         while (window.pollEvent(event))
         {
+            if (event.type == sf::Event::MouseMoved) 
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    if (buttons[i]->isInside(window))
+                    {
+                        buttons[i]->setOpacity(true);
+                    }
+                    else
+                    {
+                        buttons[i]->setOpacity(false);
+                    }
+                }
+                    break;
+            }
             if (event.type == sf::Event::Closed)
                 window.close();
 
@@ -925,6 +949,12 @@ int main()
                 else if (key == 0 && buttons[5]->isInside(window))
                 {
                     string word = Windows::getStringFromUser("Find");
+
+                    if (word.size() == 0)
+                    {
+                        break;
+                    }
+
                     string s = String::constructString(S);
                     
                     int pos = -1;
