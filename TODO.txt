@@ -12,3 +12,5 @@
 - fix blurry buttons
 - move zoom in/out buttons to the bottom
 - modal for unsaved changes
+
+- fullscreeen legit
