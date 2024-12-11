@@ -16,12 +16,16 @@ const int fontUnit = 10;
 const int scrollUnit = 10;
 const int timeUnit = 500;
 const char cursorChar = ' ';
+const int N = 1e8 + 10;
+const int BUCKET = 2e4;
 
+char input[N];
 int charHeight[C][C];
 int fontSize = 60;
 
+int cursorHeight = 0, cursorWidth = 0;
 int navBarOffset = 50;
-int cntRowsOffset = 200;
+int cntRowsOffset = 10;
 int globalHeightLine = fontSize + 5;
 const int HEIGHT = 1000;
 const int WIDTH = 1000;
@@ -32,7 +36,7 @@ namespace String
 {
     void precalculateCharDim()
     {
-        for (int fnt = fontUnit; fnt < C; fnt += fontUnit) ///precalculeaza width-urile si height-urile caracterilor in functie de marimea fontului 
+        for (int fnt = fontUnit; fnt < C; fnt += fontUnit) 
         {
             for (int i = 0; i <= 255; i++)
                 charHeight[fnt][i] = fnt + 5;
@@ -418,8 +422,8 @@ namespace String
         if (String::len(T) + 1 == p1 || String::get(p1, T) == 10) return txt;
         int p2 = String::findNextEndline(p1, T) - 1;
 
-        int t1 = String::getFirstSeen(p1, p2, Xoffset , T);
-        int t2 = String::getLastSeen(p1, p2, Xoffset + WIDTH - cntRowsOffset , T);
+        int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
+        int t2 = String::getLastSeen(p1, p2, Xoffset + WIDTH - cntRowsOffset, T);
 
         if (t1 == -1 || t2 == -1) return txt;
         String::traverseString(t1, t2, T, txt);
@@ -439,6 +443,38 @@ namespace String
         merge(T, T, t3);
 
         return ans;
+    }
+
+    void heapify(Treap* &T)
+    {   
+        if (T == 0) return;
+        Treap* mx = T;
+
+        if (T->L && T->L->priority > mx->priority)
+            mx = T->L;
+       
+        if (T->R && T->R->priority > mx->priority)
+            mx = T->R;
+
+        if (mx != T)
+        {
+            swap(T->priority, mx->priority);
+            heapify(mx);
+        }
+    }
+
+    Treap* build(char a[], int n)
+    {
+        if (n == 0)
+            return NULL;
+
+        int mid = (1 + n) / 2;
+        Treap* T = new Treap(a[mid]);
+        T->L = build(a , mid - 1);
+        T->R = build(a + mid, n - mid);
+        heapify(T);
+        recalculate(T);
+        return T;
     }
 }
 
@@ -621,7 +657,7 @@ bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
     int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
     bool modif = 0;
 
-    while (currLineWidth <= Xoffset )
+    while (currLineWidth <= Xoffset)
         Xoffset -= scrollUnitX, modif = 1;
 
     if (modif) Xoffset -= scrollUnitX;
@@ -682,7 +718,7 @@ int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollU
     if (String::get(p1, S) == 10) return p1;
 
     int p2 = String::findNextEndline(p1, S) - 1;
-    int p = String::getFirstSeen(p1, p2, w + Xoffset , S);
+    int p = String::getFirstSeen(p1, p2, w + Xoffset, S);
     // cerr << p << ' ' << p2 << '\n';
     if (p == -1) p = p2;
     return p + 1;
@@ -707,7 +743,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     for (int i = 0; i < L; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(cntRowsOffset , navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + globalHeightLine);
         text1.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -722,7 +758,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(cntRowsOffset , navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + globalHeightLine);
         text2.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -731,7 +767,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     img2.setTexture(text2.getTexture());
 
     text.setString(txt);
-    text.setPosition(cntRowsOffset , navBarOffset + textHeight + globalHeightLine);
+    text.setPosition(cntRowsOffset, navBarOffset + textHeight + globalHeightLine);
 
     text1.display();
     text2.display();
@@ -785,6 +821,29 @@ public:
     }
 };
 
+void splitCursorLine(sf::Text& text, sf::Text& h1, sf::Text& h2, string& txt, int posCursorOnScreen)
+{
+    if (txt.size() == 0)
+    {
+        h1.setString("");
+        h2.setString("");
+        return;
+    }
+
+    string s1, s2;
+
+    for (int i = 0; i < posCursorOnScreen - 1; i++) s1 += txt[i];
+    for (int i = posCursorOnScreen; i < txt.size(); i++) s2 += txt[i];
+
+    h1.setCharacterSize(fontSize);
+    h2.setCharacterSize(fontSize);
+
+    h1.setString(s1);
+    h2.setString(s2);
+    h1.setPosition(cntRowsOffset , text.getPosition().y);
+    h2.setPosition(cntRowsOffset + h1.getGlobalBounds().width + 4 + cursorWidth + 4  , text.getPosition().y);
+}
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Text Editor");
@@ -795,16 +854,28 @@ int main()
     window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
     sf::Event event;
-    sf::Text text;
+    sf::Text text , ptext1 , ptext2;
+
     sf::Font font;
 
     font.loadFromFile("assets/fonts/cour.ttf");
+
     text.setFont(font);
     text.setFillColor(sf::Color::Black);
     text.setCharacterSize(fontSize);
     text.setStyle(sf::Text::Regular);
 
-    string contents[] = {"+", "-", "Open", "Save", "Save as", "Find"};
+    ptext1.setFont(font);
+    ptext1.setFillColor(sf::Color::Black);
+    ptext1.setCharacterSize(fontSize);
+    ptext1.setStyle(sf::Text::Regular);
+
+    ptext2.setFont(font);
+    ptext2.setFillColor(sf::Color::Black);
+    ptext2.setCharacterSize(fontSize);
+    ptext2.setStyle(sf::Text::Regular);
+
+    string contents[] = { "+", "-", "Open", "Save", "Save as", "Find" };
 
     sf::Vector2f positions[6];
 
@@ -822,15 +893,7 @@ int main()
         buttons[i] = new Button(contents[i], font, size, positions[i]);
     }
 
-    // sf::Texture zoomIn, zoomOut;
-    // zoomIn.loadFromFile("assets/images/plus.png");
-    // zoomOut.loadFromFile("assets/images/minus.png");
-
-    // buttons[0]->setTexture(&zoomIn);
-    // buttons[1]->setTexture(&zoomOut);
-
     String::precalculateCharDim();
-
     String::Treap* S = new String::Treap(cursorChar, 1); ///string doar cu pointer-ul de text
 
     int Yoffset = 0, Xoffset = 0;
@@ -860,6 +923,8 @@ int main()
     string path = "";
     int Timer = 0;
     bool cursorOnScreen = 0;
+    int lastDone = 0;
+    int nr = 0;
 
     while (window.isOpen())
     {
@@ -869,7 +934,7 @@ int main()
 
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::MouseMoved) 
+            if (event.type == sf::Event::MouseMoved)
             {
                 for (int i = 0; i < 6; i++)
                 {
@@ -882,7 +947,7 @@ int main()
                         buttons[i]->setOpacity(false);
                     }
                 }
-                    break;
+                break;
             }
             if (event.type == sf::Event::Closed)
                 window.close();
@@ -895,6 +960,7 @@ int main()
                 if (key == 0 && buttons[2]->isInside(window))
                 {
                     path = Windows::getPathFromUser("Open File");
+                    if (path.size() == 0) break;
                     FILE* fptr = fopen(path.c_str(), "r");
 
                     if (fptr == NULL)
@@ -904,7 +970,7 @@ int main()
                     }
 
                     char ch;
-                    int nr = 0;
+                    nr = 0;
 
                     for (int i = String::len(S); i >= 1; i--)
                         String::del(i, S);
@@ -913,21 +979,25 @@ int main()
 
                     while ((ch = fgetc(fptr)) != EOF)
                     {
-                        int posCursor = String::findCursorPosition(S);
-                        String::insert(posCursor, S, ch);
-                        nr++;
+                        input[++nr] = ch;
                         //cerr << ch << '\n';
                     }
 
-                    int posCursor = String::findCursorPosition(S);
-                    String::del(posCursor, S);
+                    for (int i = 1; i <= min(nr, BUCKET); i++)
+                    {
+                        String::insert(i, S, input[i]);
+                        lastDone = i;
+                    }
+                   
                     String::insert(1, S);
+
                     renderAgain = 1;
-                    cerr << "done" << ' ' << nr << '\n';
+                    cerr << "done" << ' ' << nr << ' ' << lastDone << '\n';
                 }
                 else if (key == 0 && buttons[4]->isInside(window))
                 {
                     path = Windows::getPathFromUser("Save As");
+                    if (path.size() == 0) break;
                     FILE* fptr = fopen(path.c_str(), "w");
 
                     if (fptr == NULL)
@@ -1021,7 +1091,7 @@ int main()
                 else if (key == 0) ///click random pe ecran ca sa schimbi unde e cursorul
                 {
                     int newPosCursor = moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
-                    cerr << "newpos: " << newPosCursor << '\n';
+                   // cerr << "newpos: " << newPosCursor << '\n';
                     int posCursor = String::findCursorPosition(S);
                     String::del(posCursor, S);
 
@@ -1159,6 +1229,30 @@ int main()
 
         window.clear(sf::Color::White);
 
+        Timer++;
+
+        if (Timer % timeUnit == 0)
+        {
+            swap(colorCursor[0], colorCursor[1]);
+            cursorBox.setFillColor(colorCursor[0]);
+
+            int lastExistent = String::len(S);
+            int last = nr + 10;
+
+            cerr << lastDone << ' ';
+
+            for (int i = lastDone + 1; i <= min(nr, lastDone + BUCKET) ; i++)
+            {
+                String::insert(lastExistent, S, input[i]);
+                lastExistent++;
+                last = i;
+            }
+
+            lastDone = last;
+            flag = 1;
+            renderAgain = 1;
+        }
+
         if (flag || firstExec)
         {
             scrollUnitX = charWidth[fontSize][0], scrollUnitY = charHeight[fontSize]['a'];
@@ -1166,22 +1260,32 @@ int main()
             renderAgain |= firstExec;
             renderAgain |= fontChanged;
 
+            if (fontChanged || firstExec)
+            {
+                cursorHeight = globalHeightLine - 2;
+                cursorWidth = 1;
+            }
+
             fontChanged = 0;
             firstExec = 0;
 
-            int cursorLine = String::findNumberOfEndlines(1, String::findCursorPosition(S), S) + 1;
-            renderAgain |= lastCursorLine != cursorLine;
+            int posCursor = String::findCursorPosition(S);
+            int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
+            int p = String::findKthLine(cursorLine , S);
+            int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
 
+            renderAgain |= lastCursorLine != cursorLine;
+            
             if (renderAgain == 1)
             {
                 // cerr << renderAgain << '\n';
 
                 int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
-                l1 = min(numberOfLines , max(1 , (Yoffset - 1 - navBarOffset) / scrollUnitY + 1));
-                l2 = min(numberOfLines , max(1 , (Yoffset - 1 + HEIGHT - navBarOffset) / scrollUnitY));
+                l1 = max(1, (Yoffset - 1 - navBarOffset) / scrollUnitY + 1);
+                l2 = min(numberOfLines , max(1, (Yoffset - 1 + HEIGHT - navBarOffset) / scrollUnitY));
 
-                cerr << l1 << ' ' << l2 << '\n';
+               // cerr << l1 << ' ' << l2 << '\n';
 
                 sizeRLines = 0;
 
@@ -1194,24 +1298,18 @@ int main()
             {
                 if (cursorLine >= l1 && cursorLine <= l2)
                 {
-                    cerr << "here flag" << '\n';
                     updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset));
                     text.setString(renderLines[cursorLine - l1]);
                 }
             }
 
+            string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
+            splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1);
+
             if (cursorLine >= l1 && cursorLine <= l2)
             {
-                int posCursor = String::findCursorPosition(S);
-                int p = String::findPrevEndline(posCursor, S) + 1;
-                int p1 = String::getFirstSeen(p, posCursor, Xoffset , S);
-                int width = String::findWidth(p1, posCursor - 1, S);
-
-                int cursorHeight = globalHeightLine - 2;
-                int cursorWidth = charWidth[fontSize][' '] / 6;
-
                 cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                cursorBox.setPosition(width + cntRowsOffset , text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
+                cursorBox.setPosition(ptext1.getGlobalBounds().width + cntRowsOffset + 4 + cursorWidth , text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
 
                 cursorOnScreen = 1;
             }
@@ -1220,16 +1318,9 @@ int main()
             lastCursorLine = cursorLine;
         }
 
-        Timer++;
-
-        if (Timer % timeUnit == 0)
-        {
-            swap(colorCursor[0], colorCursor[1]);
-            cursorBox.setFillColor(colorCursor[0]);
-        }
-
         window.draw(img1);
-        window.draw(text);
+        window.draw(ptext1);
+        window.draw(ptext2);
         window.draw(img2);
 
         for (auto button : buttons)
@@ -1237,6 +1328,7 @@ int main()
             window.draw(button->container);
             window.draw(button->content);
         }
+
         if (cursorOnScreen) window.draw(cursorBox);
         window.display();
     }
