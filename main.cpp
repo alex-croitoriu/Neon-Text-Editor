@@ -14,19 +14,32 @@ mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 const int C = 400;
 const int fontUnit = 10;
 const int scrollUnit = 10;
-const int timeUnit = 500;
+const int timeUnit = 2000;
 const char cursorChar = ' ';
 const int N = 1e8 + 10;
 const int BUCKET = 2e4;
 
 char input[N];
-int charHeight[C][C];
-int fontSize = 60;
+float charHeight[C][C];
+int fontSize = 20;
+
+int recalculateHeightLine()
+{
+    return fontSize + 10;
+}
+
 
 int cursorHeight = 0, cursorWidth = 0;
 int navBarOffset = 50;
 int cntRowsOffset = 10;
-int globalHeightLine = fontSize + 5;
+int globalHeightLine = recalculateHeightLine();
+float centerConst = 0;
+
+float recalculateCenterConst()
+{
+    return -((globalHeightLine - charHeight[fontSize]['t']) / 2.0 + 2);
+}
+
 const int HEIGHT = 1000;
 const int WIDTH = 1000;
 
@@ -36,10 +49,22 @@ namespace String
 {
     void precalculateCharDim()
     {
+        sf::Text text;
+        sf::Font font;
+
+        font.loadFromFile("assets/fonts/cour.ttf");
+        text.setFont(font);
+
+
         for (int fnt = fontUnit; fnt < C; fnt += fontUnit) 
         {
             for (int i = 0; i <= 255; i++)
                 charHeight[fnt][i] = fnt + 5;
+            
+            text.setCharacterSize(fnt);
+            text.setString("Lorem Ipsum aaaaAAAAAppyPPPOOPOPOABCDFERFTDFDFAASDGgÊg|||");
+            charHeight[fnt]['t'] = text.getGlobalBounds().height;
+            cerr << charHeight[fnt]['t'] << '\n';
         }
     }
 
@@ -672,7 +697,7 @@ bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
 bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
 {
     int globalHeight = String::findCurrentHeight(S);
-    int height = fontSize + 5;
+    int height = recalculateHeightLine();
     bool modif = 0;
 
     while (globalHeight - height < Yoffset)
@@ -743,7 +768,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     for (int i = 0; i < L; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
         text1.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -751,14 +776,16 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     int textHeight = lastHeight;
 
     if (l1 <= cursorLine && cursorLine <= l2) txt = renderLines[cursorLine - l1];
-    else txt = " ";
+    else txt = "";
+    
+   // cerr << txt.size() << '\n';
 
-    lastHeight += globalHeightLine;
+    if(txt.size()) lastHeight += globalHeightLine;
 
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         text.setString(renderLines[i]);
-        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + globalHeightLine);
+        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
         text2.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -767,7 +794,7 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     img2.setTexture(text2.getTexture());
 
     text.setString(txt);
-    text.setPosition(cntRowsOffset, navBarOffset + textHeight + globalHeightLine);
+    text.setPosition(cntRowsOffset, navBarOffset + textHeight + centerConst + globalHeightLine);
 
     text1.display();
     text2.display();
@@ -894,6 +921,8 @@ int main()
     }
 
     String::precalculateCharDim();
+    centerConst = recalculateCenterConst();
+
     String::Treap* S = new String::Treap(cursorChar, 1); ///string doar cu pointer-ul de text
 
     int Yoffset = 0, Xoffset = 0;
@@ -919,6 +948,8 @@ int main()
     colorCursor[0] = sf::Color(0, 0, 0, 0);
 
     sf::RectangleShape cursorBox;
+    sf::RectangleShape cursorLineHighlight;
+    cursorLineHighlight.setFillColor(sf::Color(0, 0, 0, 50));
 
     string path = "";
     int Timer = 0;
@@ -1051,7 +1082,8 @@ int main()
                     fontSize += fontUnit;
                     fontSize = min(fontSize, C - fontUnit);
                     String::updateWidth(S);
-                    globalHeightLine = fontSize + 5;
+                    globalHeightLine = recalculateHeightLine();
+                    centerConst = recalculateCenterConst();
                     fontChanged = 1;
                 }
                 else if (key == 0 && buttons[1]->isInside(window))
@@ -1060,7 +1092,8 @@ int main()
                     fontSize -= fontUnit;
                     fontSize = max(fontUnit, fontSize);
                     String::updateWidth(S);
-                    globalHeightLine = fontSize + 5;
+                    globalHeightLine = recalculateHeightLine();
+                    centerConst = recalculateCenterConst();
                 }
                 else  if (key == 0 && buttons[3]->isInside(window))
                 {
@@ -1239,18 +1272,16 @@ int main()
             int lastExistent = String::len(S);
             int last = nr + 10;
 
-            cerr << lastDone << ' ';
-
             for (int i = lastDone + 1; i <= min(nr, lastDone + BUCKET) ; i++)
             {
                 String::insert(lastExistent, S, input[i]);
                 lastExistent++;
+                renderAgain = flag = 1;
                 last = i;
             }
 
             lastDone = last;
-            flag = 1;
-            renderAgain = 1;
+            Timer = 0;
         }
 
         if (flag || firstExec)
@@ -1285,7 +1316,7 @@ int main()
                 l1 = max(1, (Yoffset - 1 - navBarOffset) / scrollUnitY + 1);
                 l2 = min(numberOfLines , max(1, (Yoffset - 1 + HEIGHT - navBarOffset) / scrollUnitY));
 
-               // cerr << l1 << ' ' << l2 << '\n';
+                cerr << l1 << ' ' << l2 << '\n';
 
                 sizeRLines = 0;
 
@@ -1309,9 +1340,11 @@ int main()
             if (cursorLine >= l1 && cursorLine <= l2)
             {
                 cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                cursorBox.setPosition(ptext1.getGlobalBounds().width + cntRowsOffset + 4 + cursorWidth , text.getPosition().y + globalHeightLine * 1.1 - cursorHeight);
+                cursorBox.setPosition(ptext1.getGlobalBounds().width + cntRowsOffset + 4 + cursorWidth , text.getPosition().y);
 
                 cursorOnScreen = 1;
+                cursorLineHighlight.setSize(sf::Vector2f(WIDTH - cntRowsOffset , globalHeightLine));
+                cursorLineHighlight.setPosition(cntRowsOffset, text.getPosition().y - centerConst);
             }
             else cursorOnScreen = 0;
 
@@ -1330,6 +1363,7 @@ int main()
         }
 
         if (cursorOnScreen) window.draw(cursorBox);
+        if (cursorOnScreen) window.draw(cursorLineHighlight);
         window.display();
     }
 
