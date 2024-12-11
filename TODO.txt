@@ -1,11 +1,11 @@
-- fix scroll bug
+- fix scroll bug (DONE)
 - cursor should always be visible when zooming in/out
 
 - add highlight for current line
 - add line numbers to the left
 
 - dropdown menus
-- cursor without space
+- cursor without space (DONE)
 - stats
 - dark/light mode
 - improve find functionality
