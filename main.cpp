@@ -17,21 +17,22 @@ const int scrollUnit = 10;
 const int timeUnit = 2000;
 const char cursorChar = ' ';
 const int N = 1e8 + 10;
-const int BUCKET = 5e4;
+const int BUCKET = 1e5;
 
-char input[N];
+vector < char > input;
 float charHeight[C][C];
-int fontSize = 20;
+int fontSize = 50;
 pair < int, int > segmOnScreen[C];
 
-int recalculateHeightLine()
+int recalculateHeightLine(int fnt = fontSize)
 {
-    return fontSize + 10;
+    return fnt + 10;
 }
 
 int cursorHeight = 0, cursorWidth = 0;
 int navBarOffset = 50;
 int cntRowsOffset = 10;
+int cursorInfoOffset = 0;
 int globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
 
@@ -40,7 +41,7 @@ float recalculateCenterConst()
     return -((globalHeightLine - charHeight[fontSize]['t']) / 2.0 + 2);
 }
 
-const int HEIGHT = 1000;
+const int HEIGHT = 300;
 const int WIDTH = 1000;
 
 vector < string > renderLines(1000);
@@ -59,7 +60,7 @@ namespace String
         for (int fnt = fontUnit; fnt < C; fnt += fontUnit) 
         {
             for (int i = 0; i <= 255; i++)
-                charHeight[fnt][i] = fnt + 5;
+                charHeight[fnt][i] = recalculateHeightLine(fnt);
             
             text.setCharacterSize(fnt);
             text.setString("Lorem Ipsum aaaaAAAAAppyPPPOOPOPOABCDFERFTDFDFAASDGgÊg|||");
@@ -711,9 +712,9 @@ bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
 
     // cerr << "globalHeight is: " << globalHeight << '\n' << "height is " << height << '\n';
 
-    while (globalHeight > Yoffset + HEIGHT - navBarOffset - height)
+    while (globalHeight > Yoffset + HEIGHT - cursorInfoOffset - navBarOffset - height)
         Yoffset += scrollUnitY, modif = 1;
-
+    cerr << modif << '\n';
     return modif;
 }
 
@@ -976,6 +977,7 @@ int main()
     int lastDone = 0;
     int nr = 0;
     int cntX = 0;
+    FILE* fptr = NULL;
 
     while (window.isOpen())
     {
@@ -987,31 +989,36 @@ int main()
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
+            cerr << selectFlag << ' ';
             sf::Vector2i localPosition = sf::Mouse::getPosition(window);
             //sf::Vector2i globalPosition = sf::Mouse::getPosition();
 
-            if (localPosition.x >= cntRowsOffset && localPosition.y >= navBarOffset && localPosition.x < WIDTH && localPosition.y < HEIGHT)
+            if (localPosition.x >= cntRowsOffset && localPosition.y >= navBarOffset && localPosition.x < WIDTH && localPosition.y < HEIGHT - cursorInfoOffset)
             {
+                int posCursor = String::findCursorPosition(S);
                 int newPosCursor = moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
-                // cerr << "newpos: " << newPosCursor << '\n';
+                newPosCursor -= (newPosCursor > posCursor);
 
+                //int posCursorOnHold = String::findCursorPosition(S);
+                //cerr << "posCurs: " << posCursorOnHold << ' ' << newPosCursor << '\n';
+
+                // cerr << "newpos: " << newPosCursor << '\n';
                 if (leftButtonPressed == 0)
                 {
-                    int posCursor = String::findCursorPosition(S);
-                    posCursorOnHold = newPosCursor;
                     String::del(posCursor, S);
                     leftButtonPressed = 1;
                     selectFlag = 0;
 
-                    if (newPosCursor <= posCursor) String::insert(newPosCursor, S);
-                    else String::insert(newPosCursor - 1, S), --posCursorOnHold;
-                }
-                else if (newPosCursor != posCursorOnHold)
+                    String::insert(newPosCursor, S);
+                 }
+                else if (newPosCursor != posCursor)
                 {
                     selectFlag = 1;
 
-                    if (newPosCursor < posCursorOnHold) segmSelected = { newPosCursor , posCursorOnHold - 1 };
-                    else segmSelected = { posCursorOnHold + 1 , newPosCursor };
+                    if (newPosCursor < posCursor) segmSelected = { newPosCursor , posCursor - 1 };
+                    else segmSelected = { posCursor + 1 , newPosCursor };
+
+                    cerr << "asdfasd: " << segmSelected.first << ' ' << segmSelected.second << '\n';
                 }
 
 
@@ -1036,7 +1043,7 @@ int main()
                 Yoffset = max(0, Yoffset);
             }
 
-            if (localPosition.y >= HEIGHT)
+            if (localPosition.y >= HEIGHT - cursorInfoOffset)
             {
                 Yoffset += scrollUnitY;
             }
@@ -1044,11 +1051,13 @@ int main()
             flag = 1;
             renderAgain = 1;
         }
-        else if (ctrlX == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::X))
+        else if (selectFlag && ctrlX == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::X))
         {
             ctrlX = 1;
             int L = segmSelected.first;
             int R = segmSelected.second;
+
+            cerr << "LR " << L << ' ' << R << '\n';
 
             String::Treap* s1 = 0, * s2 = 0, * s3 = 0;
             String::split(S, s2, s3, R);
@@ -1066,10 +1075,11 @@ int main()
             flag = 1;
             renderAgain = 1;
 
+            //return 0;
             renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
             renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
         }
-        else if(ctrlC == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+        else if(selectFlag && ctrlC == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::C))
         {
             ctrlC = 1;
             int L = segmSelected.first;
@@ -1106,6 +1116,13 @@ int main()
 
             renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
             renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+        }
+        else if (selectFlag && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) ///needs work trebuie eliminat cursoru
+        {
+            segmSelected = { 1 , String::len(S) };
+            selectFlag = 1;
+            flag = 1;
+            renderAgain = 1;
         }
         else while (window.pollEvent(event))
         {
@@ -1168,7 +1185,7 @@ int main()
                 {
                     path = Windows::getPathFromUser("Open File");
                     if (path.size() == 0) break;
-                    FILE* fptr = fopen(path.c_str(), "r");
+                    fptr = fopen(path.c_str(), "r");
 
                     if (fptr == NULL)
                     {
@@ -1183,17 +1200,16 @@ int main()
                         String::del(i, S);
 
                     S = new String::Treap(cursorChar, 1);
+                   // input.clear();
+                    //input.push_back('\0');
 
-                    while ((ch = fgetc(fptr)) != EOF)
+                    while ((ch = fgetc(fptr)) != EOF && nr <= BUCKET)
                     {
-                        input[++nr] = ch;
+                       // input.push_back(ch);
+                        ++nr;
+                        String::insert(nr, S, ch);
+                        lastDone = nr;
                         //cerr << ch << '\n';
-                    }
-
-                    for (int i = 1; i <= min(nr, BUCKET); i++)
-                    {
-                        String::insert(i, S, input[i]);
-                        lastDone = i;
                     }
                    
                     String::insert(1, S);
@@ -1389,9 +1405,9 @@ int main()
             if (event.type == sf::Event::TextEntered) ///ce scrie user-ul
             {
                 int ch = event.text.unicode;
-               // cerr << ch << '\n';
+                cerr << "flag " << ch << '\n';
 
-                if (ch == 27 || ch == 24 || ch == 3 || ch == 22)
+                if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22)
                     break;
 
                 int posCursor = String::findCursorPosition(S);
@@ -1439,18 +1455,21 @@ int main()
             swap(colorCursor[0], colorCursor[1]);
             cursorBox.setFillColor(colorCursor[0]);
 
-            int lastExistent = String::len(S);
-            int last = nr + 10;
+            char ch;
 
-            for (int i = lastDone + 1; i <= min(nr, lastDone + BUCKET) ; i++)
+            while (fptr && (ch = fgetc(fptr)) != EOF && nr <= lastDone + BUCKET)
             {
-                String::insert(lastExistent, S, input[i]);
-                lastExistent++;
+                //input.push_back(ch);
+                ++nr;
+                String::insert(nr + 1 , S, ch);
                 renderAgain = flag = 1;
-                last = i;
             }
 
-            lastDone = last;
+            if (fptr && (ch = fgetc(fptr)) == EOF)
+            {
+                cerr << "DONE" << '\n';
+                return 0;
+            }
             Timer = 0;
         }
 
@@ -1483,9 +1502,10 @@ int main()
 
                 int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
-                l1 = max(1, (Yoffset - 1 - navBarOffset) / scrollUnitY + 1);
-                l2 = min(numberOfLines , max(1, (Yoffset - 1 + HEIGHT - navBarOffset) / scrollUnitY));
+                l1 = max(1, (Yoffset - navBarOffset) / scrollUnitY + 1);
+                l2 = min(numberOfLines , max(1, (Yoffset + HEIGHT - cursorInfoOffset - navBarOffset) / scrollUnitY));
 
+               // cerr << "has: " << numberOfLines << ' ' << Yoffset << ' ' << scrollUnitY << '\n';
                 //cerr << l1 << ' ' << l2 << '\n';
 
                 sizeRLines = 0;
@@ -1552,7 +1572,7 @@ int main()
                     int w = String::findWidth(l, li - 1, S);
                     int W = String::findWidth(li, ri, S);
 
-                    box.setPosition(w + cntRowsOffset , y);
+                    box.setPosition(w + cntRowsOffset + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] + 4 + cursorWidth + 4 : 0) , y);
                     box.setSize(sf::Vector2f(W, globalHeightLine));
                     box.setFillColor(sf::Color(0, 0, 0, 128));
                     selectedBoxes.push_back(box);
