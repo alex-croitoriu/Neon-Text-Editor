@@ -21,19 +21,19 @@ const int BUCKET = 1e5;
 
 vector < char > input;
 float charHeight[C][C];
-int fontSize = 50;
+int fontSize = 20;
 pair < int, int > segmOnScreen[C];
 
-int recalculateHeightLine(int fnt = fontSize)
+float recalculateHeightLine(int fnt = fontSize)
 {
-    return fnt + 10;
+    return fnt * 1.5;
 }
 
 int cursorHeight = 0, cursorWidth = 0;
 int navBarOffset = 50;
 int cntRowsOffset = 10;
 int cursorInfoOffset = 0;
-int globalHeightLine = recalculateHeightLine();
+float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
 
 float recalculateCenterConst()
@@ -41,10 +41,15 @@ float recalculateCenterConst()
     return -((globalHeightLine - charHeight[fontSize]['t']) / 2.0 + 2);
 }
 
-const int HEIGHT = 300;
+const int HEIGHT = 1000;
 const int WIDTH = 1000;
 
 vector < string > renderLines(1000);
+
+float cursorDist()
+{
+    return 0.7;
+}
 
 namespace String
 {
@@ -755,6 +760,20 @@ int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollU
 
 string txt1, txt2, txt, all;
 
+void centerText(sf::Text &text, string s , float start)
+{
+    bool empty = 0;
+    s += "|";
+    text.setString(s);
+    int centerConst = ( (float) globalHeightLine - text.getGlobalBounds().height) / 2;
+    cerr << "center const is: " << centerConst << '\n';
+    cerr << "text is " << s << ' ' << text.getGlobalBounds().height << '\n';
+    s.pop_back();
+    text.setString(s);
+    text.setPosition(cntRowsOffset, (float) start + centerConst);
+    cerr << "y " << start + centerConst << ' ' << navBarOffset << '\n';
+}
+
 void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTexture& text2, sf::Sprite& img1, sf::Sprite& img2, int l1, int l2, int cursorLine, int scrollUnitY)
 {
     txt1.clear(), txt2.clear(), txt.clear();
@@ -771,8 +790,9 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
 
     for (int i = 0; i < L; i++)
     {
-        text.setString(renderLines[i]);
-        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
+        centerText(text, renderLines[i] , navBarOffset + lastHeight + globalHeightLine);
+       // text.setString(renderLines[i]);
+       // text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
         text1.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -788,8 +808,9 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
 
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
-        text.setString(renderLines[i]);
-        text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
+        centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
+       // text.setString(renderLines[i]);
+        //text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
         text2.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -797,8 +818,9 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     img1.setTexture(text1.getTexture());
     img2.setTexture(text2.getTexture());
 
-    text.setString(txt);
-    text.setPosition(cntRowsOffset, navBarOffset + textHeight + centerConst + globalHeightLine);
+    centerText(text, txt , navBarOffset + textHeight + globalHeightLine);
+   // text.setString(txt);
+    //text.setPosition(cntRowsOffset, navBarOffset + textHeight + centerConst + globalHeightLine);
 
     text1.display();
     text2.display();
@@ -857,28 +879,23 @@ void splitCursorLine(sf::Text& text, sf::Text& h1, sf::Text& h2, string& txt, in
     if (txt.size() == 0)
     {
         h1.setString("");
-        h2.setString("");
         return;
     }
 
     if (fp == -1)
     {
         h1 = text;
-        h2.setString("");
         return;
     }
     string s1, s2;
 
     for (int i = 0; i < posCursorOnScreen - 1; i++) s1 += txt[i];
-    for (int i = posCursorOnScreen; i < txt.size(); i++) s2 += txt[i];
+    for (int i = posCursorOnScreen; i < txt.size(); i++) s1 += txt[i];
 
     h1.setCharacterSize(fontSize);
-    h2.setCharacterSize(fontSize);
 
     h1.setString(s1);
-    h2.setString(s2);
     h1.setPosition(cntRowsOffset , text.getPosition().y);
-    h2.setPosition(cntRowsOffset + h1.getGlobalBounds().width + 4 + cursorWidth + 4  , text.getPosition().y);
 }
 
 int main()
@@ -1018,7 +1035,7 @@ int main()
                     if (newPosCursor < posCursor) segmSelected = { newPosCursor , posCursor - 1 };
                     else segmSelected = { posCursor + 1 , newPosCursor };
 
-                    cerr << "asdfasd: " << segmSelected.first << ' ' << segmSelected.second << '\n';
+                  //  cerr << "asdfasd: " << segmSelected.first << ' ' << segmSelected.second << '\n';
                 }
 
 
@@ -1026,24 +1043,36 @@ int main()
                 renderAgain = 1;
             }
 
-            if (localPosition.x < cntRowsOffset)
+            if (selectFlag && localPosition.x < cntRowsOffset)
             {
                 Xoffset -= scrollUnitX;
                 Xoffset = max(0, Xoffset);
+
+                if (localPosition.y >= navBarOffset && localPosition.y < HEIGHT - cursorInfoOffset)
+                {
+                    int l = findLineOnScreen(localPosition.y);
+                   // segmSelected.first = segmOnScreen[l].first;
+                }
             }
 
-            if (localPosition.x >= WIDTH)
+            if (selectFlag && localPosition.x >= WIDTH)
             {
                 Xoffset += scrollUnitX;
+
+                if (localPosition.y >= navBarOffset && localPosition.y < HEIGHT - cursorInfoOffset)
+                {
+                    int l = findLineOnScreen(localPosition.y);
+                    // segmSelected.second = segmOnScreen[l].second;
+                }
             }
 
-            if (localPosition.y < navBarOffset)
+            if (selectFlag && localPosition.y < navBarOffset)
             {
                 Yoffset -= scrollUnitY;
                 Yoffset = max(0, Yoffset);
             }
 
-            if (localPosition.y >= HEIGHT - cursorInfoOffset)
+            if (selectFlag && localPosition.y >= HEIGHT - cursorInfoOffset)
             {
                 Yoffset += scrollUnitY;
             }
@@ -1057,7 +1086,7 @@ int main()
             int L = segmSelected.first;
             int R = segmSelected.second;
 
-            cerr << "LR " << L << ' ' << R << '\n';
+            //cerr << "LR " << L << ' ' << R << '\n';
 
             String::Treap* s1 = 0, * s2 = 0, * s3 = 0;
             String::split(S, s2, s3, R);
@@ -1066,7 +1095,7 @@ int main()
             buffer = String::constructString(s2);
             //++cntX;
 
-            cerr << buffer << '\n';
+           //cerr << buffer << '\n';
 
             delete s2;
 
@@ -1102,7 +1131,7 @@ int main()
             int posCursor = String::findCursorPosition(S);
             ctrlV = 1;
 
-            cerr << "I am here" << '\n';
+           // cerr << "I am here" << '\n';
 
             for (auto ch : buffer)
             {
@@ -1117,7 +1146,7 @@ int main()
             renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
             renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
         }
-        else if (selectFlag && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) ///needs work trebuie eliminat cursoru
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) ///needs work trebuie eliminat cursoru
         {
             segmSelected = { 1 , String::len(S) };
             selectFlag = 1;
@@ -1405,7 +1434,7 @@ int main()
             if (event.type == sf::Event::TextEntered) ///ce scrie user-ul
             {
                 int ch = event.text.unicode;
-                cerr << "flag " << ch << '\n';
+               // cerr << "flag " << ch << '\n';
 
                 if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22)
                     break;
@@ -1467,8 +1496,8 @@ int main()
 
             if (fptr && (ch = fgetc(fptr)) == EOF)
             {
-                cerr << "DONE" << '\n';
-                return 0;
+                //cerr << "DONE" << '\n';
+               // return 0;
             }
             Timer = 0;
         }
@@ -1493,6 +1522,7 @@ int main()
             int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
             int p = String::findKthLine(cursorLine , S);
             int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
+            int widthTillCursor = String::findWidth(fp, posCursor - 1, S);
 
             renderAgain |= lastCursorLine != cursorLine;
             
@@ -1537,14 +1567,14 @@ int main()
             if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
             {
                 cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                cursorBox.setPosition(ptext1.getGlobalBounds().width + cntRowsOffset + 4 + cursorWidth , text.getPosition().y);
+                cursorBox.setPosition(cntRowsOffset + widthTillCursor , (cursorLine - l1) * globalHeightLine + navBarOffset);
 
                 cursorOnScreen = 1;
             }
             else cursorOnScreen = 0;
 
             cursorLineHighlight.setSize(sf::Vector2f(WIDTH - cntRowsOffset, globalHeightLine));
-            cursorLineHighlight.setPosition(cntRowsOffset, text.getPosition().y - centerConst);
+            cursorLineHighlight.setPosition(cntRowsOffset, (cursorLine - l1)* globalHeightLine + navBarOffset);
 
             lastCursorLine = cursorLine;
 
@@ -1572,7 +1602,7 @@ int main()
                     int w = String::findWidth(l, li - 1, S);
                     int W = String::findWidth(li, ri, S);
 
-                    box.setPosition(w + cntRowsOffset + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] + 4 + cursorWidth + 4 : 0) , y);
+                    box.setPosition(w + cntRowsOffset + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0) , y);
                     box.setSize(sf::Vector2f(W, globalHeightLine));
                     box.setFillColor(sf::Color(0, 0, 0, 128));
                     selectedBoxes.push_back(box);
@@ -1584,7 +1614,6 @@ int main()
         if (selectFlag) for (auto box : selectedBoxes) window.draw(box);
         window.draw(img1);
         window.draw(ptext1);
-        window.draw(ptext2);
         window.draw(img2);
 
         for (auto button : buttons)
