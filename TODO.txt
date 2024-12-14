@@ -1,20 +1,18 @@
 - [X] fix scroll bug
 - [X] cursor should always be visible when zooming in/out and navigating
-
 - [X] add highlight for current line
-- [ ] add line numbers to the left
-
-- [ ] dropdown menus
 - [X] cursor without space
+- [X] cut, copy, paste
+- [X] select text
+
+- [ ] add line numbers to the left
+- [ ] right click
+- [ ] dropdown menus
+- [ ] scrollbar
 - [ ] stats
 - [ ] dark/light mode
 - [ ] improve find functionality
 - [ ] fix blurry buttons
 - [ ] move zoom in/out buttons to the bottom
 - [ ] modal for unsaved changes 
-
 - [ ] fullscreeen legit
-- [X] cut, copy, paste
-- [X] select text
-
-- [ ] right click

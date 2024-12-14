@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <chrono>
 #include <random>
-#include "precompute.h"
+#include "precompute.hpp"
+#include "button.hpp"
 
 using namespace std;
 
@@ -530,7 +531,7 @@ namespace Windows
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
-        text.setString("EnterPath: ");
+        text.setString("Enter path: ");
 
         pth.setFont(font);
         pth.setFillColor(sf::Color::Green);
@@ -826,54 +827,6 @@ void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTextu
     text2.display();
 }
 
-class Button
-{
-public:
-    sf::RectangleShape container;
-    sf::Text content;
-    sf::Texture texture;
-    Button(string& content, sf::Font& font, sf::Vector2f& size, sf::Vector2f& position)
-    {
-        this->container.setSize(size);
-        this->container.setPosition(position);
-        this->container.setFillColor(sf::Color(0, 0, 0, 0));
-
-        this->content.setString(content);
-        this->content.setFont(font);
-        this->content.setCharacterSize(13);
-        this->content.setStyle(sf::Text::Bold);
-        this->content.setFillColor(sf::Color::Black);
-
-        sf::Vector2f center(
-            ((2 * this->container.getGlobalBounds().left + this->container.getGlobalBounds().width) / 2.0),
-            ((2 * this->container.getGlobalBounds().top + this->container.getGlobalBounds().height) / 2.0)
-        );
-
-        this->content.setPosition
-        (
-            center.x - this->content.getLocalBounds().width / 2.0,
-            center.y - this->content.getLocalBounds().height / 2.0
-        );
-    }
-    void setTexture(const sf::Texture* texture)
-    {
-        this->container.setTexture(texture);
-    }
-    sf::FloatRect getGlobalBounds()
-    {
-        return container.getGlobalBounds();
-    }
-    bool isInside(sf::RenderWindow& window)
-    {
-        sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-        return this->getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
-    }
-    void setOpacity(bool hover)
-    {
-        this->container.setFillColor(sf::Color(0, 0, 0, hover ? 32 : 0));
-    }
-};
-
 void splitCursorLine(sf::Text& text, sf::Text& h1, sf::Text& h2, string& txt, int posCursorOnScreen , int fp)
 {
     if (txt.size() == 0)
@@ -982,6 +935,7 @@ int main()
 
     string path = "" , buffer = "";
     int Timer = 0;
+    int cursorTimer = 0;
     bool cursorOnScreen = 0;
     bool cursorLineOnScreen = 1;
     bool leftButtonPressed = 0;
@@ -1306,17 +1260,19 @@ int main()
                     globalHeightLine = recalculateHeightLine();
                     centerConst = recalculateCenterConst();
                     fontChanged = 1;
+                    cursorTimer = 0;
                 }
                 else if (key == 0 && buttons[1]->isInside(window))
                 {
-                    fontChanged = 1;
                     fontSize -= fontUnit;
                     fontSize = max(fontUnit, fontSize);
                     String::updateWidth(S);
                     globalHeightLine = recalculateHeightLine();
                     centerConst = recalculateCenterConst();
+                    fontChanged = 1;
+                    cursorTimer = 0;
                 }
-                else  if (key == 0 && buttons[3]->isInside(window))
+                else if (key == 0 && buttons[3]->isInside(window))
                 {
                     if (path.size() == 0)
                     {
@@ -1344,6 +1300,7 @@ int main()
                 }
                 else if (key == 0) ///click random pe ecran ca sa schimbi unde e cursorul
                 {
+                    cursorTimer = 0;
                     break;
                 }
                 else break;
@@ -1360,7 +1317,7 @@ int main()
             if (event.type == sf::Event::KeyPressed)
             {
                 //selectFlag = 0;
-               // cerr << event.key.code << '\n';
+                // cerr << event.key.code << '\n';
                 int key = event.key.code;
 
                 if (key == 36) ///escape
@@ -1382,7 +1339,9 @@ int main()
                         String::del(posCursor, S);
                         String::insert(p2 + min(chCurr, chPrev) + 1, S);
                         renderAgain = 1;
+                        cursorTimer = 0;
                     }
+                    
                 }
                 else if (key == 74) ///down arrow
                 {
@@ -1398,6 +1357,7 @@ int main()
                         String::del(posCursor, S);
                         String::insert(p1 + min(chCurr, chNext) + 1 - 1, S);
                         renderAgain = 1;
+                        cursorTimer = 0;
                     }
                 }
                 else if (key == 71) ///left arrow
@@ -1408,6 +1368,7 @@ int main()
                     {
                         String::del(posCursor, S);
                         String::insert(posCursor - 1, S);
+                        cursorTimer = 0;
                     }
                 }
                 else if (key == 72)  ///right arrow
@@ -1418,6 +1379,7 @@ int main()
                     {
                         String::del(posCursor, S);
                         String::insert(posCursor + 1, S);
+                        cursorTimer = 0;
                     }
                 }
                 else break;
@@ -1478,12 +1440,10 @@ int main()
         window.clear(sf::Color::White);
 
         Timer++;
+        Timer %= timeUnit;
 
         if (Timer % timeUnit == 0)
         {
-            swap(colorCursor[0], colorCursor[1]);
-            cursorBox.setFillColor(colorCursor[0]);
-
             char ch;
 
             while (fptr && (ch = fgetc(fptr)) != EOF && nr <= lastDone + BUCKET)
@@ -1499,7 +1459,18 @@ int main()
                 //cerr << "DONE" << '\n';
                // return 0;
             }
-            Timer = 0;
+        }
+
+        cursorTimer++;
+        cursorTimer %= timeUnit * 2;
+        
+        if (cursorTimer % (timeUnit * 2) <= timeUnit)
+        {
+            cursorBox.setFillColor(colorCursor[1]);
+        }
+        else if (cursorTimer % (timeUnit * 2) != 0)
+        {
+            cursorBox.setFillColor(colorCursor[0]);
         }
 
         if (flag || firstExec)
@@ -1607,7 +1578,6 @@ int main()
                     box.setFillColor(sf::Color(0, 0, 0, 128));
                     selectedBoxes.push_back(box);
                 }
-                
             }
         }
 
@@ -1626,7 +1596,6 @@ int main()
         if (cursorLineOnScreen && selectFlag == 0) window.draw(cursorLineHighlight);
         window.display();
     }
-
 
     return 0;
 }
