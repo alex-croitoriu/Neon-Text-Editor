@@ -37,11 +37,6 @@ float recalculateCenterConst()
 
 vector<string> renderLines(1000);
 
-float cursorDist() // e folosit undeva asta?
-{
-    return 0.7;
-}
-
 namespace String
 {
     void precalculateCharDim()
