@@ -25,8 +25,10 @@ float recalculateHeightLine(int fnt = fontSize)
 
 int cursorHeight = 0, cursorWidth = 0;
 int navBarOffset = 50;
-int cntRowsOffset = 55;
+int cntRowsOffset = 60;
 int cursorInfoOffset = 0;
+int lineNumberMaxDigits = 4;
+
 float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
 
@@ -819,15 +821,18 @@ void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTextu
     {
         string line = "";
         string number = to_string(i);
-        for (int j = 0; j < 4 - number.length(); j++)
+        if (number.length() > lineNumberMaxDigits)
+            lineNumberMaxDigits = number.length();
+        for (int j = 0; j < lineNumberMaxDigits - number.length(); j++)
             line += " ";
         line += number;
-        centerText(text, line, navBarOffset + lastHeight + globalHeightLine, 0);
+        centerText(text, line, navBarOffset + lastHeight + globalHeightLine, 5);
         text3.draw(text);
         lastHeight += globalHeightLine;
     }
 
-    cntRowsOffset = text.getLocalBounds().width + 1.25 * charWidth[fontSize]['a'];
+    cntRowsOffset = (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+    cerr << cntRowsOffset << '\n';
 
     text.setLetterSpacing(1);
 
@@ -912,7 +917,7 @@ int main()
     window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
     sf::Event event;
-    sf::Text text, ptext1, ptext2, lineNumbers;
+    sf::Text text, ptext1, ptext2;
 
     sf::Font font;
 
@@ -932,11 +937,6 @@ int main()
     ptext2.setFillColor(sf::Color::Black);
     ptext2.setCharacterSize(fontSize);
     ptext2.setStyle(sf::Text::Regular);
-
-    lineNumbers.setFont(font);
-    lineNumbers.setFillColor(sf::Color::Black);
-    lineNumbers.setCharacterSize(fontSize);
-    lineNumbers.setStyle(sf::Text::Regular);
 
     string buttonContents[] = {"-", "+", "Open", "Save", "Save as", "Find"};
 
