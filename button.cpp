@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
+
 #include <string>
+
 #include "button.hpp"
 
 using namespace std;
@@ -16,15 +18,10 @@ Button::Button(string& string, sf::Font& font, sf::Vector2f& size, sf::Vector2f&
     content.setStyle(sf::Text::Bold);
     content.setFillColor(sf::Color::Black);
 
-    sf::Vector2f center(
-        ((2 * container.getGlobalBounds().left + container.getGlobalBounds().width) / 2.0),
-        ((2 * container.getGlobalBounds().top + container.getGlobalBounds().height) / 2.0)
-    );
-
     content.setPosition
     (
-        center.x - content.getLocalBounds().width / 2.0,
-        center.y - content.getLocalBounds().height / 2.0
+        (2 * container.getGlobalBounds().left + container.getGlobalBounds().width) / 2.0 - content.getLocalBounds().width / 2.0,
+        (2 * container.getGlobalBounds().top + container.getGlobalBounds().height) / 2.0 - content.getLocalBounds().height / 2.0
     );
 }
 
@@ -33,18 +30,18 @@ void Button::setTexture(const sf::Texture* texture)
     container.setTexture(texture);
 }
 
-sf::FloatRect Button::getGlobalBounds()
+void Button::setOpacity(bool hover)
 {
-    return container.getGlobalBounds();
+    container.setFillColor(sf::Color(0, 0, 0, hover ? 32 : 0));
 }
 
-bool Button::isInside(sf::RenderWindow& window)
+bool Button::isHovering(sf::RenderWindow& window)
 {
     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
     return getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
-void Button::setOpacity(bool hover)
+sf::FloatRect Button::getGlobalBounds()
 {
-    container.setFillColor(sf::Color(0, 0, 0, hover ? 32 : 0));
+    return container.getGlobalBounds();
 }

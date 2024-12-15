@@ -7,3 +7,4 @@ lineCount = int(input) * 1000000 / len(line)
 
 for i in range(0, int(lineCount)):
     output.write(line)
+    

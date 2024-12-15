@@ -4,15 +4,16 @@
 - [X] cursor without space
 - [X] cut, copy, paste
 - [X] select text
+- [X] add line numbers to the left
 
-- [ ] add line numbers to the left
-- [ ] right click
 - [ ] dropdown menus
+- [ ] right click
 - [ ] scrollbar
-- [ ] stats
+- [ ] stats (current cursor position - line and column, current zoom level, current file name)
 - [ ] dark/light mode
 - [ ] improve find functionality
 - [ ] fix blurry buttons
 - [ ] move zoom in/out buttons to the bottom
 - [ ] modal for unsaved changes 
 - [ ] fullscreeen legit
+- [ ] name and logo
