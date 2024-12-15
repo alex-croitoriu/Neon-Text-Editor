@@ -30,11 +30,6 @@ int cursorInfoOffset = 0;
 float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
 
-float recalculateCenterConst()
-{
-    return -((globalHeightLine - charHeight[fontSize]['t']) / 2.0 + 2);
-}
-
 vector<string> renderLines(1000);
 
 namespace String
@@ -736,11 +731,11 @@ bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
     // if (modif) Yoffset -= scrollUnitY;
     Yoffset = max(0, Yoffset);
 
-    // cerr << "globalHeight is: " << globalHeight << '\n' << "height is " << height << '\n';
+     cerr << "globalHeight is: " << globalHeight << '\n' << "height is " << height << '\n';
 
-    while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset - height)
+    while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset)
         Yoffset += scrollUnitY, modif = 1;
-    cerr << modif << '\n';
+    cerr << "modif is: " << modif << ' ' << Yoffset << '\n';
     return modif;
 }
 
@@ -957,7 +952,6 @@ int main()
     }
 
     String::precalculateCharDim();
-    centerConst = recalculateCenterConst();
 
     String::Treap *S = new String::Treap(cursorChar, 1); /// string doar cu pointer-ul de text
 
@@ -1305,7 +1299,6 @@ int main()
                         fontSize = min(fontSize, maxFontSize - fontUnit);
                         String::updateWidth(S);
                         globalHeightLine = recalculateHeightLine();
-                        centerConst = recalculateCenterConst();
                         fontChanged = 1;
                         cursorTimer = 0;
                     }
@@ -1315,7 +1308,6 @@ int main()
                         fontSize = max(fontUnit, fontSize);
                         String::updateWidth(S);
                         globalHeightLine = recalculateHeightLine();
-                        centerConst = recalculateCenterConst();
                         fontChanged = 1;
                         cursorTimer = 0;
                     }
@@ -1549,7 +1541,7 @@ int main()
 
                 int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
-                l1 = max(1, (Yoffset - navBarOffset) / scrollUnitY + 1);
+                l1 = max(1, (Yoffset) / scrollUnitY + 1);
                 l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - cursorInfoOffset - navBarOffset) / scrollUnitY));
 
                 // cerr << "has: " << numberOfLines << ' ' << Yoffset << ' ' << scrollUnitY << '\n';
