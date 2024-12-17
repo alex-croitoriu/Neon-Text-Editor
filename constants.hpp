@@ -2,8 +2,8 @@
 
 #define cursorChar ' '
 
-extern const int windowWidth = 800;
-extern const int windowHeight = 600;
+extern const int windowWidth = 1024;
+extern const int windowHeight = 800;
 
 extern const int maxFontSize = 400;
 extern const int fontUnit = 10;

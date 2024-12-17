@@ -11,12 +11,13 @@ class Menu
 {
     bool isOpen;
     sf::RectangleShape container;
-    std::string label;
+    std::vector<Button> buttons;
     Button *toggleButton;
-    std::vector<Button*> buttons;
 
 public:
-    Menu(std::string &_title);
-    void setIsOpen(bool _isOpen);
-    void addButton(Button &button);
+    Menu(Button *_toggleButton, std::vector<std::string> &buttonLabels, sf::Vector2f position, sf::Font &font);
+    void toggle();
+    bool getIsOpen();
+    std::vector<Button> getButtons();
+    void draw(sf::RenderWindow &window);
 };

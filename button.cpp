@@ -4,29 +4,45 @@
 
 #include "button.hpp"
 
-Button::Button(std::string& label, sf::Vector2f& size, sf::Vector2f& position, int fontSize) //, std::function<void> _onClick = nullptr
+Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, sf::Font &font, int fontSize) //, std::function<void> _onClick = nullptr
 {
     // onClick = _onClick;
-
-    sf::Font font;
-    font.loadFromFile("assets/fonts/cour.ttf");
 
     container.setSize(size);
     container.setPosition(position);
     container.setFillColor(sf::Color(0, 0, 0, 0));
 
-    content.setString(label);
-    content.setFont(font);
-    content.setCharacterSize(fontSize);
+    content = sf::Text(label, font, fontSize);
     content.setStyle(sf::Text::Bold);
     content.setFillColor(sf::Color::Black);
 
+    // content.setOrigin(content.getLocalBounds().getSize() / 2.f + text.getLocalBounds().getPosition());
     content.setPosition
     (
         (2 * container.getGlobalBounds().left + container.getGlobalBounds().width) / 2.0 - content.getLocalBounds().width / 2.0,
         (2 * container.getGlobalBounds().top + container.getGlobalBounds().height) / 2.0 - content.getLocalBounds().height / 2.0
     );
 }
+
+// Button::Button(std::string  &label, sf::Vector2f &position, sf::Font &font, int fontSize) //, std::function<void> _onClick = nullptr
+// {
+//     // onClick = _onClick;
+
+//     container.setSize(sf::Vector2f(20, 100));
+//     container.setPosition(position);
+//     container.setFillColor(sf::Color(0, 0, 0, 0));
+
+//     content = sf::Text(label, font, fontSize);
+//     content.setStyle(sf::Text::Bold);
+//     content.setFillColor(sf::Color::Black);
+
+//     // content.setOrigin(content.getLocalBounds().getSize() / 2.f + text.getLocalBounds().getPosition());
+//     content.setPosition
+//     (
+//         container.getGlobalBounds().left + 20,
+//         (2 * container.getGlobalBounds().top + container.getGlobalBounds().height) / 2.0 - content.getLocalBounds().height / 2.0
+//     );
+// }
 
 void Button::draw(sf::RenderWindow &window)
 {
@@ -54,4 +70,3 @@ sf::FloatRect Button::getGlobalBounds()
 {
     return container.getGlobalBounds();
 }
-

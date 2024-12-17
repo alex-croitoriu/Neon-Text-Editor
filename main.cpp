@@ -8,6 +8,7 @@
 
 #include "constants.hpp"
 #include "button.hpp"
+#include "menu.hpp"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ int cursorHeight = 0, cursorWidth = 0;
 int navBarOffset = 50;
 int cntRowsOffset = 60;
 int cursorInfoOffset = 0;
-int lineNumberMaxDigits = 4;
+int lineNumberMaxDigits = 3;
 
 float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
@@ -549,7 +550,6 @@ namespace Windows
 
         pth.setFont(font);
         pth.setFillColor(sf::Color::Green);
-        pth.setString("");
         pth.setPosition(200, 0);
 
         string path;
@@ -733,7 +733,8 @@ bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
     // if (modif) Yoffset -= scrollUnitY;
     Yoffset = max(0, Yoffset);
 
-     cerr << "globalHeight is: " << globalHeight << '\n' << "height is " << height << '\n';
+    cerr << "globalHeight is: " << globalHeight << '\n'
+         << "height is " << height << '\n';
 
     while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset)
         Yoffset += scrollUnitY, modif = 1;
@@ -933,23 +934,38 @@ int main()
     ptext2.setCharacterSize(fontSize);
     ptext2.setStyle(sf::Text::Regular);
 
-    string buttonContents[] = {"-", "+", "Open", "Save", "Save as", "Find"};
 
-    sf::Vector2f buttonPositions[6];
+    string menuLabels[] = {"File", "Edit", "Options"};
 
-    for (int i = 0; i < 6; i++)
+    vector<Button> fileMenuButtons;
+    vector<string> fileMenuButtonLabels = { "Open", "Save", "Save as" };
+    sf::Vector2f fileMenuButtonPositions[] = 
     {
-        buttonPositions[i] = sf::Vector2f(i * 90, 0);
-    }
+        sf::Vector2f(20, 20),
+        sf::Vector2f(20, 40),
+        sf::Vector2f(20, 60),
+    };
+    sf::Vector2f buttonSize(60, 20);
 
-    sf::Vector2f size(90.0, 30.0);
+    for (int i = 0; i < 3; i++)
+        fileMenuButtons.emplace_back(fileMenuButtonLabels[i], buttonSize, fileMenuButtonPositions[i], font, 10);
+
+    string buttonLabels[] = {"-", "+", "Open", "Save", "Save as", "Find"};
+
+    sf::Vector2f buttonPositions[10];
+    for (int i = 0; i < 10; i++)
+        buttonPositions[i] = sf::Vector2f(i * 90, 0);
 
     Button *buttons[6];
 
     for (int i = 0; i < 6; i++)
-    {
-        buttons[i] = new Button(buttonContents[i], size, buttonPositions[i], 12);
-    }
+        buttons[i] = new Button(buttonLabels[i], buttonSize, buttonPositions[i + 2], font, 10);
+
+    Button *toggleFileMenuButton = new Button(menuLabels[0], buttonSize, buttonPositions[0], font, 10);
+    Button *toggleEditMenuButton = new Button(menuLabels[1], buttonSize, buttonPositions[1], font, 10);
+
+    Menu *fileMenu = new Menu(toggleFileMenuButton, fileMenuButtonLabels, sf::Vector2f(0, 20), font);
+    // Menu *editMenu = new Menu(toggleEditMenuButton);
 
     String::precalculateCharDim();
 
@@ -1170,6 +1186,16 @@ int main()
                         else
                             buttons[i]->setOpacity(false);
                     }
+                    if (toggleFileMenuButton->isHovering(window))
+                        toggleFileMenuButton->setOpacity(true);
+                    else
+                        toggleFileMenuButton->setOpacity(false);
+
+                    for (auto button : fileMenu->getButtons())
+                        if (button.isHovering(window))
+                            button.setOpacity(true);
+                        else
+                            button.setOpacity(false);
                     break;
                 }
                 if (event.type == sf::Event::Closed)
@@ -1336,8 +1362,16 @@ int main()
                         fclose(fptr);
                         break;
                     }
+                    else if (key == 0 && toggleFileMenuButton->isHovering(window)) 
+                    {
+                        fileMenu->toggle();
+                    }
                     else if (key == 0) /// click random pe ecran ca sa schimbi unde e cursorul
                     {
+                        if (fileMenu->getIsOpen())
+                        {
+                            fileMenu->toggle();
+                        }
                         cursorTimer = 0;
                         break;
                     }
@@ -1627,13 +1661,17 @@ int main()
         window.draw(img2);
         window.draw(img3);
 
-        for (auto button : buttons)
-            button->draw(window);
-
         if (cursorOnScreen)
             window.draw(cursorBox);
         if (cursorLineOnScreen && selectFlag == 0)
             window.draw(cursorLineHighlight);
+
+        for (auto button : buttons)
+            button->draw(window);
+        
+        fileMenu->draw(window);
+        // editMenu->draw();
+
         window.display();
     }
 
