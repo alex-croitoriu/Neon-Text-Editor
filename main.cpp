@@ -948,7 +948,7 @@ int main()
 
     for (int i = 0; i < 6; i++)
     {
-        buttons[i] = new Button(buttonContents[i], font, size, buttonPositions[i]);
+        buttons[i] = new Button(buttonContents[i], size, buttonPositions[i], 12);
     }
 
     String::precalculateCharDim();
@@ -1628,10 +1628,7 @@ int main()
         window.draw(img3);
 
         for (auto button : buttons)
-        {
-            window.draw(button->container);
-            window.draw(button->content);
-        }
+            button->draw(window);
 
         if (cursorOnScreen)
             window.draw(cursorBox);

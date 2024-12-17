@@ -3,19 +3,20 @@
 #include <SFML/Graphics.hpp>
 
 #include <string>
-
-using namespace std;
+#include <functional>
 
 class Button
 {
-public:
     sf::RectangleShape container;
     sf::Text content;
     sf::Texture texture;
+    // std::function<void> onClick;
     
-    Button(string &string, sf::Font &font, sf::Vector2f &size, sf::Vector2f &position);
+public:
+    Button(std::string &label, sf::Vector2f &size, sf::Vector2f &position, int fontSize); //, std::function<void> _onClick
+    void draw(sf::RenderWindow &window);
     void setTexture(const sf::Texture *texture);
-    void setOpacity(bool hover);
+    void setOpacity(bool isHovering);
     bool isHovering(sf::RenderWindow &window);
     sf::FloatRect getGlobalBounds();
 };
