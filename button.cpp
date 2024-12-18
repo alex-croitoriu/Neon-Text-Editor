@@ -4,7 +4,7 @@
 
 #include "button.hpp"
 
-Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, sf::Font &font, int fontSize) //, std::function<void> _onClick = nullptr
+Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, sf::Font &font, int fontSize, bool alignCenter) //, std::function<void> _onClick = nullptr
 {
     // onClick = _onClick;
 
@@ -16,48 +16,16 @@ Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, 
     content.setStyle(sf::Text::Bold);
     content.setFillColor(sf::Color::Black);
 
-    // content.setOrigin(content.getLocalBounds().getSize() / 2.f + text.getLocalBounds().getPosition());
-    content.setPosition
-    (
-        (2 * container.getGlobalBounds().left + container.getGlobalBounds().width) / 2.0 - content.getLocalBounds().width / 2.0,
-        (2 * container.getGlobalBounds().top + container.getGlobalBounds().height) / 2.0 - content.getLocalBounds().height / 2.0
-    );
-}
-
-// Button::Button(std::string  &label, sf::Vector2f &position, sf::Font &font, int fontSize) //, std::function<void> _onClick = nullptr
-// {
-//     // onClick = _onClick;
-
-//     container.setSize(sf::Vector2f(20, 100));
-//     container.setPosition(position);
-//     container.setFillColor(sf::Color(0, 0, 0, 0));
-
-//     content = sf::Text(label, font, fontSize);
-//     content.setStyle(sf::Text::Bold);
-//     content.setFillColor(sf::Color::Black);
-
-//     // content.setOrigin(content.getLocalBounds().getSize() / 2.f + text.getLocalBounds().getPosition());
-//     content.setPosition
-//     (
-//         container.getGlobalBounds().left + 20,
-//         (2 * container.getGlobalBounds().top + container.getGlobalBounds().height) / 2.0 - content.getLocalBounds().height / 2.0
-//     );
-// }
-
-void Button::draw(sf::RenderWindow &window)
-{
-    window.draw(container);
-    window.draw(content);
-}
-
-void Button::setTexture(const sf::Texture* texture)
-{
-    container.setTexture(texture);
-}
-
-void Button::setOpacity(bool isHovering)
-{
-    container.setFillColor(sf::Color(0, 0, 0, isHovering ? 32 : 0));
+    if (alignCenter) 
+    {
+        content.setOrigin(content.getGlobalBounds().getSize() / 2.f + content.getLocalBounds().getPosition());
+        content.setPosition(container.getPosition() + container.getSize() / 2.f);
+    }
+    else
+    {
+        content.setOrigin(0, content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y);
+        content.setPosition(container.getGlobalBounds().left + 20, container.getPosition().y + container.getSize().y / 2.f);
+    }
 }
 
 bool Button::isHovering(sf::RenderWindow &window)
@@ -66,7 +34,23 @@ bool Button::isHovering(sf::RenderWindow &window)
     return getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
+std::string Button::getLabel()
+{
+    return label;
+}
+
 sf::FloatRect Button::getGlobalBounds()
 {
     return container.getGlobalBounds();
+}
+
+void Button::setHoverState(bool isHovering)
+{
+    container.setFillColor(sf::Color(0, 0, 0, isHovering ? 32 : 0));
+}
+
+void Button::draw(sf::RenderWindow &window)
+{
+    window.draw(container);
+    window.draw(content);
 }

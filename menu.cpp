@@ -6,29 +6,31 @@
 #include "button.hpp"
 #include "menu.hpp"
 
-Menu::Menu(Button *_toggleButton, std::vector<std::string> &buttonLabels, sf::Vector2f position, sf::Font &font)
+Menu::Menu(Button *_toggleButton, int _buttonCount, std::string buttonLabels[], sf::Vector2f position, sf::Font &font)
 {
     isOpen = false;
 
     toggleButton = _toggleButton;
+    buttonCount = _buttonCount;
 
-    sf::Vector2f size(20, 60);
-    for (int i = 0; i < buttonLabels.size(); i++)
+    sf::Vector2f size(150, 30);
+
+    buttons = new Button*[buttonCount];
+    for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f pos(position.x + 10, position.y + 10 + 30 * i);
-        buttons.emplace_back(buttonLabels[i], size, pos, font, 12);
+        sf::Vector2f pos(position.x, position.y + 30 * i);
+        buttons[i] = new Button(buttonLabels[i], size, pos, font, 12, false);
     }
 
-    container.setSize(sf::Vector2f(100, 60));
+    container.setSize(sf::Vector2f(size.x, size.y * buttonCount));
     container.setPosition(position);
-    container.setFillColor(sf::Color(209, 255, 255, 255));
-    // container.setOutlineThickness(2);
-    container.setOutlineColor(sf::Color::Black);
+    container.setFillColor(sf::Color::Cyan);
 }
 
-void Menu::toggle()
+bool Menu::isHovering(sf::RenderWindow &window)
 {
-    isOpen = !isOpen;
+    sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+    return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
 bool Menu::getIsOpen() 
@@ -36,9 +38,24 @@ bool Menu::getIsOpen()
     return isOpen;
 }
 
-std::vector<Button> Menu::getButtons()
+int Menu::getButtonCount() 
+{
+    return buttonCount;
+}
+
+Button** Menu::getButtons()
 {
     return buttons;
+}
+
+void Menu::setIsOpen(bool _isOpen)
+{
+    isOpen = _isOpen;
+}
+
+void Menu::toggle()
+{
+    isOpen = !isOpen;
 }
 
 void Menu::draw(sf::RenderWindow &window)
@@ -49,7 +66,9 @@ void Menu::draw(sf::RenderWindow &window)
     {
         toggleButton->draw(window);
         window.draw(container);
-        for (auto button : buttons)
-            button.draw(window);
+        for (int i = 0; i < buttonCount; i++)
+        {
+            buttons[i]->draw(window);
+        }
     }
 }

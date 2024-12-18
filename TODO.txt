@@ -15,5 +15,6 @@
 - [ ] fix blurry buttons
 - [ ] move zoom in/out buttons to the bottom
 - [ ] modal for unsaved changes 
+- [ ] modals for find/save/open file
 - [ ] fullscreeen legit
 - [ ] name and logo

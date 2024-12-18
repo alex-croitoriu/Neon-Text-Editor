@@ -25,7 +25,7 @@ float recalculateHeightLine(int fnt = fontSize)
 }
 
 int cursorHeight = 0, cursorWidth = 0;
-int navBarOffset = 50;
+int navBarOffset = 40;
 int cntRowsOffset = 60;
 int cursorInfoOffset = 0;
 int lineNumberMaxDigits = 3;
@@ -935,37 +935,36 @@ int main()
     ptext2.setStyle(sf::Text::Regular);
 
 
-    string menuLabels[] = {"File", "Edit", "Options"};
 
-    vector<Button> fileMenuButtons;
-    vector<string> fileMenuButtonLabels = { "Open", "Save", "Save as" };
-    sf::Vector2f fileMenuButtonPositions[] = 
+    string menuLabels[] = { "File", "Edit", "Options" };
+
+    string zoomInButtonLabels[]   = { "-", "+" };
+    string fileMenuButtonLabels[] = { "Open", "Save", "Save as" };
+    string editMenuButtonLabels[] = { "Copy", "Paste", "Cut", "Find" };
+
+    sf::Vector2f buttonPositions[] = 
     {
-        sf::Vector2f(20, 20),
-        sf::Vector2f(20, 40),
-        sf::Vector2f(20, 60),
+        sf::Vector2f(  0, 0),
+        sf::Vector2f( 60, 0),
+        sf::Vector2f(120, 0),
+        sf::Vector2f(180, 0)
     };
+
     sf::Vector2f buttonSize(60, 20);
-
-    for (int i = 0; i < 3; i++)
-        fileMenuButtons.emplace_back(fileMenuButtonLabels[i], buttonSize, fileMenuButtonPositions[i], font, 10);
-
-    string buttonLabels[] = {"-", "+", "Open", "Save", "Save as", "Find"};
-
-    sf::Vector2f buttonPositions[10];
-    for (int i = 0; i < 10; i++)
-        buttonPositions[i] = sf::Vector2f(i * 90, 0);
-
-    Button *buttons[6];
-
-    for (int i = 0; i < 6; i++)
-        buttons[i] = new Button(buttonLabels[i], buttonSize, buttonPositions[i + 2], font, 10);
 
     Button *toggleFileMenuButton = new Button(menuLabels[0], buttonSize, buttonPositions[0], font, 10);
     Button *toggleEditMenuButton = new Button(menuLabels[1], buttonSize, buttonPositions[1], font, 10);
 
-    Menu *fileMenu = new Menu(toggleFileMenuButton, fileMenuButtonLabels, sf::Vector2f(0, 20), font);
-    // Menu *editMenu = new Menu(toggleEditMenuButton);
+    Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonSize, buttonPositions[2], font, 10);
+    Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonSize, buttonPositions[3], font, 10);
+
+    Menu *fileMenu = new Menu(toggleFileMenuButton, 3, fileMenuButtonLabels, sf::Vector2f( 0, 20), font);
+    Menu *editMenu = new Menu(toggleEditMenuButton, 4, editMenuButtonLabels, sf::Vector2f(60, 20), font);
+
+    Button** fileMenuButtons = fileMenu->getButtons();
+    Button** editMenuButtons = editMenu->getButtons();
+
+
 
     String::precalculateCharDim();
 
@@ -1026,80 +1025,95 @@ int main()
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
-            cerr << selectFlag << ' ';
             sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-            // sf::Vector2i globalPosition = sf::Mouse::getPosition();
+            bool isAnyButtonPressed = false;
+            
+            if (toggleFileMenuButton->isHovering(window) || toggleEditMenuButton->isHovering(window) || zoomOutButton->isHovering(window) || zoomOutButton->isHovering(window))
+                isAnyButtonPressed = true;
 
-            if (localPosition.x >= cntRowsOffset && localPosition.y >= navBarOffset && localPosition.x < windowWidth && localPosition.y < windowHeight - cursorInfoOffset)
+            if (fileMenu->getIsOpen())
+                for (int i = 0; i < fileMenu->getButtonCount(); i++) 
+                    if (fileMenuButtons[i]->isHovering(window))
+                        isAnyButtonPressed = true;
+
+            if (editMenu->getIsOpen())
+                for (int i = 0; i < editMenu->getButtonCount(); i++) 
+                    if (editMenuButtons[i]->isHovering(window))
+                        isAnyButtonPressed = true;
+            
+            if (!isAnyButtonPressed) 
             {
-                int posCursor = String::findCursorPosition(S);
-                int newPosCursor = moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
-                newPosCursor -= (newPosCursor > posCursor);
-
-                // int posCursorOnHold = String::findCursorPosition(S);
-                // cerr << "posCurs: " << posCursorOnHold << ' ' << newPosCursor << '\n';
-
-                // cerr << "newpos: " << newPosCursor << '\n';
-                if (leftButtonPressed == 0)
+                if (localPosition.x >= cntRowsOffset && localPosition.y >= navBarOffset && localPosition.x < windowWidth && localPosition.y < windowHeight - cursorInfoOffset)
                 {
-                    String::del(posCursor, S);
-                    leftButtonPressed = 1;
-                    selectFlag = 0;
+                    int posCursor = String::findCursorPosition(S);
+                    int newPosCursor = moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
+                    newPosCursor -= (newPosCursor > posCursor);
 
-                    String::insert(newPosCursor, S);
+                    // int posCursorOnHold = String::findCursorPosition(S);
+                    // cerr << "posCurs: " << posCursorOnHold << ' ' << newPosCursor << '\n';
+
+                    // cerr << "newpos: " << newPosCursor << '\n';
+                    if (leftButtonPressed == 0)
+                    {
+                        String::del(posCursor, S);
+                        leftButtonPressed = 1;
+                        selectFlag = 0;
+
+                        String::insert(newPosCursor, S);
+                    }
+                    else if (newPosCursor != posCursor)
+                    {
+                        selectFlag = 1;
+
+                        if (newPosCursor < posCursor)
+                            segmSelected = {newPosCursor, posCursor - 1};
+                        else
+                            segmSelected = {posCursor + 1, newPosCursor};
+
+                        //  cerr << "asdfasd: " << segmSelected.first << ' ' << segmSelected.second << '\n';
+                    }
+
+                    flag = 1;
+                    renderAgain = 1;
                 }
-                else if (newPosCursor != posCursor)
+
+                if (selectFlag && localPosition.x < cntRowsOffset)
                 {
-                    selectFlag = 1;
+                    Xoffset -= scrollUnitX;
+                    Xoffset = max(0, Xoffset);
 
-                    if (newPosCursor < posCursor)
-                        segmSelected = {newPosCursor, posCursor - 1};
-                    else
-                        segmSelected = {posCursor + 1, newPosCursor};
+                    if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
+                    {
+                        int l = findLineOnScreen(localPosition.y);
+                        // segmSelected.first = segmOnScreen[l].first;
+                    }
+                }
 
-                    //  cerr << "asdfasd: " << segmSelected.first << ' ' << segmSelected.second << '\n';
+                if (selectFlag && localPosition.x >= windowWidth)
+                {
+                    Xoffset += scrollUnitX;
+
+                    if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
+                    {
+                        int l = findLineOnScreen(localPosition.y);
+                        // segmSelected.second = segmOnScreen[l].second;
+                    }
+                }
+
+                if (selectFlag && localPosition.y < navBarOffset)
+                {
+                    Yoffset -= scrollUnitY;
+                    Yoffset = max(0, Yoffset);
+                }
+
+                if (selectFlag && localPosition.y >= windowHeight - cursorInfoOffset)
+                {
+                    Yoffset += scrollUnitY;
                 }
 
                 flag = 1;
                 renderAgain = 1;
             }
-
-            if (selectFlag && localPosition.x < cntRowsOffset)
-            {
-                Xoffset -= scrollUnitX;
-                Xoffset = max(0, Xoffset);
-
-                if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
-                {
-                    int l = findLineOnScreen(localPosition.y);
-                    // segmSelected.first = segmOnScreen[l].first;
-                }
-            }
-
-            if (selectFlag && localPosition.x >= windowWidth)
-            {
-                Xoffset += scrollUnitX;
-
-                if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
-                {
-                    int l = findLineOnScreen(localPosition.y);
-                    // segmSelected.second = segmOnScreen[l].second;
-                }
-            }
-
-            if (selectFlag && localPosition.y < navBarOffset)
-            {
-                Yoffset -= scrollUnitY;
-                Yoffset = max(0, Yoffset);
-            }
-
-            if (selectFlag && localPosition.y >= windowHeight - cursorInfoOffset)
-            {
-                Yoffset += scrollUnitY;
-            }
-
-            flag = 1;
-            renderAgain = 1;
         }
         else if (selectFlag && ctrlX == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::X))
         {
@@ -1152,8 +1166,6 @@ int main()
             int posCursor = String::findCursorPosition(S);
             ctrlV = 1;
 
-            // cerr << "I am here" << '\n';
-
             for (auto ch : buffer)
             {
                 String::insert(posCursor, S, ch);
@@ -1179,24 +1191,56 @@ int main()
             {
                 if (event.type == sf::Event::MouseMoved)
                 {
-                    for (int i = 0; i < 6; i++)
-                    {
-                        if (buttons[i]->isHovering(window))
-                            buttons[i]->setOpacity(true);
-                        else
-                            buttons[i]->setOpacity(false);
-                    }
-                    if (toggleFileMenuButton->isHovering(window))
-                        toggleFileMenuButton->setOpacity(true);
+                    if (zoomOutButton->isHovering(window))
+                        zoomOutButton->setHoverState(true);
                     else
-                        toggleFileMenuButton->setOpacity(false);
+                        zoomOutButton->setHoverState(false);
 
-                    for (auto button : fileMenu->getButtons())
-                        if (button.isHovering(window))
-                            button.setOpacity(true);
+                    if (zoomInButton->isHovering(window))
+                        zoomInButton->setHoverState(true);
+                    else
+                        zoomInButton->setHoverState(false);
+
+
+                    if (toggleFileMenuButton->isHovering(window))
+                    {
+                        toggleFileMenuButton->setHoverState(true);
+                        fileMenu->setIsOpen(true);
+                    }
+                    else
+                        toggleFileMenuButton->setHoverState(false);
+
+                    if (toggleEditMenuButton->isHovering(window))
+                    {
+                        toggleEditMenuButton->setHoverState(true);
+                        editMenu->setIsOpen(true);
+                    }
+                    else
+                        toggleEditMenuButton->setHoverState(false);
+
+                    if (fileMenu->getIsOpen() && !fileMenu->isHovering(window) && !toggleFileMenuButton->isHovering(window))
+                        fileMenu->setIsOpen(false);
+
+                    if (editMenu->getIsOpen() && !editMenu->isHovering(window) && !toggleEditMenuButton->isHovering(window))
+                        editMenu->setIsOpen(false);
+
+                    for (int i = 0; i < fileMenu->getButtonCount(); i++)
+                    {
+                        if (fileMenuButtons[i]->isHovering(window))
+                            fileMenuButtons[i]->setHoverState(true);
                         else
-                            button.setOpacity(false);
-                    break;
+                            fileMenuButtons[i]->setHoverState(false);
+                    }
+
+                    for (int i = 0; i < editMenu->getButtonCount(); i++)
+                    {
+                        if (editMenuButtons[i]->isHovering(window))
+                            editMenuButtons[i]->setHoverState(true);
+                        else
+                            editMenuButtons[i]->setHoverState(false);
+                    }
+
+                    // break;
                 }
                 if (event.type == sf::Event::Closed)
                     window.close();
@@ -1207,6 +1251,8 @@ int main()
 
                     if (key == 0)
                         leftButtonPressed = 0;
+                    
+                    ctrlC = ctrlV = ctrlX = 0;
                 }
 
                 if (event.type == sf::Event::KeyReleased)
@@ -1228,157 +1274,238 @@ int main()
                 if (event.type == sf::Event::MouseButtonPressed)
                 {
                     int key = event.key.code;
-                    sf::Vector2i localPosition = sf::Mouse::getPosition(window);
 
-                    if (key == 0 && buttons[2]->isHovering(window))
+                    if (key == 0)
                     {
-                        path = Windows::getPathFromUser("Open File");
-                        if (path.size() == 0)
-                            break;
-                        fptr = fopen(path.c_str(), "r");
-
-                        if (fptr == NULL)
+                        if (zoomOutButton->isHovering(window))
                         {
-                            Windows::throwMessage("Wrong Path!");
-                            break;
+                            fontSize -= fontUnit;
+                            fontSize = max(fontUnit, fontSize);
+                            String::updateWidth(S);
+                            globalHeightLine = recalculateHeightLine();
+                            fontChanged = 1;
+                            cursorTimer = 0;
                         }
-
-                        char ch;
-                        nr = 0;
-
-                        for (int i = String::len(S); i >= 1; i--)
-                            String::del(i, S);
-
-                        S = new String::Treap(cursorChar, 1);
-                        // input.clear();
-                        // input.push_back('\0');
-
-                        while ((ch = fgetc(fptr)) != EOF && nr <= bucketSize)
+                        else if (zoomInButton->isHovering(window))
                         {
-                            // input.push_back(ch);
-                            ++nr;
-                            String::insert(nr, S, ch);
-                            lastDone = nr;
-                            // cerr << ch << '\n';
+                            fontSize += fontUnit;
+                            fontSize = min(fontSize, maxFontSize - fontUnit);
+                            String::updateWidth(S);
+                            globalHeightLine = recalculateHeightLine();
+                            fontChanged = 1;
+                            cursorTimer = 0;
                         }
-
-                        String::insert(1, S);
-
-                        renderAgain = 1;
-                        cerr << "done" << ' ' << nr << ' ' << lastDone << '\n';
-                    }
-                    else if (key == 0 && buttons[4]->isHovering(window))
-                    {
-                        path = Windows::getPathFromUser("Save As");
-                        if (path.size() == 0)
-                            break;
-
-                        FILE *fptr = fopen(path.c_str(), "w");
-
-                        if (fptr == NULL)
-                        {
-                            Windows::throwMessage("Wrong Path!");
-                            break;
-                        }
-
-                        int posCursor = String::findCursorPosition(S);
-
-                        for (int i = 1; i <= String::len(S); i++)
-                        {
-                            char ch = String::get(i, S);
-                            if (posCursor != i)
-                                fprintf(fptr, "%c", ch);
-                        }
-
-                        fclose(fptr);
-
-                        break;
-                    }
-                    else if (key == 0 && buttons[5]->isHovering(window))
-                    {
-                        string word = Windows::getStringFromUser("Find");
-
-                        if (word.size() == 0)
-                            break;
-
-                        string s = String::constructString(S);
-                        int pos = -1;
-                        int matchings = 0;
-
-                        while ((pos = s.find(word, pos + 1)) < s.size())
-                        {
-                            matchings++;
-
-                            for (int i = pos; i <= pos + word.size() - 1; i++)
-                            {
-                            }
-
-                            pos += word.size() - 1;
-                        }
-
-                        Windows::throwMessage("There are " + to_string(matchings) + " matchings!");
-                        break;
-                    }
-                    else if (key == 0 && buttons[1]->isHovering(window))
-                    {
-                        fontSize += fontUnit;
-                        fontSize = min(fontSize, maxFontSize - fontUnit);
-                        String::updateWidth(S);
-                        globalHeightLine = recalculateHeightLine();
-                        fontChanged = 1;
-                        cursorTimer = 0;
-                    }
-                    else if (key == 0 && buttons[0]->isHovering(window))
-                    {
-                        fontSize -= fontUnit;
-                        fontSize = max(fontUnit, fontSize);
-                        String::updateWidth(S);
-                        globalHeightLine = recalculateHeightLine();
-                        fontChanged = 1;
-                        cursorTimer = 0;
-                    }
-                    else if (key == 0 && buttons[3]->isHovering(window))
-                    {
-                        if (path.size() == 0)
-                            path = Windows::getPathFromUser("Save");
-
-                        FILE *fptr = fopen(path.c_str(), "w");
-
-                        if (fptr == NULL)
-                        {
-                            Windows::throwMessage("Wrong Path!");
-                            break;
-                        }
-
-                        int posCursor = String::findCursorPosition(S);
-
-                        for (int i = 1; i <= String::len(S); i++)
-                        {
-                            char ch = String::get(i, S);
-                            if (posCursor != i)
-                                fprintf(fptr, "%c", ch);
-                        }
-
-                        fclose(fptr);
-                        break;
-                    }
-                    else if (key == 0 && toggleFileMenuButton->isHovering(window)) 
-                    {
-                        fileMenu->toggle();
-                    }
-                    else if (key == 0) /// click random pe ecran ca sa schimbi unde e cursorul
-                    {
-                        if (fileMenu->getIsOpen())
+                        else if (toggleFileMenuButton->isHovering(window)) 
                         {
                             fileMenu->toggle();
+                            editMenu->setIsOpen(false);
                         }
-                        cursorTimer = 0;
-                        break;
+                        else if (toggleEditMenuButton->isHovering(window)) 
+                        {
+                            editMenu->toggle();
+                            fileMenu->setIsOpen(false);
+                        }
+
+                        // TODO: de facut astea dinamice ca asa cum is acuma fac spume
+
+                        else if (fileMenu->getIsOpen() && fileMenuButtons[0]->isHovering(window))
+                        {
+                            fileMenu->setIsOpen(false);
+                            
+                            path = Windows::getPathFromUser("Open File");
+                            if (path.size() == 0)
+                                break;
+                            fptr = fopen(path.c_str(), "r");
+
+                            if (fptr == NULL)
+                            {
+                                Windows::throwMessage("Wrong Path!");
+                                break;
+                            }
+
+                            char ch;
+                            nr = 0;
+
+                            for (int i = String::len(S); i >= 1; i--)
+                                String::del(i, S);
+
+                            S = new String::Treap(cursorChar, 1);
+
+                            while ((ch = fgetc(fptr)) != EOF && nr <= bucketSize)
+                            {
+                                ++nr;
+                                String::insert(nr, S, ch);
+                                lastDone = nr;
+                            }
+
+                            String::insert(1, S);
+
+                            renderAgain = 1;
+                        }
+                        else if (fileMenu->getIsOpen() && fileMenuButtons[1]->isHovering(window))
+                        {
+                            fileMenu->setIsOpen(false);
+
+                            if (path.size() == 0)
+                            path = Windows::getPathFromUser("Save");
+
+                            FILE *fptr = fopen(path.c_str(), "w");
+
+                            if (fptr == NULL)
+                            {
+                                Windows::throwMessage("Wrong Path!");
+                                break;
+                            }
+
+                            int posCursor = String::findCursorPosition(S);
+
+                            for (int i = 1; i <= String::len(S); i++)
+                            {
+                                char ch = String::get(i, S);
+                                if (posCursor != i)
+                                    fprintf(fptr, "%c", ch);
+                            }
+
+                            fclose(fptr);
+                        }
+                        else if (fileMenu->getIsOpen() && fileMenuButtons[2]->isHovering(window))
+                        {
+                            fileMenu->setIsOpen(false);
+
+                            path = Windows::getPathFromUser("Save As");
+                            if (path.size() == 0)
+                                break;
+
+                            FILE *fptr = fopen(path.c_str(), "w");
+
+                            if (fptr == NULL)
+                            {
+                                Windows::throwMessage("Wrong Path!");
+                                break;
+                            }
+
+                            int posCursor = String::findCursorPosition(S);
+
+                            for (int i = 1; i <= String::len(S); i++)
+                            {
+                                char ch = String::get(i, S);
+                                if (posCursor != i)
+                                    fprintf(fptr, "%c", ch);
+                            }
+
+                            fclose(fptr);
+                        }
+                        else if (editMenu->getIsOpen() && editMenuButtons[0]->isHovering(window))
+                        {
+                            if (selectFlag && ctrlC == 0)
+                            {
+                                editMenu->setIsOpen(false);
+                                ctrlC = 1;
+                                int L = segmSelected.first;
+                                int R = segmSelected.second;
+
+                                String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
+                                String::split(S, s2, s3, R);
+                                String::split(s2, s1, s2, L - 1);
+
+                                buffer = String::constructString(s2);
+
+                                String::merge(S, s1, s2);
+                                String::merge(S, S, s3);
+
+                                flag = 1;
+                                renderAgain = 1;
+                            }
+                        }
+                        else if (editMenu->getIsOpen() && editMenuButtons[1]->isHovering(window))
+                        {
+                            cerr << "CtrLV: " <<  ctrlV;
+                            if (ctrlV == 0)
+                            {
+                                editMenu->setIsOpen(false);
+                                int posCursor = String::findCursorPosition(S);
+                                ctrlV = 1;
+
+                                cerr << "I am here" << '\n';
+
+                                for (auto ch : buffer)
+                                {
+                                    String::insert(posCursor, S, ch);
+                                    posCursor++;
+                                }
+
+                                flag = 1;
+                                renderAgain = 1;
+                                selectFlag = 0;
+
+                                renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
+                                renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+                            }
+                        }
+                        else if (editMenu->getIsOpen() && editMenuButtons[2]->isHovering(window))
+                        {
+                            if (selectFlag && ctrlX == 0)
+                            {
+                                editMenu->setIsOpen(false);
+                                ctrlX = 1;
+                                int L = segmSelected.first;
+                                int R = segmSelected.second;
+
+                                String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
+                                String::split(S, s2, s3, R);
+                                String::split(s2, s1, s2, L - 1);
+
+                                buffer = String::constructString(s2);
+
+                                delete s2;
+
+                                String::merge(S, s1, s3);
+                                selectFlag = 0;
+                                flag = 1;
+                                renderAgain = 1;
+
+                                renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
+                                renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+                            }
+                        }
+                        else if (editMenu->getIsOpen() && editMenuButtons[3]->isHovering(window))
+                        {
+                            editMenu->setIsOpen(false);
+
+                            string word = Windows::getStringFromUser("Find");
+
+                            if (word.size() == 0)
+                                break;
+
+                            string s = String::constructString(S);
+                            int pos = -1;
+                            int matchings = 0;
+
+                            while ((pos = s.find(word, pos + 1)) < s.size())
+                            {
+                                matchings++;
+
+                                for (int i = pos; i <= pos + word.size() - 1; i++)
+                                {
+                                }
+
+                                pos += word.size() - 1;
+                            }
+
+                            Windows::throwMessage("There are " + to_string(matchings) + " matchings!");
+                            break;
+                        }
+                        else // click random pe ecran ca sa schimbi unde e cursorul
+                        {
+                            fileMenu->setIsOpen(false);
+                            editMenu->setIsOpen(false);
+                            cursorTimer = 0;
+                            break;
+                        }
                     }
-                    else
-                        break;
 
                     flag = 1;
+
                     selectFlag = 0;
 
                     renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
@@ -1656,6 +1783,7 @@ int main()
         if (selectFlag)
             for (auto box : selectedBoxes)
                 window.draw(box);
+
         window.draw(img1);
         window.draw(ptext1);
         window.draw(img2);
@@ -1666,11 +1794,11 @@ int main()
         if (cursorLineOnScreen && selectFlag == 0)
             window.draw(cursorLineHighlight);
 
-        for (auto button : buttons)
-            button->draw(window);
+        zoomOutButton->draw(window);
+        zoomInButton->draw(window);
         
         fileMenu->draw(window);
-        // editMenu->draw();
+        editMenu->draw(window);
 
         window.display();
     }

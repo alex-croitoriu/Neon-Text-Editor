@@ -10,14 +10,22 @@
 class Menu 
 {
     bool isOpen;
+    int buttonCount;
     sf::RectangleShape container;
-    std::vector<Button> buttons;
+    Button **buttons;
     Button *toggleButton;
 
 public:
-    Menu(Button *_toggleButton, std::vector<std::string> &buttonLabels, sf::Vector2f position, sf::Font &font);
-    void toggle();
+    Menu(Button *_toggleButton, int buttonCount, std::string buttonLabels[], sf::Vector2f position, sf::Font &font);
+
+    bool isHovering(sf::RenderWindow &window);
+
     bool getIsOpen();
-    std::vector<Button> getButtons();
+    int getButtonCount();
+    Button** getButtons();
+
+    void setIsOpen(bool _isOpen);
+    void toggle();
+
     void draw(sf::RenderWindow &window);
 };
