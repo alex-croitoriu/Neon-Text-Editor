@@ -1324,59 +1324,36 @@ int main()
                             if (path.size() == 0)
                                 break;
                             
-                            HANDLE file_handle = CreateFileA(path.c_str() , GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-                            HANDLE mapping_handle = CreateFileMapping(file_handle, nullptr, PAGE_READONLY, 0, 0, nullptr);
-                            char* mapped_data = static_cast<char*>(MapViewOfFile(mapping_handle, FILE_MAP_READ, 0, 0, 0));
-                            DWORD fileSize =  GetFileSize(file_handle, nullptr);
+                            HANDLE fileHandle = CreateFileA(path.c_str() , GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-                            //S = new String::Treap(cursorChar, 1);
-                            int nr = 1;
-
-                            ptr = new String::Treap*[fileSize + 1];
-                            ptr[fileSize] = new String::Treap(cursorChar, 1);
-
-                            for (int i = 0; i < fileSize; i++)
+                            if (fileHandle == INVALID_HANDLE_VALUE) 
                             {
-                                nr++;
-                                char ch = mapped_data[i];
-                                ptr[i] = new String::Treap(ch);
-                            }
-                            //return 0;
-                            S = String::build(fileSize + 1, ptr);
-                            cerr << fileSize << '\n';
-                            
-                              // return 0;
-                          //  cerr << mapped_data << '\n';
-                            //UnmapViewOfFile(mapped_data);
-                           // CloseHandle(mapping_handle);
-                           // CloseHandle(file_handle);
-                            //return 0;
-                            /*
-                            if (fptr == NULL)
-                            {
-                                Windows::throwMessage("Wrong Path!");
+                                Windows::throwMessage("Invalid Path");
                                 break;
                             }
 
-                            char ch;
-                            nr = 0;
+                            HANDLE mappingHandle = CreateFileMapping(fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
+                            char* data = (char*) (MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
+                            DWORD fileSize =  GetFileSize(fileHandle, nullptr);
 
-                            for (int i = String::len(S); i >= 1; i--)
-                                String::del(i, S);
+                            ptr = new String::Treap*[fileSize + 1];
+                            ptr[0] = new String::Treap(cursorChar, 1);
 
-                            S = new String::Treap(cursorChar, 1);
-
-                            while ((ch = fgetc(fptr)) != EOF && nr <= bucketSize)
+                            for (int i = 0; i < fileSize; i++)
                             {
-                                ++nr;
-                                String::insert(nr, S, ch);
-                                lastDone = nr;
+                                char ch = data[i];
+                                ptr[i + 1] = new String::Treap(ch);
                             }
 
-                            String::insert(1, S);
-                            */
+                            S = String::build(fileSize + 1, ptr);
+                            cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
+                            
+                            UnmapViewOfFile(data);
+                            CloseHandle(mappingHandle);
+                            CloseHandle(fileHandle);
 
                             renderAgain = 1;
+                            flag = 1;
                         }
                         else if (fileMenu->getIsOpen() && fileMenuButtons[1]->isHovering(window))
                         {
