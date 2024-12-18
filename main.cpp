@@ -950,6 +950,12 @@ int main()
         sf::Vector2f(180, 0)
     };
 
+    sf::Vector2f menuPositions[] = 
+    {
+        sf::Vector2f( 0, 20),
+        sf::Vector2f(60, 20)
+    };
+
     sf::Vector2f buttonSize(60, 20);
 
     Button *toggleFileMenuButton = new Button(menuLabels[0], buttonSize, buttonPositions[0], font, 10);
@@ -958,8 +964,8 @@ int main()
     Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonSize, buttonPositions[2], font, 10);
     Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonSize, buttonPositions[3], font, 10);
 
-    Menu *fileMenu = new Menu(toggleFileMenuButton, 3, fileMenuButtonLabels, sf::Vector2f( 0, 20), font);
-    Menu *editMenu = new Menu(toggleEditMenuButton, 4, editMenuButtonLabels, sf::Vector2f(60, 20), font);
+    Menu *fileMenu = new Menu(toggleFileMenuButton, 3, fileMenuButtonLabels, menuPositions[0], font);
+    Menu *editMenu = new Menu(toggleEditMenuButton, 4, editMenuButtonLabels, menuPositions[1], font);
 
     Button** fileMenuButtons = fileMenu->getButtons();
     Button** editMenuButtons = editMenu->getButtons();
@@ -1213,6 +1219,7 @@ int main()
                     if (toggleEditMenuButton->isHovering(window))
                     {
                         toggleEditMenuButton->setHoverState(true);
+                        editMenu->setPosition(menuPositions[1]);
                         editMenu->setIsOpen(true);
                     }
                     else
@@ -1239,9 +1246,8 @@ int main()
                         else
                             editMenuButtons[i]->setHoverState(false);
                     }
-
-                    // break;
                 }
+
                 if (event.type == sf::Event::Closed)
                     window.close();
 
@@ -1302,7 +1308,7 @@ int main()
                         }
                         else if (toggleEditMenuButton->isHovering(window)) 
                         {
-                            editMenu->toggle();
+                            editMenu->setPosition(menuPositions[1]);
                             fileMenu->setIsOpen(false);
                         }
 
