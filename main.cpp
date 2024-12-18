@@ -1657,20 +1657,26 @@ int main()
 
         if (timer % timeUnit == 0)
         {
-            char ch;
+           
+        }
 
-            while (fptr && (ch = fgetc(fptr)) != EOF && nr <= lastDone + bucketSize)
+        {
+            char ch;
+            int rdch = 0;
+
+            while (fptr && (ch = fgetc(fptr)) != EOF && rdch <= bucketSize)
             {
                 // input.push_back(ch);
                 ++nr;
+                ++rdch;
                 String::insert(nr + 1, S, ch);
                 renderAgain = flag = 1;
             }
 
             if (fptr && (ch = fgetc(fptr)) == EOF)
             {
-                // cerr << "DONE" << '\n';
-                // return 0;
+                 cerr << "DONE" << '\n';
+                 return 0;
             }
         }
 
