@@ -896,13 +896,28 @@ float splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, string &txt, i
 
     h1.setString(s1);
     float w = h1.getGlobalBounds().width;
+    char ch;
 
+    if (posCursorOnScreen < txt.size() && txt[posCursorOnScreen] != 13) ch = txt[posCursorOnScreen];
+    else ch = '|';
+
+    s1 += ch;
+    h1.setString(s1);
+    float W = h1.getGlobalBounds().width;
+    s1.pop_back();
+    
+    s2 += ch;
+
+    h1.setString(s2);
+    float cW = h1.getGlobalBounds().width;
+    
     for (int i = posCursorOnScreen; i < txt.size(); i++)
         s1 += txt[i];
 
     h1.setString(s1);
     h1.setPosition(cntRowsOffset, text.getPosition().y);
-    return w;
+
+    return w + (W - w - cW) / 2;
 }
 
 string getTime(string param)
@@ -1800,7 +1815,7 @@ int main()
             int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
             int lp = String::getLastSeen(p , posCursor , Xoffset + windowWidth - cntRowsOffset, S);
             if (lp < posCursor) fp = -1;
-            int widthTillCursor = String::findWidth(fp, posCursor - 1, S);
+          //  int widthTillCursor = String::findWidth(fp, posCursor - 1, S);
 
             renderAgain |= lastCursorLine != cursorLine;
 
@@ -1841,7 +1856,6 @@ int main()
                 }
             }
 
-
             string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
             float cw = splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1, fp);
 
@@ -1853,7 +1867,7 @@ int main()
             if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
             {
                 cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                cursorBox.setPosition(cntRowsOffset + cw , (cursorLine - l1) * globalHeightLine + navBarOffset);
+                cursorBox.setPosition((float) cntRowsOffset + cw , (cursorLine - l1) * globalHeightLine + navBarOffset);
 
                 cursorOnScreen = 1;
             }
