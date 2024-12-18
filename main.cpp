@@ -1639,9 +1639,9 @@ int main()
                     int direction = event.mouseWheel.delta;
 
                     if (direction == +1)
-                        Xoffset -= scrollUnitX, Xoffset = max(0, Xoffset);
+                        Yoffset -= scrollUnitY, Yoffset = max(0, Yoffset);
                     if (direction == -1)
-                        Xoffset += scrollUnitX;
+                        Yoffset += scrollUnitY;
 
                     renderAgain = 1;
                     flag = 1;
