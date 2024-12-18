@@ -499,6 +499,7 @@ namespace String
     {
         if (T == 0)
             return;
+
         Treap *mx = T;
 
         if (T->L && T->L->priority > mx->priority)
@@ -526,6 +527,21 @@ namespace String
         heapify(T);
         recalculate(T);
         return T;
+    }
+
+    string constructRawString(Treap*& T)
+    {
+        int posCursor = findCursorPosition(T);
+        Treap* t1, * t2, * t3;
+        split(T, t2, t3, posCursor);
+        split(t2, t1, t2, posCursor - 1);
+        merge(T, t1, t3);
+
+        string raw = constructString(T);
+
+        insert(len(T) + 1 , T);
+
+        return raw;
     }
 }
 
@@ -734,12 +750,12 @@ bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
     // if (modif) Yoffset -= scrollUnitY;
     Yoffset = max(0, Yoffset);
 
-    cerr << "globalHeight is: " << globalHeight << '\n'
-         << "height is " << height << '\n';
+   // cerr << "globalHeight is: " << globalHeight << '\n'
+       //  << "height is " << height << '\n';
 
     while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset)
         Yoffset += scrollUnitY, modif = 1;
-    cerr << "modif is: " << modif << ' ' << Yoffset << '\n';
+   // cerr << "modif is: " << modif << ' ' << Yoffset << '\n';
     return modif;
 }
 
@@ -829,7 +845,7 @@ void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTextu
     }
 
     cntRowsOffset = (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
-    cerr << cntRowsOffset << '\n';
+   // cerr << cntRowsOffset << '\n';
 
     text.setLetterSpacing(1);
 
@@ -1023,6 +1039,11 @@ int main()
     int cntX = 0;
     FILE *fptr = NULL;
     String::Treap** ptr;
+
+    vector < int > positions;
+    int currentAppearance = 0;
+    bool matchCase = 1, wholeWord = 1 , findFlag = 0;
+    string word;
 
     while (window.isOpen())
     {
@@ -1267,7 +1288,7 @@ int main()
                 {
                     int key = event.key.code;
 
-                    cerr << "this key " << key << '\n';
+                   // cerr << "this key " << key << '\n';
 
                     if (key == 23)
                         ctrlX = 0;
@@ -1481,28 +1502,66 @@ int main()
                         else if (editMenu->getIsOpen() && editMenuButtons[3]->isHovering(window))
                         {
                             editMenu->setIsOpen(false);
-
-                            string word = Windows::getStringFromUser("Find");
+                            ///apelat dupa ce faci setarile cu wholeWord si matchCase
+                            word = Windows::getStringFromUser("Find");
 
                             if (word.size() == 0)
                                 break;
 
-                            string s = String::constructString(S);
-                            int pos = -1;
-                            int matchings = 0;
+                            string s = String::constructRawString(S);
 
-                            while ((pos = s.find(word, pos + 1)) < s.size())
+                            if (matchCase == 0)
                             {
-                                matchings++;
+                                for (auto& i : word)
+                                    if (i >= 'A' && i <= 'Z')
+                                        i = i - 'A' + 'a';
 
-                                for (int i = pos; i <= pos + word.size() - 1; i++)
-                                {
-                                }
-
-                                pos += word.size() - 1;
+                                for (auto& i : s)
+                                    if (i >= 'A' && i <= 'Z')
+                                        i = i - 'A' + 'a';
                             }
 
-                            Windows::throwMessage("There are " + to_string(matchings) + " matchings!");
+                            vector < int > PI(word.size());
+                            vector < int > pi(s.size());        
+                            positions.clear();
+
+                            PI[0] = 0;
+
+                            for (int i = 1; i < word.size(); i++)
+                            {
+                                int t = PI[i - 1];
+
+                                while (t && s[i] != s[t])
+                                    t = PI[t - 1];
+
+                                t += s[i] == s[t];
+                                PI[i] = t;
+                            }
+
+                            for (int i = 0 ; i < s.size(); i++)
+                            {
+                                int t = (i == 0 ? 0 : pi[i - 1]);
+
+                                while (t && (t == word.size() || s[i] != word[t]))
+                                    t = PI[t - 1];
+
+                                t += word[t] == s[i];
+                                pi[i] = t;
+
+                                if (t == word.size())
+                                {
+                                    if(wholeWord == 0 || ((i - word.size() + 1 == 0 || s[i - word.size()] == ' ' || s[i - word.size()] == '\n') && (i == s.size() - 1 || s[i + 1] == ' ' || s[i + 1] == '\n')))
+                                        positions.push_back(i - word.size() + 1 + 1);
+                                }
+                            }
+                            
+                            cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
+                            cerr << '\n';
+                            cerr << "Raw:" << s << '\n';
+                            currentAppearance = 0;
+                            findFlag = 1;
+                            renderAgain = 1;
+                            flag = 1;
                             break;
                         }
                         else // click random pe ecran ca sa schimbi unde e cursorul
@@ -1578,24 +1637,47 @@ int main()
                     }
                     else if (key == 71) /// left arrow
                     {
-                        int posCursor = String::findCursorPosition(S);
-
-                        if (posCursor > 1)
+                        if (findFlag == 1)
                         {
-                            String::del(posCursor, S);
-                            String::insert(posCursor - 1, S);
-                            cursorTimer = 0;
+                            currentAppearance--;
+                            currentAppearance = max(0, currentAppearance);
+                            cerr << "After left arrow: " << currentAppearance << '\n';
+                            renderAgain = 1;
+                            flag = 1;
+                        }
+                        else
+                        {
+                            int posCursor = String::findCursorPosition(S);
+
+                            if (posCursor > 1)
+                            {
+                                String::del(posCursor, S);
+                                String::insert(posCursor - 1, S);
+                                cursorTimer = 0;
+                            }
                         }
                     }
                     else if (key == 72) /// right arrow
                     {
-                        int posCursor = String::findCursorPosition(S);
-
-                        if (posCursor < String::len(S))
+                        if (findFlag == 1)
                         {
-                            String::del(posCursor, S);
-                            String::insert(posCursor + 1, S);
-                            cursorTimer = 0;
+                            currentAppearance++;
+                            currentAppearance = min((int) positions.size() - 1, currentAppearance);
+
+                            cerr << "After right arrow: " << currentAppearance << '\n';
+                            renderAgain = 1;
+                            flag = 1;
+                        }
+                        else
+                        {
+                            int posCursor = String::findCursorPosition(S);
+
+                            if (posCursor < String::len(S))
+                            {
+                                String::del(posCursor, S);
+                                String::insert(posCursor + 1, S);
+                                cursorTimer = 0;
+                            }
                         }
                     }
                     else
@@ -1662,32 +1744,6 @@ int main()
         timer++;
         timer %= timeUnit;
 
-        if (timer % timeUnit == 0)
-        {
-           
-        }
-        /*
-        {
-            char ch;
-            int rdch = 0;
-
-            while (fptr && (ch = fgetc(fptr)) != EOF && rdch <= bucketSize)
-            {
-                // input.push_back(ch);
-                ++nr;
-                ++rdch;
-                String::insert(nr + 1, S, ch);
-                renderAgain = flag = 1;
-            }
-
-            if (fptr && (ch = fgetc(fptr)) == EOF)
-            {
-                 cerr << "DONE" << '\n';
-                 return 0;
-            }
-        }
-        */
-
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
 
@@ -1699,6 +1755,16 @@ int main()
         if (flag || firstExec)
         {
             scrollUnitX = charWidth[fontSize][0], scrollUnitY = charHeight[fontSize]['a'];
+
+            if (findFlag == 1)
+            {
+                if (currentAppearance < positions.size())
+                {
+                    int P = positions[currentAppearance];
+                    int L = String::findNumberOfEndlines(1, P, S) + 1;
+                    Yoffset = (L - 1) * globalHeightLine;
+                }
+            }
 
             renderAgain |= firstExec;
             renderAgain |= fontChanged;
@@ -1802,9 +1868,33 @@ int main()
                     selectedBoxes.push_back(box);
                 }
             }
+
+            if (findFlag)
+            {
+                for (int i = 0; i < sizeRLines; i++)
+                {
+                    int l = segmOnScreen[i].first;
+                    int r = segmOnScreen[i].second;
+
+                    int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
+                    int y = i * globalHeightLine + navBarOffset;
+
+                    while (p < positions.size() && positions[p] <= r)
+                    {
+                        int w = String::findWidth(l, positions[p] - 1 , S);
+                        int W = String::findWidth(positions[p], positions[p] + word.size() - 1 , S);
+
+                        box.setPosition(cntRowsOffset + w , y);
+                        box.setSize(sf::Vector2f(W, globalHeightLine));
+                        box.setFillColor(sf::Color(255, 255 , 0, 128));
+                        selectedBoxes.push_back(box);
+                        p++;
+                    }
+                }
+            }
         }
 
-        if (selectFlag)
+        if (selectFlag | findFlag)
             for (auto box : selectedBoxes)
                 window.draw(box);
 
@@ -1815,7 +1905,7 @@ int main()
 
         if (cursorOnScreen)
             window.draw(cursorBox);
-        if (cursorLineOnScreen && selectFlag == 0)
+        if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0)
             window.draw(cursorLineHighlight);
 
         zoomOutButton->draw(window);
