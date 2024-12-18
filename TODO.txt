@@ -5,9 +5,9 @@
 - [X] cut, copy, paste
 - [X] select text
 - [X] add line numbers to the left
+- [X] dropdown menus
+- [X] right click
 
-- [ ] dropdown menus
-- [ ] right click
 - [ ] scrollbar
 - [ ] stats (current cursor position - line and column, current zoom level, current file name)
 - [ ] dark/light mode
