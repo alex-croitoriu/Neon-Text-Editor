@@ -76,7 +76,7 @@ namespace String
         int cnt;
         int priority;
 
-        Treap(char ch, bool flagCursor = 0)
+        Treap(char ch = 0, bool flagCursor = 0)
         {
             this->ch = ch;
             L = R = 0;
@@ -514,15 +514,15 @@ namespace String
         }
     }
 
-    Treap *build(char a[], int n)
+    Treap *build(int n , Treap **P)
     {
         if (n == 0)
             return NULL;
 
-        int mid = (1 + n) / 2;
-        Treap *T = new Treap(a[mid]);
-        T->L = build(a, mid - 1);
-        T->R = build(a + mid, n - mid);
+        int mid = (n - 1) / 2;
+        Treap *T = P[mid];
+        T->L = build(mid , P);
+        T->R = build(n - (mid + 1) , P + mid + 1);
         heapify(T);
         recalculate(T);
         return T;
@@ -1022,6 +1022,7 @@ int main()
     int nr = 0;
     int cntX = 0;
     FILE *fptr = NULL;
+    String::Treap** ptr;
 
     while (window.isOpen())
     {
@@ -1328,23 +1329,29 @@ int main()
                             char* mapped_data = static_cast<char*>(MapViewOfFile(mapping_handle, FILE_MAP_READ, 0, 0, 0));
                             DWORD fileSize =  GetFileSize(file_handle, nullptr);
 
-                            S = new String::Treap(cursorChar, 1);
+                            //S = new String::Treap(cursorChar, 1);
                             int nr = 1;
+
+                            ptr = new String::Treap*[fileSize + 1];
+                            ptr[fileSize] = new String::Treap(cursorChar, 1);
 
                             for (int i = 0; i < fileSize; i++)
                             {
                                 nr++;
                                 char ch = mapped_data[i];
-                                String::insert(nr, S, ch);
+                                ptr[i] = new String::Treap(ch);
                             }
-
+                            //return 0;
+                            S = String::build(fileSize + 1, ptr);
                             cerr << fileSize << '\n';
+                            
+                              // return 0;
                           //  cerr << mapped_data << '\n';
-                            UnmapViewOfFile(mapped_data);
-                            CloseHandle(mapping_handle);
-                            CloseHandle(file_handle);
-                            return 0;
-
+                            //UnmapViewOfFile(mapped_data);
+                           // CloseHandle(mapping_handle);
+                           // CloseHandle(file_handle);
+                            //return 0;
+                            /*
                             if (fptr == NULL)
                             {
                                 Windows::throwMessage("Wrong Path!");
@@ -1367,6 +1374,7 @@ int main()
                             }
 
                             String::insert(1, S);
+                            */
 
                             renderAgain = 1;
                         }
@@ -1681,7 +1689,7 @@ int main()
         {
            
         }
-
+        /*
         {
             char ch;
             int rdch = 0;
@@ -1701,6 +1709,7 @@ int main()
                  return 0;
             }
         }
+        */
 
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
