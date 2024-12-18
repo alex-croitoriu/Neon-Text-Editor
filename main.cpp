@@ -5,6 +5,7 @@
 #include <fstream>
 #include <chrono>
 #include <random>
+#include <windows.h>
 
 #include "constants.hpp"
 #include "button.hpp"
@@ -1321,7 +1322,28 @@ int main()
                             path = Windows::getPathFromUser("Open File");
                             if (path.size() == 0)
                                 break;
-                            fptr = fopen(path.c_str(), "r");
+                            
+                            HANDLE file_handle = CreateFileA(path.c_str() , GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+                            HANDLE mapping_handle = CreateFileMapping(file_handle, nullptr, PAGE_READONLY, 0, 0, nullptr);
+                            char* mapped_data = static_cast<char*>(MapViewOfFile(mapping_handle, FILE_MAP_READ, 0, 0, 0));
+                            DWORD fileSize =  GetFileSize(file_handle, nullptr);
+
+                            S = new String::Treap(cursorChar, 1);
+                            int nr = 1;
+
+                            for (int i = 0; i < fileSize; i++)
+                            {
+                                nr++;
+                                char ch = mapped_data[i];
+                                String::insert(nr, S, ch);
+                            }
+
+                            cerr << fileSize << '\n';
+                          //  cerr << mapped_data << '\n';
+                            UnmapViewOfFile(mapped_data);
+                            CloseHandle(mapping_handle);
+                            CloseHandle(file_handle);
+                            return 0;
 
                             if (fptr == NULL)
                             {
