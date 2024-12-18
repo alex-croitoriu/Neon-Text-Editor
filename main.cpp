@@ -1133,7 +1133,6 @@ int main()
             flag = 1;
             renderAgain = 1;
 
-            // return 0;
             renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
             renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
         }
@@ -1173,9 +1172,10 @@ int main()
             renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
             renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) /// needs work trebuie eliminat cursoru
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) 
         {
-            segmSelected = {1, String::len(S)};
+            segmSelected = {1, String::len(S) - 1};
+            buffer = String::constructRawString(S);
             selectFlag = 1;
             flag = 1;
             renderAgain = 1;
@@ -1518,9 +1518,9 @@ int main()
                                 }
                             }
                             
-                            cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
+                          //  cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
                             cerr << '\n';
-                            cerr << "Raw:" << s << '\n';
+                           // cerr << "Raw:" << s << '\n';
                             currentAppearance = 0;
                             findFlag = 1;
                             renderAgain = 1;
