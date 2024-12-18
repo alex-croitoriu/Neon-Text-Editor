@@ -7,6 +7,7 @@
 #include <random>
 #include <windows.h>
 #include <ctime>
+#include <cassert>
 
 #include "constants.hpp"
 #include "button.hpp"
@@ -19,7 +20,7 @@ mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
 int fontSize = 20;
-pair<int, int> segmOnScreen[maxFontSize];
+pair<int, int> segmOnScreen[100000];
 
 float recalculateHeightLine(int fnt = fontSize)
 {
@@ -477,6 +478,9 @@ namespace String
 
     int findWidth(int l, int r, Treap *&T)
     {
+        if (l == -1)
+            return 0;
+
         if (l > r)
             return 0;
         Treap *t1 = 0, *t2 = 0, *t3 = 0;
@@ -752,11 +756,8 @@ int sizeRLines = 0;
 
 void updateTextLine(int line, vector<string> &renderLines, string L)
 {
-    if (line == sizeRLines)
-        renderLines[sizeRLines++] = L;
-    else
-        renderLines[line] = L;
-    // textLines[line].setString(L);
+    if (line == sizeRLines) renderLines[sizeRLines++] = L;
+    else renderLines[line] = L;
 }
 
 int findLineOnScreen(float y)
@@ -767,7 +768,7 @@ int findLineOnScreen(float y)
 int moveCursorToClick(sf::Vector2i localPosition, String::Treap *&S, int scrollUnitY, int l1, int l2, int Xoffset)
 {
     int l = findLineOnScreen(localPosition.y);
-    int w = localPosition.x - cntRowsOffset;
+    float w = localPosition.x - cntRowsOffset;
 
     if (l + l1 - 1 > l2)
         return String::len(S) + 1;
@@ -804,7 +805,6 @@ void centerText(sf::Text &text, string s, float startY, float startX = cntRowsOf
 void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTexture &text2, sf::RenderTexture &text3, sf::Sprite &img1, sf::Sprite &img2, sf::Sprite &img3, int l1, int l2, int cursorLine, int scrollUnitY)
 {
     txt1.clear(), txt2.clear(), txt.clear();
-    all.clear();
     int h1 = 0;
     int L = min(l2 - l1 + 1, cursorLine - l1);
 
@@ -872,30 +872,37 @@ void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTextu
     text3.display();
 }
 
-void splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, string &txt, int posCursorOnScreen, int fp)
+float splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, string &txt, int posCursorOnScreen, int fp)
 {
     if (txt.size() == 0)
     {
         h1.setString("");
-        return;
+        return 0;
     }
 
     if (fp == -1)
     {
         h1 = text;
-        return;
+        return 0;
     }
+
+
+    h1.setCharacterSize(fontSize);
+
     string s1, s2;
 
     for (int i = 0; i < posCursorOnScreen - 1; i++)
         s1 += txt[i];
+
+    h1.setString(s1);
+    float w = h1.getGlobalBounds().width;
+
     for (int i = posCursorOnScreen; i < txt.size(); i++)
         s1 += txt[i];
 
-    h1.setCharacterSize(fontSize);
-
     h1.setString(s1);
     h1.setPosition(cntRowsOffset, text.getPosition().y);
+    return w;
 }
 
 string getTime(string param)
@@ -915,6 +922,22 @@ string getTime(string param)
     return currTime;
 }
 
+bool isApOnScreen(int ap , int sz)
+{
+    for (int i = 0; i < sizeRLines; i++)
+    {
+        int l = segmOnScreen[i].first;
+        int r = segmOnScreen[i].second;
+        
+        if (l == -1) 
+            continue;
+
+        if (l <= ap && ap <= r && ap + sz - 1 <= r)
+            return 1;
+    }
+
+    return 0;
+}
 
 int main()
 {
@@ -1038,7 +1061,7 @@ int main()
 
     vector < int > positions;
     int currentAppearance = 0;
-    bool matchCase = 1, wholeWord = 0 , findFlag = 0;
+    bool matchCase = 0, wholeWord = 0 , findFlag = 0;
     string word;
     string param;
 
@@ -1513,10 +1536,10 @@ int main()
                             {
                                 int t = PI[i - 1];
 
-                                while (t && s[i] != s[t])
+                                while (t && word[i] != word[t])
                                     t = PI[t - 1];
 
-                                t += s[i] == s[t];
+                                t += word[i] == word[t];
                                 PI[i] = t;
                             }
 
@@ -1537,9 +1560,11 @@ int main()
                                 }
                             }
                             
-                          //  cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
+                            cerr << "Found: " << positions.size() << '\n';
+                            cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
                             cerr << '\n';
                            // cerr << "Raw:" << s << '\n';
+                            cerr << "ENTERERERERERERERE";
                             currentAppearance = 0;
                             findFlag = 1;
                             renderAgain = 1;
@@ -1629,6 +1654,8 @@ int main()
                             cerr << "After left arrow: " << currentAppearance << '\n';
                             renderAgain = 1;
                             flag = 1;
+                            selectFlag = 0;
+                            break;
                         }
                         else
                         {
@@ -1652,6 +1679,8 @@ int main()
                             cerr << "After right arrow: " << currentAppearance << '\n';
                             renderAgain = 1;
                             flag = 1;
+                            selectFlag = 0;
+                            break;
                         }
                         else
                         {
@@ -1693,6 +1722,7 @@ int main()
                 {
                     int ch = event.text.unicode;
 
+                    cerr << "txt is " << ch << "\n";
                     if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22)
                         break;
 
@@ -1752,16 +1782,6 @@ int main()
         {
             scrollUnitX = charWidth[fontSize][0], scrollUnitY = charHeight[fontSize]['a'];
 
-            if (findFlag == 1)
-            {
-                if (currentAppearance < positions.size())
-                {
-                    int P = positions[currentAppearance];
-                    int L = String::findNumberOfEndlines(1, P, S) + 1;
-                    Yoffset = (L - 1) * globalHeightLine;
-                }
-            }
-
             renderAgain |= firstExec;
             renderAgain |= fontChanged;
 
@@ -1778,9 +1798,25 @@ int main()
             int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
             int p = String::findKthLine(cursorLine, S);
             int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
+            int lp = String::getLastSeen(p , posCursor , Xoffset + windowWidth - cntRowsOffset, S);
+            if (lp < posCursor) fp = -1;
             int widthTillCursor = String::findWidth(fp, posCursor - 1, S);
 
             renderAgain |= lastCursorLine != cursorLine;
+
+            if (findFlag == 1)
+            {
+                if (currentAppearance < positions.size() && !isApOnScreen(positions[currentAppearance] , word.size()))
+                {
+                    int P = positions[currentAppearance];
+                    int L = String::findNumberOfEndlines(1, P, S) + 1;
+                    int F = String::findKthLine(L, S);
+                    Yoffset = (L - 1) * globalHeightLine;
+                    Xoffset = String::findWidth(F, P - 1, S);
+                }
+
+                renderAgain = 1;
+            }
 
             if (renderAgain == 1)
             {
@@ -1805,8 +1841,9 @@ int main()
                 }
             }
 
+
             string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
-            splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1, fp);
+            float cw = splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1, fp);
 
             if (cursorLine >= l1 && cursorLine <= l2)
                 cursorLineOnScreen = 1;
@@ -1816,7 +1853,7 @@ int main()
             if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
             {
                 cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                cursorBox.setPosition(cntRowsOffset + widthTillCursor, (cursorLine - l1) * globalHeightLine + navBarOffset);
+                cursorBox.setPosition(cntRowsOffset + cw , (cursorLine - l1) * globalHeightLine + navBarOffset);
 
                 cursorOnScreen = 1;
             }
@@ -1866,11 +1903,15 @@ int main()
                     int l = segmOnScreen[i].first;
                     int r = segmOnScreen[i].second;
 
+                    if (l == -1) continue;
+
                     int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
                     int y = i * globalHeightLine + navBarOffset;
+                    cerr << "On line " << i + 1 << ": ";
 
                     while (p < positions.size() && positions[p] <= r)
                     {
+                        cerr << positions[p] << ' ';
                         int w = String::findWidth(l, positions[p] - 1 , S);
                         int W = String::findWidth(positions[p], positions[p] + word.size() - 1 , S);
 
@@ -1881,7 +1922,11 @@ int main()
                         selectedBoxes.push_back(box);
                         p++;
                     }
+
+                    cerr << '\n';
                 }
+
+                cerr << "\n\n";
             }
         }
 
