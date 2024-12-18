@@ -1503,6 +1503,13 @@ int main()
                             break;
                         }
                     }
+                    else if (key == 1)
+                    {
+                        sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+                        editMenu->setPosition(sf::Vector2f(localPosition.x, localPosition.y));
+                        editMenu->setIsOpen(true);
+                        break;
+                    }
 
                     flag = 1;
 

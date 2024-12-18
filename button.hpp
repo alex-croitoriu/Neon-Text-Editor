@@ -20,6 +20,7 @@ public:
     std::string getLabel();
     sf::FloatRect getGlobalBounds();
 
+    void setPosition(sf::Vector2f position);
     void setHoverState(bool isHovering);
     
     void draw(sf::RenderWindow &window);

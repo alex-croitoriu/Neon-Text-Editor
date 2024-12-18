@@ -25,6 +25,7 @@ public:
     Button** getButtons();
 
     void setIsOpen(bool _isOpen);
+    void setPosition(sf::Vector2f position);
     void toggle();
 
     void draw(sf::RenderWindow &window);

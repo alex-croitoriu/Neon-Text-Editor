@@ -53,6 +53,16 @@ void Menu::setIsOpen(bool _isOpen)
     isOpen = _isOpen;
 }
 
+void Menu::setPosition(sf::Vector2f position)
+{
+    container.setPosition(position);
+    for (int i = 0; i < buttonCount; i++)
+    {
+        sf::Vector2f pos(position.x, position.y + 30 * i);
+        buttons[i]->setPosition(pos);
+    }
+}
+
 void Menu::toggle()
 {
     isOpen = !isOpen;

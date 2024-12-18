@@ -44,6 +44,13 @@ sf::FloatRect Button::getGlobalBounds()
     return container.getGlobalBounds();
 }
 
+void Button::setPosition(sf::Vector2f position)
+{
+    container.setPosition(position);
+    content.setOrigin(0, content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y);
+    content.setPosition(container.getGlobalBounds().left + 20, container.getPosition().y + container.getSize().y / 2.f);
+}
+
 void Button::setHoverState(bool isHovering)
 {
     container.setFillColor(sf::Color(0, 0, 0, isHovering ? 32 : 0));
