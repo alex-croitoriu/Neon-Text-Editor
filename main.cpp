@@ -1425,14 +1425,11 @@ int main()
                         }
                         else if (editMenu->getIsOpen() && editMenuButtons[1]->isHovering(window))
                         {
-                            cerr << "CtrLV: " <<  ctrlV;
                             if (ctrlV == 0)
                             {
                                 editMenu->setIsOpen(false);
                                 int posCursor = String::findCursorPosition(S);
                                 ctrlV = 1;
-
-                                cerr << "I am here" << '\n';
 
                                 for (auto ch : buffer)
                                 {
@@ -1599,7 +1596,7 @@ int main()
 
                     flag = 1;
                     selectFlag = 0;
-                    // cerr << "enter here" << '\n';
+                    
                     renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
                     renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
 
