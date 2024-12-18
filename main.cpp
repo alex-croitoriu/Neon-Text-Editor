@@ -28,7 +28,7 @@ float recalculateHeightLine(int fnt = fontSize)
 int cursorHeight = 0, cursorWidth = 0;
 int navBarOffset = 40;
 int cntRowsOffset = 60;
-int cursorInfoOffset = 0;
+int cursorInfoOffset = 100;
 int lineNumberMaxDigits = 3;
 
 float globalHeightLine = recalculateHeightLine();
@@ -50,11 +50,6 @@ namespace String
         {
             for (int i = 0; i <= 255; i++)
                 charHeight[fnt][i] = recalculateHeightLine(fnt);
-
-            text.setCharacterSize(fnt);
-            text.setString("Lorem Ipsum aaaaAAAAAppyPPPOOPOPOABCDFERFTDFDFAASDGgÊg|||");
-            charHeight[fnt]['t'] = text.getGlobalBounds().height;
-            //  cerr << charHeight[fnt]['t'] << '\n';
         }
     }
 
@@ -747,15 +742,11 @@ bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
     while (globalHeight - height < Yoffset)
         Yoffset -= scrollUnitY, modif = 1;
 
-    // if (modif) Yoffset -= scrollUnitY;
     Yoffset = max(0, Yoffset);
-
-   // cerr << "globalHeight is: " << globalHeight << '\n'
-       //  << "height is " << height << '\n';
 
     while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset)
         Yoffset += scrollUnitY, modif = 1;
-   // cerr << "modif is: " << modif << ' ' << Yoffset << '\n';
+
     return modif;
 }
 
@@ -780,8 +771,6 @@ int moveCursorToClick(sf::Vector2i localPosition, String::Treap *&S, int scrollU
     int l = findLineOnScreen(localPosition.y);
     int w = localPosition.x - cntRowsOffset;
 
-    // cerr << averageLineHeight << ' ' << l << ' ' << l1 << ' ' << l2 << ' ' << localPosition.y << '\n';
-
     if (l + l1 - 1 > l2)
         return String::len(S) + 1;
     int p1 = String::findKthLine(l + l1 - 1, S);
@@ -795,7 +784,7 @@ int moveCursorToClick(sf::Vector2i localPosition, String::Treap *&S, int scrollU
 
     int p2 = String::findNextEndline(p1, S) - 1;
     int p = String::getFirstSeen(p1, p2, w + Xoffset, S);
-    // cerr << p << ' ' << p2 << '\n';
+
     if (p == -1)
         p = p2;
     return p + 1;
@@ -845,7 +834,6 @@ void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTextu
     }
 
     cntRowsOffset = (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
-   // cerr << cntRowsOffset << '\n';
 
     text.setLetterSpacing(1);
 
@@ -854,8 +842,6 @@ void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTextu
     for (int i = 0; i < L; i++)
     {
         centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
-        // text.setString(renderLines[i]);
-        // text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
         text1.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -867,16 +853,12 @@ void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTextu
     else
         txt = "";
 
-    // cerr << txt.size() << '\n';
-
     if (txt.size())
         lastHeight += globalHeightLine;
 
     for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
-        // text.setString(renderLines[i]);
-        // text.setPosition(cntRowsOffset, navBarOffset + lastHeight + centerConst + globalHeightLine);
         text2.draw(text);
         lastHeight += globalHeightLine;
     }
@@ -886,8 +868,6 @@ void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTextu
     img3.setTexture(text3.getTexture());
 
     centerText(text, txt, navBarOffset + textHeight + globalHeightLine);
-    // text.setString(txt);
-    // text.setPosition(cntRowsOffset, navBarOffset + textHeight + centerConst + globalHeightLine);
 
     text1.display();
     text2.display();
