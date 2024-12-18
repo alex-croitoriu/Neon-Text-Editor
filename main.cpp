@@ -6,6 +6,7 @@
 #include <chrono>
 #include <random>
 #include <windows.h>
+#include <ctime>
 
 #include "constants.hpp"
 #include "button.hpp"
@@ -897,6 +898,24 @@ void splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, string &txt, in
     h1.setPosition(cntRowsOffset, text.getPosition().y);
 }
 
+string getTime(string param)
+{
+    time_t timestamp = time(NULL);
+    struct tm datetime = *localtime(&timestamp);
+
+    char data[100];
+
+    int len = strftime(data, 100, param.c_str(), &datetime);
+
+    string currTime;
+
+    for (int i = 0; i < len; i++)
+        currTime += data[i];
+
+    return currTime;
+}
+
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
@@ -1021,13 +1040,13 @@ int main()
     int currentAppearance = 0;
     bool matchCase = 1, wholeWord = 0 , findFlag = 0;
     string word;
+    string param;
 
     while (window.isOpen())
     {
         bool flag = 0;
         bool fontChanged = 0;
         bool renderAgain = 0;
-        // bool ctrlX = 0 , ctrlY = 0 , ctrlV = 0;
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
@@ -1556,6 +1575,7 @@ int main()
                 if (event.type == sf::Event::KeyPressed)
                 {
                     int key = event.key.code;
+                    cerr << "key is " << key << '\n';
 
                     if (key == 36) /// escape
                     {
@@ -1645,8 +1665,20 @@ int main()
                             }
                         }
                     }
-                    else
-                        break;
+                    else if (key == 45) ///dummy key for test
+                    {
+                        string data = getTime("%B %e, %Y"); 
+                        int posCursor = String::findCursorPosition(S);
+
+                        for (auto i : data)
+                        {
+                            String::insert(posCursor, S, i);
+                            posCursor++;
+                        }
+
+                        renderAgain = 1;
+                    }
+                    else break;
 
                     flag = 1;
                     selectFlag = 0;
