@@ -572,7 +572,6 @@ namespace Windows
             {
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    // cerr << event.key.code << ' ';
                     int key = event.key.code;
 
                     if (key == 58 || key == 36)
@@ -639,7 +638,6 @@ namespace Windows
             {
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    // cerr << event.key.code << ' ';
                     int key = event.key.code;
 
                     if (key == 58 || key == 36)
@@ -696,7 +694,6 @@ namespace Windows
             {
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    // cerr << event.key.code << ' ';
                     int key = event.key.code;
 
                     if (key == 58 || key == 36)
@@ -1022,7 +1019,7 @@ int main()
 
     vector < int > positions;
     int currentAppearance = 0;
-    bool matchCase = 1, wholeWord = 1 , findFlag = 0;
+    bool matchCase = 1, wholeWord = 0 , findFlag = 0;
     string word;
 
     while (window.isOpen())
@@ -1058,10 +1055,6 @@ int main()
                     int newPosCursor = moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
                     newPosCursor -= (newPosCursor > posCursor);
 
-                    // int posCursorOnHold = String::findCursorPosition(S);
-                    // cerr << "posCurs: " << posCursorOnHold << ' ' << newPosCursor << '\n';
-
-                    // cerr << "newpos: " << newPosCursor << '\n';
                     if (leftButtonPressed == 0)
                     {
                         String::del(posCursor, S);
@@ -1078,8 +1071,6 @@ int main()
                             segmSelected = {newPosCursor, posCursor - 1};
                         else
                             segmSelected = {posCursor + 1, newPosCursor};
-
-                        //  cerr << "asdfasd: " << segmSelected.first << ' ' << segmSelected.second << '\n';
                     }
 
                     flag = 1;
@@ -1130,17 +1121,11 @@ int main()
             int L = segmSelected.first;
             int R = segmSelected.second;
 
-            // cerr << "LR " << L << ' ' << R << '\n';
-
             String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
             String::split(S, s2, s3, R);
             String::split(s2, s1, s2, L - 1);
 
             buffer = String::constructString(s2);
-            //++cntX;
-
-            // cerr << buffer << '\n';
-
             delete s2;
 
             String::merge(S, s1, s3);
@@ -1267,8 +1252,6 @@ int main()
                 if (event.type == sf::Event::KeyReleased)
                 {
                     int key = event.key.code;
-
-                   // cerr << "this key " << key << '\n';
 
                     if (key == 23)
                         ctrlX = 0;
@@ -1447,7 +1430,7 @@ int main()
 
                                 flag = 1;
                                 renderAgain = 1;
-                                selectFlag = 0;
+                                selectFlag = findFlag = 0;
 
                                 renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
                                 renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
@@ -1471,7 +1454,7 @@ int main()
                                 delete s2;
 
                                 String::merge(S, s1, s3);
-                                selectFlag = 0;
+                                selectFlag = findFlag = 0;
                                 flag = 1;
                                 renderAgain = 1;
 
@@ -1562,7 +1545,7 @@ int main()
 
                     flag = 1;
 
-                    selectFlag = 0;
+                    selectFlag = findFlag = 0;
 
                     renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
                     renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
@@ -1572,8 +1555,6 @@ int main()
 
                 if (event.type == sf::Event::KeyPressed)
                 {
-                    // selectFlag = 0;
-                    //  cerr << event.key.code << '\n';
                     int key = event.key.code;
 
                     if (key == 36) /// escape
@@ -1597,6 +1578,8 @@ int main()
                             renderAgain = 1;
                             cursorTimer = 0;
                         }
+
+                        findFlag = 0;
                     }
                     else if (key == 74) /// down arrow
                     {
@@ -1614,6 +1597,8 @@ int main()
                             renderAgain = 1;
                             cursorTimer = 0;
                         }
+
+                        findFlag = 0;
                     }
                     else if (key == 71) /// left arrow
                     {
@@ -1675,7 +1660,6 @@ int main()
                 if (event.type == sf::Event::TextEntered) /// ce scrie user-ul
                 {
                     int ch = event.text.unicode;
-                    // cerr << "flag " << ch << '\n';
 
                     if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22)
                         break;
@@ -1695,7 +1679,7 @@ int main()
                     }
 
                     flag = 1;
-                    selectFlag = 0;
+                    selectFlag = findFlag = 0;
 
                     renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
                     renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
@@ -1768,15 +1752,10 @@ int main()
 
             if (renderAgain == 1)
             {
-                // cerr << renderAgain << '\n';
-
                 int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
                 l1 = max(1, (Yoffset) / scrollUnitY + 1);
                 l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - cursorInfoOffset - navBarOffset) / scrollUnitY));
-
-                // cerr << "has: " << numberOfLines << ' ' << Yoffset << ' ' << scrollUnitY << '\n';
-                // cerr << l1 << ' ' << l2 << '\n';
 
                 sizeRLines = 0;
 
@@ -1794,7 +1773,6 @@ int main()
                 }
             }
 
-            // cerr << "here" << ' ';
             string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
             splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1, fp);
 
@@ -1866,7 +1844,8 @@ int main()
 
                         box.setPosition(cntRowsOffset + w , y);
                         box.setSize(sf::Vector2f(W, globalHeightLine));
-                        box.setFillColor(sf::Color(255, 255 , 0, 128));
+                        if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
+                        else box.setFillColor(sf::Color(255, 187, 0 , 128));
                         selectedBoxes.push_back(box);
                         p++;
                     }
