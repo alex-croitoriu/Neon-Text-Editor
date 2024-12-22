@@ -556,13 +556,13 @@ namespace String
         }
     }
 
-    Treap *build(int n , Treap **P)
+    Treap *build(int n , Treap *P)
     {
         if (n == 0)
             return NULL;
 
         int mid = (n - 1) / 2;
-        Treap *T = P[mid];
+        Treap *T = &P[mid];
         T->L = build(mid , P);
         T->R = build(n - (mid + 1) , P + mid + 1);
         heapify(T);
@@ -572,11 +572,11 @@ namespace String
 
     Treap* build(int n, const char *data)
     {
-        Treap** ptr = new Treap*[n];
+        Treap* ptr = new Treap[n];
 
         for (int i = 0; i < n; i++)
         {
-            ptr[i] = new Treap(data[i]);
+            ptr[i] = Treap(data[i]);
         }
 
         return build(n, ptr);
@@ -1347,6 +1347,8 @@ namespace TimeFunction
 
 int main()
 {
+    cerr << sizeof String::Treap;
+
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
     sf::View view;
     sf::Image mainIcon;
@@ -1881,7 +1883,7 @@ int main()
 
                                 buffer = String::constructString(s2);
 
-                                delete s2;
+                                String::del(s2);
 
                                 String::merge(S, s1, s3);
                                 selectFlag = findFlag = 0;
