@@ -1130,6 +1130,9 @@ namespace ReplaceFind
                     positions.push_back(i - word.size() + 1 + 1);
             }
         }
+
+        cerr << "positions are: "; for (auto i : positions) cerr << i << ' ';
+        cerr << '\n';
     }
 
     bool isApOnScreen(int ap, int sz)
@@ -1198,13 +1201,16 @@ namespace ReplaceFind
         if (P != -1) nxt[P] = N;
         if (N != -1) prv[N] = P;
 
-        prv[idx] = nxt[idx] = -1;
+        //prv[idx] = nxt[idx] = -1;
     }
 
     int findLastReplace(int idx, vector < int >& bit)
     {
         int l = 0, r = idx - 1, ans = -1, mid = 0;
         int value = BIT::get(idx, bit);
+
+        if (value == 0)
+            return -1;
 
         while (l <= r)
         {
@@ -1241,12 +1247,13 @@ namespace ReplaceFind
             return 0;
 
         int p1 = findLastReplace(idx, bit);
-        //cerr << "              working\n" << '\n';
+     //   cerr << "              working\n" << '\n';
         int p2 = findNextReplace(idx, bit);
+      //  cerr << idx << ' ' << p1 << ' ' << p2 << '\n';
 
         if (p1 != -1)
         {
-            if (positions[p1] + (int) rword.size() - 1 >= positions[idx])
+            if (positions[p1] + (int) word.size() - 1 >= positions[idx])
                 return 0;
         }
 
@@ -1261,23 +1268,30 @@ namespace ReplaceFind
 
     int findNextValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word, vector < int >& prv, vector < int >& nxt, set < int >& notRemoved)
     {
-        while (nxt[idx] != -1 && canReplace(nxt[idx], bit, positions, gone, rword, word) == 0)
+        int x = nxt[idx];
+
+        while (x != -1 && canReplace(x, bit, positions, gone, rword, word) == 0)
         {
-            delAp(nxt[idx], prv, nxt, bit, gone, notRemoved, 0);
+            int y = nxt[x];
+            delAp(x, prv, nxt, bit, gone, notRemoved, 0);
+            x = y;
         }
 
-        // cerr << '\n';
-        return nxt[idx];
+        return x;
     }
 
     int findPrevValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word, vector < int >& prv, vector < int >& nxt, set <int>& notRemoved)
     {
-        while (prv[idx] != -1 && canReplace(prv[idx], bit, positions, gone, rword, word) == 0)
+        int x = prv[idx];
+
+        while (x != -1 && canReplace(x, bit, positions, gone, rword, word) == 0)
         {
-            delAp(prv[idx], prv, nxt, bit, gone, notRemoved, 0);
+            int y = prv[x];
+            delAp(x, prv, nxt, bit, gone, notRemoved, 0);
+            x = y;
         }
 
-        return prv[idx];
+        return x;
     }
 
     int findRealPosition(int idx, vector < int >& positions, vector < int >& bit, string& word, string& rword)
@@ -2184,9 +2198,11 @@ int main()
 
                         int L = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
                         String::replace(L, L + word.size() - 1, rword, S);
+                        ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                         int nxtAppearance = ReplaceFind::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                         int prvAppearance = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                        ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                        
+                        nxt[currentAppearance] = prv[currentAppearance] = -1;
                         currentAppearance = max(nxtAppearance, prvAppearance);
 
                         renderAgain = 1;
@@ -2580,7 +2596,7 @@ int main()
 
                         int p = ReplaceFind::traceFirstApToRender(l , positions, bit, notRemoved , word, rword);
                         int y = i * globalHeightLine + navBarOffset;
-                       // cerr << "On line " << i + 1 << ": " << p;
+                        cerr << "On line " << i + 1 << ": " << p;
 
                         while (p != -1 && p < positions.size() && ReplaceFind::findRealPosition(p, positions, bit, word, rword) <= r)
                         {
@@ -2594,18 +2610,48 @@ int main()
                             else box.setFillColor(sf::Color(255, 187, 0, 128));
                             selectedBoxes.push_back(box);
                             p = ReplaceFind::findNextValidAppearance(p, bit, positions, gone, rword, word , prv, nxt , notRemoved);
+                            cerr << p << ' ';
                         }
 
-                      //  cerr << '\n';
+                        cerr << '\n';
                     }
 
-                   //cerr << "\n\n";
+                   cerr << "\n\n";
                 }
             }
         }
 
         if (wordWrap == 0)
         {
+            if (findFlag | replaceFlag)
+            {
+                int highlighted = 0;
+
+                for (int i = 0; i < selectedBoxes.size(); i++)
+                {
+                    if (selectedBoxes[i].getFillColor() == sf::Color(255, 187, 0, 128))
+                        highlighted = i;
+                }
+
+                for (int i = 0; i < highlighted; i++)
+                {
+                    if (selectedBoxes[i].getPosition().y == selectedBoxes[i + 1].getPosition().y)
+                    {
+                        selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x , selectedBoxes[i].getSize().x), globalHeightLine));
+                    }
+                }
+
+                for (int i = highlighted + 1; i < selectedBoxes.size(); i++)
+                {
+                    if (selectedBoxes[i].getPosition().y == selectedBoxes[i - 1].getPosition().y)
+                    {
+                        int oldX = selectedBoxes[i].getPosition().x;
+                        selectedBoxes[i].setPosition(max(selectedBoxes[i].getPosition().x , selectedBoxes[i - 1].getPosition().x + selectedBoxes[i - 1].getSize().x) , selectedBoxes[i].getPosition().y);
+                        selectedBoxes[i].setSize(sf::Vector2f(selectedBoxes[i].getSize().x - (selectedBoxes[i].getPosition().x - oldX), globalHeightLine));
+                    }
+                }
+            }
+
             if (selectFlag | findFlag | replaceFlag)
                 for (auto box : selectedBoxes)
                     window.draw(box);
@@ -2615,10 +2661,8 @@ int main()
             window.draw(img2);
             window.draw(img3);
 
-            if (cursorOnScreen)
-                window.draw(cursorBox);
-            if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0)
-                window.draw(cursorLineHighlight);
+            if (cursorOnScreen) window.draw(cursorBox);
+            if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)  window.draw(cursorLineHighlight);
         }
         else
         {
