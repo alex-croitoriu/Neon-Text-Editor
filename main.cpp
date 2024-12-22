@@ -9,6 +9,7 @@
 #include <ctime>
 #include <cassert>
 #include <set>
+#include <commdlg.h>
 
 #include "constants.hpp"
 #include "button.hpp"
@@ -488,15 +489,18 @@ namespace String
         segmOnScreen[I] = {-1, -1};
         if (String::len(T) + 1 == p1 || String::get(p1, T) == 10)
             return txt;
+
         int p2 = String::findNextEndline(p1, T) - 1;
 
         int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
         int t2 = String::getLastSeen(p1, p2, Xoffset + windowWidth - cntRowsOffset, T);
 
+        if (I == 0) cerr << t1 << ' ' << t2 << '\n';
         segmOnScreen[I] = {t1, t2};
 
         if (t1 == -1 || t2 == -1)
-            return txt;
+            return segmOnScreen[I] = { -1 , -1 } , txt;
+
         String::traverseString(t1, t2, T, txt);
         return txt;
     }
@@ -595,6 +599,14 @@ namespace String
             insert(len(t1) + 1, t1, word[i]);
 
         merge(T, t1, t3);
+    }
+
+    void saveText(FILE* fptr, Treap*& T)
+    {
+        if (T == 0) return;
+        saveText(fptr, T->L);
+        if(T -> flagCursor == 0) fprintf(fptr, "%c", T -> ch);
+        saveText(fptr, T->R);
     }
 }
 
@@ -768,209 +780,294 @@ namespace Windows
             window.display();
         }
     }
-}
 
-bool updateViewX(String::Treap *&S, int &Xoffset, int scrollUnitX)
-{
-    int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
-    bool modif = 0;
-
-    while (currLineWidth <= Xoffset)
-        Xoffset -= scrollUnitX, modif = 1;
-
-    if (modif)
-        Xoffset -= scrollUnitX;
-    Xoffset = max(0, Xoffset);
-
-    while (currLineWidth >= Xoffset + windowWidth - cntRowsOffset)
-        Xoffset += scrollUnitX, modif = 1;
-
-    return modif;
-}
-
-bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
-{
-    int globalHeight = String::findCurrentHeight(S);
-    int height = recalculateHeightLine();
-    bool modif = 0;
-
-    while (globalHeight - height < Yoffset)
-        Yoffset -= scrollUnitY, modif = 1;
-
-    Yoffset = max(0, Yoffset);
-
-    while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset)
-        Yoffset += scrollUnitY, modif = 1;
-
-    return modif;
-}
-
-int sizeRLines = 0;
-
-void updateTextLine(int line, vector<string> &renderLines, string L)
-{
-    if (line == sizeRLines) renderLines[sizeRLines++] = L;
-    else renderLines[line] = L;
-}
-
-int findLineOnScreen(float y)
-{
-    return (int)((y - navBarOffset) / globalHeightLine) + 1;
-}
-
-int moveCursorToClick(sf::Vector2i localPosition, String::Treap *&S, int scrollUnitY, int l1, int l2, int Xoffset)
-{
-    int l = findLineOnScreen(localPosition.y);
-    float w = localPosition.x - cntRowsOffset;
-
-    if (l + l1 - 1 > l2)
-        return String::len(S) + 1;
-    int p1 = String::findKthLine(l + l1 - 1, S);
-    if (w <= 0)
-        return p1;
-
-    if (String::len(S) + 1 == p1)
-        return String::len(S) + 1;
-    if (String::get(p1, S) == 10)
-        return p1;
-
-    int p2 = String::findNextEndline(p1, S) - 1;
-    int p = String::getFirstSeen(p1, p2, w + Xoffset, S);
-
-    if (p == -1)
-        p = p2;
-    return p + 1;
-}
-
-string txt1, txt2, txt, all;
-
-void centerText(sf::Text &text, string s, float startY, float startX = cntRowsOffset)
-{
-    bool empty = 0;
-    s += "|";
-    text.setString(s);
-    int centerConst = ((float)globalHeightLine - text.getGlobalBounds().height) / 2;
-    s.pop_back();
-    text.setString(s);
-    text.setPosition(startX, (float)startY + centerConst);
-}
-
-void updateSmartRender(sf::Text &text, sf::RenderTexture &text1, sf::RenderTexture &text2, sf::RenderTexture &text3, sf::Sprite &img1, sf::Sprite &img2, sf::Sprite &img3, int l1, int l2, int cursorLine, int scrollUnitY)
-{
-    txt1.clear(), txt2.clear(), txt.clear();
-    int h1 = 0;
-    int L = min(l2 - l1 + 1, cursorLine - l1);
-
-    text.setCharacterSize(fontSize);
-    text.setLetterSpacing(0.7);
-
-    text1.clear(sf::Color(0, 0, 0, 0));
-    text2.clear(sf::Color(0, 0, 0, 0));
-    text3.clear(sf::Color(0, 0, 0, 0));
-
-    int lastHeight = -globalHeightLine;
-
-    for (int i = l1; i <= l2; i++)
+    string saveAS()
     {
-        string line = "";
-        string number = to_string(i);
-        if (number.length() > lineNumberMaxDigits)
-            lineNumberMaxDigits = number.length();
-        for (int j = 0; j < lineNumberMaxDigits - number.length(); j++)
-            line += " ";
-        line += number;
-        centerText(text, line, navBarOffset + lastHeight + globalHeightLine, 5);
-        text3.draw(text);
-        lastHeight += globalHeightLine;
+        OPENFILENAMEA ofn;
+        char szFile[260];       // Buffer for full file path
+        char szFileTitle[260];  // Buffer for file title (file name only)
+
+        // Initialize the OPENFILENAME structure
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = NULL;   // Handle to the owner window
+        ofn.lpstrFile = szFile;
+        ofn.lpstrFile[0] = '\0';  // Initialize the file buffer with an empty string
+        ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]);  // Wide chars
+        ofn.lpstrFileTitle = szFileTitle;
+        ofn.lpstrFileTitle[0] = '\0';  // Initialize file title buffer
+        ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]);  // Wide chars
+        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";  // Wide character filter
+        ofn.nFilterIndex = 1;   // Default filter index
+        ofn.lpstrInitialDir = NULL; // Initial directory
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT; // Overwrite prompt for save dialog
+
+        if (GetOpenFileNameA(&ofn) == TRUE) {
+            // File selected and dialog confirmed
+            std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
+            return ofn.lpstrFile;
+        }
+        else {
+            // Dialog was canceled or an error occurred
+            std::cout << "Open file dialog canceled or failed." << std::endl;
+            return "";
+        }
     }
 
-    cntRowsOffset = (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
-
-    text.setLetterSpacing(1);
-
-    lastHeight = -globalHeightLine;
-
-    for (int i = 0; i < L; i++)
+    string open()
     {
-        centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
-        text1.draw(text);
-        lastHeight += globalHeightLine;
+        OPENFILENAMEA ofn;
+        char szFile[260];       // Buffer for full file path
+        char szFileTitle[260];  // Buffer for file title (file name only)
+
+        // Initialize the OPENFILENAME structure
+        ZeroMemory(&ofn, sizeof(ofn));
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = NULL;   // Handle to the owner window
+        ofn.lpstrFile = szFile;
+        ofn.lpstrFile[0] = '\0';  // Initialize the file buffer with an empty string
+        ofn.nMaxFile = sizeof(szFile);
+        ofn.lpstrFileTitle = szFileTitle;
+        ofn.lpstrFileTitle[0] = '\0';  // Initialize file title buffer
+        ofn.nMaxFileTitle = sizeof(szFileTitle);
+        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";  // ANSI character filter
+        ofn.nFilterIndex = 1;   // Default filter index
+        ofn.lpstrInitialDir = NULL; // Initial directory
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+        // Display the Open dialog box
+        if (GetOpenFileNameA(&ofn) == TRUE) {
+            // File selected and dialog confirmed
+            std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
+            return ofn.lpstrFile;
+        }
+        else {
+            // Dialog was canceled or an error occurred
+            std::cout << "Open file dialog canceled or failed." << std::endl;
+            return "";
+        }
     }
-
-    int textHeight = lastHeight;
-
-    if (l1 <= cursorLine && cursorLine <= l2)
-        txt = renderLines[cursorLine - l1];
-    else
-        txt = "";
-
-    if (txt.size())
-        lastHeight += globalHeightLine;
-
-    for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
-    {
-        centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
-        text2.draw(text);
-        lastHeight += globalHeightLine;
-    }
-
-    img1.setTexture(text1.getTexture());
-    img2.setTexture(text2.getTexture());
-    img3.setTexture(text3.getTexture());
-
-    centerText(text, txt, navBarOffset + textHeight + globalHeightLine);
-
-    text1.display();
-    text2.display();
-    text3.display();
 }
 
-float splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, string &txt, int posCursorOnScreen, int fp)
+namespace Render
 {
-    if (txt.size() == 0)
+    bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
     {
-        h1.setString("");
-        return 0;
+        int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
+        bool modif = 0;
+
+        while (currLineWidth <= Xoffset)
+            Xoffset -= scrollUnitX, modif = 1;
+
+        if (modif)
+            Xoffset -= scrollUnitX;
+        Xoffset = max(0, Xoffset);
+
+        while (currLineWidth >= Xoffset + windowWidth - cntRowsOffset)
+            Xoffset += scrollUnitX, modif = 1;
+
+        return modif;
     }
 
-    if (fp == -1)
+    bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
     {
-        h1 = text;
-        return 0;
+        int globalHeight = String::findCurrentHeight(S);
+        int height = recalculateHeightLine();
+        bool modif = 0;
+
+        while (globalHeight - height < Yoffset)
+            Yoffset -= scrollUnitY, modif = 1;
+
+        Yoffset = max(0, Yoffset);
+
+        while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset)
+            Yoffset += scrollUnitY, modif = 1;
+
+        return modif;
     }
 
+    int sizeRLines = 0;
 
-    h1.setCharacterSize(fontSize);
+    void updateTextLine(int line, vector<string>& renderLines, string L)
+    {
+        if (line == sizeRLines) renderLines[sizeRLines++] = L;
+        else renderLines[line] = L;
+    }
 
-    string s1, s2;
+    int findLineOnScreen(float y)
+    {
+        return (int)((y - navBarOffset) / globalHeightLine) + 1;
+    }
 
-    for (int i = 0; i < posCursorOnScreen - 1; i++)
-        s1 += txt[i];
+    int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
+    {
+        int l = findLineOnScreen(localPosition.y);
+        float w = localPosition.x - cntRowsOffset;
 
-    h1.setString(s1);
-    float w = h1.getGlobalBounds().width;
-    char ch;
+        if (l + l1 - 1 > l2)
+            return String::len(S) + 1;
+        int p1 = String::findKthLine(l + l1 - 1, S);
+        if (w <= 0)
+            return p1;
 
-    if (posCursorOnScreen < txt.size() && txt[posCursorOnScreen] != 13) ch = txt[posCursorOnScreen];
-    else ch = '|';
+        if (String::len(S) + 1 == p1)
+            return String::len(S) + 1;
+        if (String::get(p1, S) == 10)
+            return p1;
 
-    s1 += ch;
-    h1.setString(s1);
-    float W = h1.getGlobalBounds().width;
-    s1.pop_back();
-    
-    s2 += ch;
+        int p2 = String::findNextEndline(p1, S) - 1;
+        int p = String::getFirstSeen(p1, p2, w + Xoffset, S);
 
-    h1.setString(s2);
-    float cW = h1.getGlobalBounds().width;
-    
-    for (int i = posCursorOnScreen; i < txt.size(); i++)
-        s1 += txt[i];
+        if (p == -1)
+            p = p2;
+        return p + 1;
+    }
 
-    h1.setString(s1);
-    h1.setPosition(cntRowsOffset, text.getPosition().y);
+    string txt1, txt2, txt, all;
 
-    return w + (W - w - cW) / 2;
+    void centerText(sf::Text& text, string s, float startY, float startX = cntRowsOffset)
+    {
+        bool empty = 0;
+        s += "|";
+        text.setString(s);
+        int centerConst = ((float)globalHeightLine - text.getGlobalBounds().height) / 2;
+        s.pop_back();
+        text.setString(s);
+        text.setPosition(startX, (float)startY + centerConst);
+    }
+
+    void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTexture& text2, sf::RenderTexture& text3, sf::Sprite& img1, sf::Sprite& img2, sf::Sprite& img3, int l1, int l2, int cursorLine, int scrollUnitY)
+    {
+        txt1.clear(), txt2.clear(), txt.clear();
+        int h1 = 0;
+        int L = min(l2 - l1 + 1, cursorLine - l1);
+
+        text.setCharacterSize(fontSize);
+        text.setLetterSpacing(0.7);
+
+        text1.clear(sf::Color(0, 0, 0, 0));
+        text2.clear(sf::Color(0, 0, 0, 0));
+        text3.clear(sf::Color(0, 0, 0, 0));
+
+        int lastHeight = -globalHeightLine;
+
+        for (int i = l1; i <= l2; i++)
+        {
+            string line = "";
+            string number = to_string(i);
+            if (number.length() > lineNumberMaxDigits)
+                lineNumberMaxDigits = number.length();
+            for (int j = 0; j < lineNumberMaxDigits - number.length(); j++)
+                line += " ";
+            line += number;
+            centerText(text, line, navBarOffset + lastHeight + globalHeightLine, 5);
+            text3.draw(text);
+            lastHeight += globalHeightLine;
+        }
+
+        cntRowsOffset = (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+
+        text.setLetterSpacing(1);
+
+        lastHeight = -globalHeightLine;
+
+        for (int i = 0; i < L; i++)
+        {
+            centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
+            text1.draw(text);
+            lastHeight += globalHeightLine;
+        }
+
+        int textHeight = lastHeight;
+
+        if (l1 <= cursorLine && cursorLine <= l2)
+            txt = renderLines[cursorLine - l1];
+        else
+            txt = "";
+
+        if (txt.size())
+            lastHeight += globalHeightLine;
+
+        for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
+        {
+            centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
+            text2.draw(text);
+            lastHeight += globalHeightLine;
+        }
+
+        img1.setTexture(text1.getTexture());
+        img2.setTexture(text2.getTexture());
+        img3.setTexture(text3.getTexture());
+
+        centerText(text, txt, navBarOffset + textHeight + globalHeightLine);
+
+        text1.display();
+        text2.display();
+        text3.display();
+    }
+
+    float splitCursorLine(sf::Text& text, sf::Text& h1, sf::Text& h2, string& txt, int posCursorOnScreen, int fp)
+    {
+        if (txt.size() == 0)
+        {
+            h1.setString("");
+            return 0;
+        }
+
+        if (fp == -1)
+        {
+            h1 = text;
+            return 0;
+        }
+
+
+        h1.setCharacterSize(fontSize);
+
+        string s1, s2;
+
+        for (int i = 0; i < posCursorOnScreen - 1; i++)
+            s1 += txt[i];
+
+        h1.setString(s1);
+        float w = h1.getGlobalBounds().width;
+        char ch;
+
+        if (posCursorOnScreen < txt.size() && txt[posCursorOnScreen] != 13) ch = txt[posCursorOnScreen];
+        else ch = '|';
+
+        s1 += ch;
+        h1.setString(s1);
+        float W = h1.getGlobalBounds().width;
+        s1.pop_back();
+
+        s2 += ch;
+
+        h1.setString(s2);
+        float cW = h1.getGlobalBounds().width;
+
+        for (int i = posCursorOnScreen; i < txt.size(); i++)
+            s1 += txt[i];
+
+        h1.setString(s1);
+        h1.setPosition(cntRowsOffset, text.getPosition().y);
+
+        return w + (W - w - cW) / 2;
+    }
+
+    void render(int &l1 , int &l2 , String::Treap *&S , int Yoffset , int Xoffset , int cursorLine , sf::Text& text, sf::RenderTexture& text1, sf::RenderTexture& text2, sf::RenderTexture& text3, sf::Sprite& img1, sf::Sprite& img2, sf::Sprite& img3, int scrollUnitY)
+    {
+        int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
+
+        l1 = max(1, (Yoffset) / scrollUnitY + 1);
+        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - cursorInfoOffset - navBarOffset) / scrollUnitY));
+
+        sizeRLines = 0;
+
+        for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2; i++)
+            updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset, i - l1));
+
+        updateSmartRender(text, text1, text2, text3, img1, img2, img3, l1, l2, cursorLine, scrollUnitY);
+    }
 }
 
 string getTime(string param)
@@ -990,180 +1087,190 @@ string getTime(string param)
     return currTime;
 }
 
-bool isApOnScreen(int ap , int sz)
-{
-    for (int i = 0; i < sizeRLines; i++)
-    {
-        int l = segmOnScreen[i].first;
-        int r = segmOnScreen[i].second;
-        
-        if (l == -1) 
-            continue;
+using namespace Render;
 
-        if (l <= ap && ap <= r && ap + sz - 1 <= r)
-            return 1;
+namespace ReplaceFind
+{
+    bool isApOnScreen(int ap, int sz)
+    {
+        for (int i = 0; i < sizeRLines; i++)
+        {
+            int l = segmOnScreen[i].first;
+            int r = segmOnScreen[i].second;
+
+            if (l == -1)
+                continue;
+
+            cerr << "Line: " << i + 1 << ": " << l << ' ' << r << '\n';
+
+            if (l <= ap && ap <= r && ap + sz - 1 <= r)
+                return 1;
+        }
+
+        cerr << '\n';
+        return 0;
     }
 
-    return 0;
-}
-
-bool isValid(char ch)
-{
-    return ch != 10 && ch != ' ';
-}
-
-namespace BIT
-{
-    void reset(vector < int >& bit)
+    bool isValid(char ch)
     {
-        for (int i = 0; i < bit.size(); i++)
-            bit[i] = 0;
+        return ch != 10 && ch != ' ';
     }
 
-    void upd(int p, int v, vector < int >& bit)
+    namespace BIT
     {
-        if (p == 0) 
-            bit[p] += v;
+        void reset(vector < int >& bit)
+        {
+            for (int i = 0; i < bit.size(); i++)
+                bit[i] = 0;
+        }
 
-        for (; p && p < bit.size(); p += p & -p)
-            bit[p] += v;
+        void upd(int p, int v, vector < int >& bit)
+        {
+            if (p == 0)
+                bit[p] += v;
+
+            for (; p && p < bit.size(); p += p & -p)
+                bit[p] += v;
+        }
+
+        int get(int p, vector < int >& bit)
+        {
+            int ans = bit[0];
+
+            for (; p; p -= p & -p)
+                ans += bit[p];
+
+            return ans;
+        }
     }
 
-    int get(int p, vector < int >& bit)
+    void delAp(int idx, vector < int >& prv, vector < int >& nxt, vector < int >& bit, vector < int >& gone, set < int >& notRemoved, int vl = 1)
     {
-        int ans = bit[0];
+        BIT::upd(idx, vl, bit);
 
-        for (; p; p -= p & -p)
-            ans += bit[p];
+        gone[idx] = 1;
+        notRemoved.erase(idx);
+
+        int P = prv[idx];
+        int N = nxt[idx];
+
+        if (P != -1) nxt[P] = N;
+        if (N != -1) prv[N] = P;
+
+        prv[idx] = nxt[idx] = -1;
+    }
+
+    int findLastReplace(int idx, vector < int >& bit)
+    {
+        int l = 0, r = idx - 1, ans = -1, mid = 0;
+        int value = BIT::get(idx, bit);
+
+        while (l <= r)
+        {
+            mid = (l + r) / 2;
+
+            if (BIT::get(mid, bit) >= value)
+                ans = mid, r = mid - 1;
+            else l = mid + 1;
+        }
+
+        return ans;
+    }
+
+    int findNextReplace(int idx, vector < int >& bit)
+    {
+        int l = idx + 1, r = bit.size() - 1, mid = 0, ans = -1;
+        int value = BIT::get(idx, bit) + 1;
+
+        while (l <= r)
+        {
+            mid = (l + r) / 2;
+
+            if (BIT::get(mid, bit) >= value)
+                ans = mid, r = mid - 1;
+            else l = mid + 1;
+        }
+
+        return ans;
+    }
+
+    bool canReplace(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word)
+    {
+        if (gone[idx])
+            return 0;
+
+        int p1 = findLastReplace(idx, bit);
+        //cerr << "              working\n" << '\n';
+        int p2 = findNextReplace(idx, bit);
+
+        if (p1 != -1)
+        {
+            if (positions[p1] + (int) rword.size() - 1 >= positions[idx])
+                return 0;
+        }
+
+        if (p2 != -1)
+        {
+            if (positions[idx] + (int) word.size() - 1 >= positions[p2])
+                return 0;
+        }
+
+        return 1;
+    }
+
+    int findNextValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word, vector < int >& prv, vector < int >& nxt, set < int >& notRemoved)
+    {
+        while (nxt[idx] != -1 && canReplace(nxt[idx], bit, positions, gone, rword, word) == 0)
+        {
+            delAp(nxt[idx], prv, nxt, bit, gone, notRemoved, 0);
+        }
+
+        // cerr << '\n';
+        return nxt[idx];
+    }
+
+    int findPrevValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word, vector < int >& prv, vector < int >& nxt, set <int>& notRemoved)
+    {
+        while (prv[idx] != -1 && canReplace(prv[idx], bit, positions, gone, rword, word) == 0)
+        {
+            delAp(prv[idx], prv, nxt, bit, gone, notRemoved, 0);
+        }
+
+        return prv[idx];
+    }
+
+    int findRealPosition(int idx, vector < int >& positions, vector < int >& bit, string& word, string& rword)
+    {
+        int sub = BIT::get(idx, bit);
+        return positions[idx] - sub * word.size() + sub * rword.size();
+    }
+
+    int traceFirstApToRender(int idx, vector < int >& positions, vector < int >& bit, set < int >& notRemoved, string& word, string& rword)
+    {
+        int l = 0, r = positions.size() - 1, mid = 0, ans = -1;
+
+        while (l <= r)
+        {
+            mid = (l + r) / 2;
+
+            auto it = notRemoved.upper_bound(mid);
+
+            if (it == notRemoved.begin())
+                l = mid + 1;
+            else
+            {
+                --it;
+                if (findRealPosition(*it, positions, bit, word, rword) >= idx)
+                    ans = mid, r = mid - 1;
+                else l = mid + 1;
+            }
+        }
 
         return ans;
     }
 }
 
-void delAp(int idx, vector < int >& prv, vector < int >& nxt , vector < int > &bit , vector < int > &gone , set < int > &notRemoved , int vl = 1)
-{
-    BIT::upd(idx, vl , bit);
-    
-    gone[idx] = 1;
-    notRemoved.erase(idx);
-
-    int P = prv[idx];
-    int N = nxt[idx];
-
-    if (P != -1) nxt[P] = N;
-    if (N != -1) prv[N] = P;
-
-    prv[idx] = nxt[idx] = -1;
-}
-
-int findLastReplace(int idx, vector < int >& bit)
-{
-    int l = 0, r = idx - 1, ans = -1 , mid = 0;
-    int value = BIT::get(idx, bit);
-
-    while (l <= r)
-    {
-        mid = (l + r) / 2;
-
-        if (BIT::get(mid, bit) >= value)
-            ans = mid, r = mid - 1;
-        else l = mid + 1;
-    }
-
-    return ans;
-}
-
-int findNextReplace(int idx, vector < int >& bit)
-{
-    int l = idx + 1, r = bit.size() - 1, mid = 0, ans = -1;
-    int value = BIT::get(idx, bit) + 1;
-
-    while (l <= r)
-    {
-        mid = (l + r) / 2;
-
-        if (BIT::get(mid , bit) >= value)
-            ans = mid, r = mid - 1;
-        else l = mid + 1;
-    }
-
-    return ans;
-}
-
-bool canReplace(int idx, vector < int >& bit, vector < int >& positions , vector < int > &gone , string &rword , string &word)
-{
-    if (gone[idx])
-        return 0;
-
-    int p1 = findLastReplace(idx, bit);
-    //cerr << "              working\n" << '\n';
-    int p2 = findNextReplace(idx, bit);
-
-    if (p1 != -1)
-    {
-        if (positions[p1] + rword.size() - 1 >= positions[idx])
-            return 0;
-    }
-
-    if (p2 != -1)
-    {
-        if (positions[idx] + word.size() - 1 >= positions[p2])
-            return 0;
-    }
-
-    return 1;
-}
-
-int findNextValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword , string &word , vector < int > &prv , vector < int > &nxt , set < int > &notRemoved)
-{
-    while (nxt[idx] != -1 && canReplace(nxt[idx], bit, positions, gone, rword , word) == 0)
-    {
-        delAp(nxt[idx], prv, nxt, bit, gone, notRemoved , 0);
-    }
-
-   // cerr << '\n';
-    return nxt[idx];
-}
-
-int findPrevValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string &word , vector < int >& prv, vector < int >& nxt , set <int> &notRemoved)
-{
-    while (prv[idx] != -1 && canReplace(prv[idx], bit, positions, gone, rword , word) == 0)
-    {
-        delAp(prv[idx], prv, nxt, bit, gone, notRemoved , 0);
-    }
-
-    return prv[idx];
-}
-
-int findRealPosition(int idx , vector < int > &positions , vector < int > &bit , string &word , string &rword)
-{
-    int sub = BIT::get(idx , bit);
-    return positions[idx] - sub * word.size() + sub * rword.size();
-}
-
-int traceFirstApToRender(int idx, vector < int >& positions, vector < int >& bit, set < int > &notRemoved , string& word, string& rword)
-{
-    int l = 0, r = positions.size() - 1, mid = 0, ans = -1;
-
-    while (l <= r)
-    {
-        mid = (l + r) / 2;
-
-        auto it = notRemoved.upper_bound(mid);
-
-        if (it == notRemoved.begin())
-            l = mid + 1;
-        else
-        {
-            --it;
-            if (findRealPosition(*it, positions, bit, word, rword) >= idx)
-                ans = mid, r = mid - 1;
-            else l = mid + 1;
-        }
-    }
-
-    return ans;
-}
+using namespace ReplaceFind;
 
 int main()
 {
@@ -1287,7 +1394,7 @@ int main()
 
     vector < int > positions , bit , gone , prv , nxt;
     int currentAppearance = 0;
-    bool matchCase = 0, wholeWord = 0 , findFlag = 0 , replaceFlag = 0;
+    bool matchCase = 0, wholeWord = 0 , findFlag = 0 , replaceFlag = 0 , replaceAllFlag = 0;
     string word , rword;
     string param;
     set < int > notRemoved;
@@ -1575,11 +1682,12 @@ int main()
                         {
                             fileMenu->setIsOpen(false);
                             
-                            path = Windows::getPathFromUser("Open File");
+                            string path = Windows::open();
+                            
                             if (path.size() == 0)
                                 break;
-                            
-                            HANDLE fileHandle = CreateFileA(path.c_str() , GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+                            HANDLE fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
                             if (fileHandle == INVALID_HANDLE_VALUE) 
                             {
@@ -1615,7 +1723,7 @@ int main()
                             fileMenu->setIsOpen(false);
 
                             if (path.size() == 0)
-                            path = Windows::getPathFromUser("Save");
+                                 path = Windows::saveAS();
 
                             FILE *fptr = fopen(path.c_str(), "w");
 
@@ -1625,22 +1733,15 @@ int main()
                                 break;
                             }
 
-                            int posCursor = String::findCursorPosition(S);
-
-                            for (int i = 1; i <= String::len(S); i++)
-                            {
-                                char ch = String::get(i, S);
-                                if (posCursor != i)
-                                    fprintf(fptr, "%c", ch);
-                            }
-
+                            String::saveText(fptr, S);
                             fclose(fptr);
                         }
                         else if (fileMenu->getIsOpen() && fileMenuButtons[2]->isHovering(window))
                         {
                             fileMenu->setIsOpen(false);
 
-                            path = Windows::getPathFromUser("Save As");
+                            path = Windows::saveAS();
+
                             if (path.size() == 0)
                                 break;
 
@@ -1652,15 +1753,7 @@ int main()
                                 break;
                             }
 
-                            int posCursor = String::findCursorPosition(S);
-
-                            for (int i = 1; i <= String::len(S); i++)
-                            {
-                                char ch = String::get(i, S);
-                                if (posCursor != i)
-                                    fprintf(fptr, "%c", ch);
-                            }
-
+                            String::saveText(fptr, S);
                             fclose(fptr);
                         }
                         else if (editMenu->getIsOpen() && editMenuButtons[0]->isHovering(window))
@@ -1886,7 +1979,7 @@ int main()
                     {
                         if (replaceFlag == 1)
                         {
-                            int pap = findPrevValidAppearance(currentAppearance, bit, positions, gone, rword , word , prv , nxt , notRemoved);
+                            int pap = findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                             if (pap != -1) currentAppearance = pap;
                             else break;
 
@@ -1921,7 +2014,7 @@ int main()
                     {
                         if (replaceFlag == 1)
                         {
-                            int nap = findNextValidAppearance(currentAppearance, bit, positions, gone, rword , word , prv , nxt , notRemoved);
+                            int nap = findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                             if (nap != -1) currentAppearance = nap;
                             else break;
 
@@ -1933,7 +2026,7 @@ int main()
                         else if (findFlag == 1)
                         {
                             currentAppearance++;
-                            currentAppearance = min((int) positions.size() - 1, currentAppearance);
+                            currentAppearance = min((int)positions.size() - 1, currentAppearance);
 
                             cerr << "After right arrow: " << currentAppearance << '\n';
                             renderAgain = 1;
@@ -1955,7 +2048,7 @@ int main()
                     }
                     else if (key == 45) ///dummy key for test
                     {
-                        string data = getTime("%B %e, %Y"); 
+                        string data = getTime("%B %e, %Y");
                         int posCursor = String::findCursorPosition(S);
 
                         for (auto i : data)
@@ -2043,10 +2136,10 @@ int main()
                             }
                         }
 
-                        prv.resize(positions.size() , -1);
-                        nxt.resize(positions.size() , -1);
-                        gone.resize(positions.size() , 0);
-                        bit.resize(positions.size() , 0);
+                        prv.resize(positions.size(), -1);
+                        nxt.resize(positions.size(), -1);
+                        gone.resize(positions.size(), 0);
+                        bit.resize(positions.size(), 0);
                         notRemoved.clear();
 
                         for (int i = 1; i < positions.size(); i++)
@@ -2081,15 +2174,36 @@ int main()
                         }
 
                         int L = findRealPosition(currentAppearance, positions, bit, word, rword);
-                        String::replace(L , L + word.size() - 1, rword , S);
-                        int nxtAppearance = findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word , prv, nxt , notRemoved);
-                        int prvAppearance = findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word , prv, nxt , notRemoved);
-                        delAp(currentAppearance, prv, nxt, bit, gone , notRemoved);
+                        String::replace(L, L + word.size() - 1, rword, S);
+                        int nxtAppearance = findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                        int prvAppearance = findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                        delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                         currentAppearance = max(nxtAppearance, prvAppearance);
 
                         renderAgain = 1;
                         flag = 1;
                         break;
+                    }
+                    else if (key == 85)
+                    {
+                        replaceAllFlag = 1;
+
+                        set < int > snapshot = notRemoved;
+
+                        for (auto currentAppearance : snapshot)
+                        {
+                            if (canReplace(currentAppearance, bit, positions, gone, rword, word) == 0)
+                            {
+                                continue;
+                            }
+
+                            int L = findRealPosition(currentAppearance, positions, bit, word, rword);
+                            String::replace(L, L + word.size() - 1, rword, S);
+                            delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                        }
+
+                        renderAgain = 1;
+                        flag = 1;
                     }
                     else break;
 
@@ -2317,6 +2431,9 @@ int main()
 
                 if (replaceFlag == 1)
                 {
+
+                    render(l1, l2, S, Yoffset, Xoffset , cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
+
                     if (currentAppearance != -1 && currentAppearance < positions.size() && !isApOnScreen(findRealPosition(currentAppearance , positions , bit , word , rword) , word.size()))
                     {
                         int P = findRealPosition(currentAppearance, positions, bit, word, rword);
@@ -2331,17 +2448,7 @@ int main()
 
                 if (renderAgain == 1)
                 {
-                    int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
-
-                    l1 = max(1, (Yoffset) / scrollUnitY + 1);
-                    l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - cursorInfoOffset - navBarOffset) / scrollUnitY));
-
-                    sizeRLines = 0;
-
-                    for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2; i++)
-                        updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset, i - l1));
-
-                    updateSmartRender(text, text1, text2, text3, img1, img2, img3, l1, l2, cursorLine, scrollUnitY);
+                    render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
                 }
                 else
                 {
