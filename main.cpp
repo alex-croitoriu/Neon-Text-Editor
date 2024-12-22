@@ -861,6 +861,10 @@ namespace Windows
     }
 }
 
+
+int sizeRLines = 0;
+string txt1, txt2, txt, all;
+
 namespace Render
 {
     bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
@@ -898,8 +902,6 @@ namespace Render
         return modif;
     }
 
-    int sizeRLines = 0;
-
     void updateTextLine(int line, vector<string>& renderLines, string L)
     {
         if (line == sizeRLines) renderLines[sizeRLines++] = L;
@@ -934,8 +936,6 @@ namespace Render
             p = p2;
         return p + 1;
     }
-
-    string txt1, txt2, txt, all;
 
     void centerText(sf::Text& text, string s, float startY, float startX = cntRowsOffset)
     {
@@ -1081,25 +1081,6 @@ namespace Render
         updateSmartRender(text, text1, text2, text3, img1, img2, img3, l1, l2, cursorLine, scrollUnitY);
     }
 }
-
-string getTime(string param)
-{
-    time_t timestamp = time(NULL);
-    struct tm datetime = *localtime(&timestamp);
-
-    char data[100];
-
-    int len = strftime(data, 100, param.c_str(), &datetime);
-
-    string currTime;
-
-    for (int i = 0; i < len; i++)
-        currTime += data[i];
-
-    return currTime;
-}
-
-using namespace Render;
 
 namespace ReplaceFind
 {
@@ -1282,7 +1263,25 @@ namespace ReplaceFind
     }
 }
 
-using namespace ReplaceFind;
+namespace TimeFunction
+{
+    string getTime(string param)
+    {
+        time_t timestamp = time(NULL);
+        struct tm datetime = *localtime(&timestamp);
+
+        char data[100];
+
+        int len = strftime(data, 100, param.c_str(), &datetime);
+
+        string currTime;
+
+        for (int i = 0; i < len; i++)
+            currTime += data[i];
+
+        return currTime;
+    }
+}
 
 int main()
 {
@@ -1442,7 +1441,7 @@ int main()
                 if (localPosition.x >= cntRowsOffset && localPosition.y >= navBarOffset && localPosition.x < windowWidth && localPosition.y < windowHeight - cursorInfoOffset)
                 {
                     int posCursor = String::findCursorPosition(S);
-                    int newPosCursor = moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
+                    int newPosCursor = Render::moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
                     newPosCursor -= (newPosCursor > posCursor);
 
                     if (leftButtonPressed == 0)
@@ -1474,7 +1473,7 @@ int main()
 
                     if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
                     {
-                        int l = findLineOnScreen(localPosition.y);
+                        int l = Render::findLineOnScreen(localPosition.y);
                         // segmSelected.first = segmOnScreen[l].first;
                     }
                 }
@@ -1485,7 +1484,7 @@ int main()
 
                     if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
                     {
-                        int l = findLineOnScreen(localPosition.y);
+                        int l = Render::findLineOnScreen(localPosition.y);
                         // segmSelected.second = segmOnScreen[l].second;
                     }
                 }
@@ -1523,8 +1522,8 @@ int main()
             flag = 1;
             renderAgain = 1;
 
-            renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
-            renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+            renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+            renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
         }
         else if (selectFlag && ctrlC == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::C))
         {
@@ -1559,8 +1558,8 @@ int main()
             renderAgain = 1;
             selectFlag = 0;
 
-            renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
-            renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+            renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+            renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) 
         {
@@ -1801,8 +1800,8 @@ int main()
                                 renderAgain = 1;
                                 selectFlag = findFlag = 0;
 
-                                renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
-                                renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+                                renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                                renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                             }
                         }
                         else if (editMenu->getIsOpen() && editMenuButtons[2]->isHovering(window))
@@ -1827,8 +1826,8 @@ int main()
                                 flag = 1;
                                 renderAgain = 1;
 
-                                renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
-                                renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+                                renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                                renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                             }
                         }
                         else if (editMenu->getIsOpen() && editMenuButtons[3]->isHovering(window))
@@ -1918,8 +1917,8 @@ int main()
 
                     selectFlag = findFlag = 0;
 
-                    renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
-                    renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
 
                     break;
                 }
@@ -1984,7 +1983,7 @@ int main()
                     {
                         if (replaceFlag == 1)
                         {
-                            int pap = findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                            int pap = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                             if (pap != -1) currentAppearance = pap;
                             else break;
 
@@ -2019,7 +2018,7 @@ int main()
                     {
                         if (replaceFlag == 1)
                         {
-                            int nap = findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                            int nap = ReplaceFind::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                             if (nap != -1) currentAppearance = nap;
                             else break;
 
@@ -2053,7 +2052,7 @@ int main()
                     }
                     else if (key == 45) ///dummy key for test
                     {
-                        string data = getTime("%B %e, %Y");
+                        string data = TimeFunction::getTime("%B %e, %Y");
                         int posCursor = String::findCursorPosition(S);
 
                         for (auto i : data)
@@ -2178,11 +2177,11 @@ int main()
                             break;
                         }
 
-                        int L = findRealPosition(currentAppearance, positions, bit, word, rword);
+                        int L = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
                         String::replace(L, L + word.size() - 1, rword, S);
-                        int nxtAppearance = findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                        int prvAppearance = findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                        delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                        int nxtAppearance = ReplaceFind::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                        int prvAppearance = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                        ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                         currentAppearance = max(nxtAppearance, prvAppearance);
 
                         renderAgain = 1;
@@ -2197,14 +2196,14 @@ int main()
 
                         for (auto currentAppearance : snapshot)
                         {
-                            if (canReplace(currentAppearance, bit, positions, gone, rword, word) == 0)
+                            if (ReplaceFind::canReplace(currentAppearance, bit, positions, gone, rword, word) == 0)
                             {
                                 continue;
                             }
 
-                            int L = findRealPosition(currentAppearance, positions, bit, word, rword);
+                            int L = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
                             String::replace(L, L + word.size() - 1, rword, S);
-                            delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                            ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                         }
 
                         renderAgain = 1;
@@ -2215,8 +2214,8 @@ int main()
                     flag = 1;
                     selectFlag = 0;
                     
-                    renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
-                    renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
 
                     break;
                 }
@@ -2246,8 +2245,8 @@ int main()
                     flag = 1;
                     selectFlag = findFlag = 0;
 
-                    renderAgain |= updateViewX(S, Xoffset, scrollUnitX);
-                    renderAgain |= updateViewY(S, Yoffset, scrollUnitY);
+                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
 
                     break;
                 }
@@ -2324,7 +2323,7 @@ int main()
 
                     line += number;
 
-                    centerText(text, line, navBarOffset + cntLine * globalHeightLine, 5);
+                    Render::centerText(text, line, navBarOffset + cntLine * globalHeightLine, 5);
                     text.setLetterSpacing(0.7);
                     text1.draw(text);
                     text.setLetterSpacing(1);
@@ -2355,7 +2354,7 @@ int main()
                             if (p3 + 1 == posCursor && p3 + 2 <= String::len(S))
                                 ch2 = String::get(p3 + 2, S);
 
-                            while (p3 >= p1 && isValid(ch2) && (p3 == posCursor || isValid(String::get(p3, S))))
+                            while (p3 >= p1 && ReplaceFind::isValid(ch2) && (p3 == posCursor || ReplaceFind::isValid(String::get(p3, S))))
                                 p3--;
 
                             if (p3 < p1)
@@ -2368,11 +2367,11 @@ int main()
 
                         cntLine++;
                         string ln = String::constructString(p1, p3, S);
-                        centerText(text, ln, navBarOffset + globalHeightLine * (cntLine - 1));
+                        Render::centerText(text, ln, navBarOffset + globalHeightLine * (cntLine - 1));
 
                         if (p1 <= posCursor && posCursor <= p3)
                         {
-                            float cw = splitCursorLine(text, text, ptext2, ln, posCursor - p1 + 1, 0);
+                            float cw = Render::splitCursorLine(text, text, ptext2, ln, posCursor - p1 + 1, 0);
                             cursorLineOnScreen = 1;
                             cerr << "cw is" << ' ' << cw << ' ' << posCursor - p1 + 1 << '\n';
                             cursorLine = l2;
@@ -2422,7 +2421,7 @@ int main()
 
                 if (findFlag == 1)
                 {
-                    if (currentAppearance < positions.size() && !isApOnScreen(positions[currentAppearance], word.size()))
+                    if (currentAppearance < positions.size() && !ReplaceFind::isApOnScreen(positions[currentAppearance], word.size()))
                     {
                         int P = positions[currentAppearance];
                         int L = String::findNumberOfEndlines(1, P, S) + 1;
@@ -2437,11 +2436,11 @@ int main()
                 if (replaceFlag == 1)
                 {
 
-                    render(l1, l2, S, Yoffset, Xoffset , cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
+                    Render::render(l1, l2, S, Yoffset, Xoffset , cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
 
-                    if (currentAppearance != -1 && currentAppearance < positions.size() && !isApOnScreen(findRealPosition(currentAppearance , positions , bit , word , rword) , word.size()))
+                    if (currentAppearance != -1 && currentAppearance < positions.size() && !ReplaceFind::isApOnScreen(ReplaceFind::findRealPosition(currentAppearance , positions , bit , word , rword) , word.size()))
                     {
-                        int P = findRealPosition(currentAppearance, positions, bit, word, rword);
+                        int P = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
                         int L = String::findNumberOfEndlines(1, P, S) + 1;
                         int F = String::findKthLine(L, S);
                         Yoffset = (L - 1) * globalHeightLine;
@@ -2453,19 +2452,19 @@ int main()
 
                 if (renderAgain == 1)
                 {
-                    render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
+                    Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
                 }
                 else
                 {
                     if (cursorLine >= l1 && cursorLine <= l2)
                     {
-                        updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset, cursorLine - l1));
+                        Render::updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset, cursorLine - l1));
                         text.setString(renderLines[cursorLine - l1]);
                     }
                 }
 
                 string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
-                float cw = splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1, fp);
+                float cw = Render::splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1, fp);
 
                 if (cursorLine >= l1 && cursorLine <= l2)
                     cursorLineOnScreen = 1;
@@ -2560,13 +2559,13 @@ int main()
 
                         if (l == -1) continue;
 
-                        int p = traceFirstApToRender(l , positions, bit, notRemoved , word, rword);
+                        int p = ReplaceFind::traceFirstApToRender(l , positions, bit, notRemoved , word, rword);
                         int y = i * globalHeightLine + navBarOffset;
                        // cerr << "On line " << i + 1 << ": " << p;
 
-                        while (p != -1 && p < positions.size() && findRealPosition(p, positions, bit, word, rword) <= r)
+                        while (p != -1 && p < positions.size() && ReplaceFind::findRealPosition(p, positions, bit, word, rword) <= r)
                         {
-                            int P = findRealPosition(p, positions, bit, word, rword);
+                            int P = ReplaceFind::findRealPosition(p, positions, bit, word, rword);
                             int w = String::findWidth(l, P - 1, S);
                             int W = String::findWidth(P, P + word.size() - 1, S);
 
@@ -2575,7 +2574,7 @@ int main()
                             if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
                             else box.setFillColor(sf::Color(255, 187, 0, 128));
                             selectedBoxes.push_back(box);
-                            p = findNextValidAppearance(p, bit, positions, gone, rword, word , prv, nxt , notRemoved);
+                            p = ReplaceFind::findNextValidAppearance(p, bit, positions, gone, rword, word , prv, nxt , notRemoved);
                         }
 
                       //  cerr << '\n';
