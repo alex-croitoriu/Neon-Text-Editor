@@ -558,6 +558,18 @@ namespace String
         return T;
     }
 
+    Treap* build(int n, const char *data)
+    {
+        Treap** ptr = new Treap*[n];
+
+        for (int i = 0; i < n; i++)
+        {
+            ptr[i] = new Treap(data[i]);
+        }
+
+        return build(n, ptr);
+    }
+
     string constructRawString(Treap*& T)
     {
         int posCursor = findCursorPosition(T);
@@ -594,11 +606,11 @@ namespace String
         split(t2, t1, t2, l - 1);
 
         del(t2);
+        
+        t2 = build((int) word.size(), word.c_str());
 
-        for (int i = 0 ; i < word.size(); i++)
-            insert(len(t1) + 1, t1, word[i]);
-
-        merge(T, t1, t3);
+        merge(T, t1, t2);
+        merge(T, T, t3);
     }
 
     void saveText(FILE* fptr, Treap*& T)
@@ -1699,16 +1711,9 @@ int main()
                             char* data = (char*) (MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
                             DWORD fileSize =  GetFileSize(fileHandle, nullptr);
 
-                            ptr = new String::Treap*[fileSize + 1];
-                            ptr[0] = new String::Treap(cursorChar, 1);
+                            S = String::build(fileSize , data);
+                            String::insert(1, S);
 
-                            for (int i = 0; i < fileSize; i++)
-                            {
-                                char ch = data[i];
-                                ptr[i + 1] = new String::Treap(ch);
-                            }
-
-                            S = String::build(fileSize + 1, ptr);
                             cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
                             
                             UnmapViewOfFile(data);
