@@ -22,7 +22,7 @@ mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
 int fontSize = 20;
-pair<int, int> segmOnScreen[100000];
+pair<int, int> segmOnScreen[windowHeight];
 
 float recalculateHeightLine(int fnt = fontSize)
 {
@@ -38,7 +38,7 @@ int lineNumberMaxDigits = 3;
 float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
 
-vector<string> renderLines(1000);
+vector<string> renderLines(windowHeight);
 
 bool wordWrap = 0;
 
@@ -212,6 +212,18 @@ namespace String
         del(T->L);
         del(T->R);
         delete T;
+    }
+
+    void del(int l, int r, Treap*& T)
+    {
+        Treap* t1 = 0, * t2 = 0, * t3 = 0;
+
+        split(T, t2, t3, r);
+        split(t2, t1, t2, l - 1);
+
+        del(t2);
+
+        merge(T, t1, t3);
     }
 
     void insert(int pos, Treap *&T, Treap *S = new Treap(cursorChar, 1))
@@ -861,7 +873,6 @@ namespace Windows
     }
 }
 
-
 int sizeRLines = 0;
 string txt1, txt2, txt, all;
 
@@ -1084,6 +1095,43 @@ namespace Render
 
 namespace ReplaceFind
 {
+    void KMP(string &s, string& word , vector < int > &positions , bool &wholeWord)
+    {
+        vector < int > PI(word.size());
+        vector < int > pi(s.size());
+        positions.clear();
+
+        PI[0] = 0;
+
+        for (int i = 1; i < word.size(); i++)
+        {
+            int t = PI[i - 1];
+
+            while (t && word[i] != word[t])
+                t = PI[t - 1];
+
+            t += word[i] == word[t];
+            PI[i] = t;
+        }
+
+        for (int i = 0; i < s.size(); i++)
+        {
+            int t = (i == 0 ? 0 : pi[i - 1]);
+
+            while (t && (t == word.size() || s[i] != word[t]))
+                t = PI[t - 1];
+
+            t += word[t] == s[i];
+            pi[i] = t;
+
+            if (t == word.size())
+            {
+                if (wholeWord == 0 || ((i - word.size() + 1 == 0 || s[i - word.size()] == ' ' || s[i - word.size()] == '\n') && (i == s.size() - 1 || s[i + 1] == ' ' || s[i + 1] == '\n')))
+                    positions.push_back(i - word.size() + 1 + 1);
+            }
+        }
+    }
+
     bool isApOnScreen(int ap, int sz)
     {
         for (int i = 0; i < sizeRLines; i++)
@@ -1852,40 +1900,16 @@ int main()
                                         i = i - 'A' + 'a';
                             }
 
-                            vector < int > PI(word.size());
-                            vector < int > pi(s.size());        
-                            positions.clear();
-
-                            PI[0] = 0;
-
-                            for (int i = 1; i < word.size(); i++)
-                            {
-                                int t = PI[i - 1];
-
-                                while (t && word[i] != word[t])
-                                    t = PI[t - 1];
-
-                                t += word[i] == word[t];
-                                PI[i] = t;
-                            }
-
-                            for (int i = 0 ; i < s.size(); i++)
-                            {
-                                int t = (i == 0 ? 0 : pi[i - 1]);
-
-                                while (t && (t == word.size() || s[i] != word[t]))
-                                    t = PI[t - 1];
-
-                                t += word[t] == s[i];
-                                pi[i] = t;
-
-                                if (t == word.size())
-                                {
-                                    if(wholeWord == 0 || ((i - word.size() + 1 == 0 || s[i - word.size()] == ' ' || s[i - word.size()] == '\n') && (i == s.size() - 1 || s[i + 1] == ' ' || s[i + 1] == '\n')))
-                                        positions.push_back(i - word.size() + 1 + 1);
-                                }
-                            }
+                            ReplaceFind::KMP(s, word, positions, wholeWord);
                             
+                            if (positions.size() == 0)
+                            {
+                                Windows::throwMessage("There are 0 matchings!");
+                                renderAgain = 1;
+                                flag = 1;
+                                break;
+                            }
+
                             cerr << "Found: " << positions.size() << '\n';
                             cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
                             cerr << '\n';
@@ -1935,6 +1959,10 @@ int main()
                             replaceFlag = 0;
                             renderAgain = 1;
                             flag = 1;
+                        }
+                        else if (findFlag == 1)
+                        {
+                            findFlag = 0;
                         }
                         else window.close();
 
@@ -2063,7 +2091,7 @@ int main()
 
                         renderAgain = 1;
                     }
-                    else if (key == 43)
+                    else if (key == 43) ///not functional ignora
                     {
                         flag = 1;
                         renderAgain = 1;
@@ -2102,43 +2130,20 @@ int main()
                                     i = i - 'A' + 'a';
                         }
 
-                        vector < int > PI(word.size());
-                        vector < int > pi(s.size());
-                        positions.clear();
+                        ReplaceFind::KMP(s, word, positions, wholeWord);
+
+                        if (positions.size() == 0)
+                        {
+                            Windows::throwMessage("There are 0 matchings!");
+                            renderAgain = 1;
+                            flag = 1;
+                            break;
+                        }
+
                         prv.clear();
                         bit.clear();
                         nxt.clear();
                         gone.clear();
-
-                        PI[0] = 0;
-
-                        for (int i = 1; i < word.size(); i++)
-                        {
-                            int t = PI[i - 1];
-
-                            while (t && word[i] != word[t])
-                                t = PI[t - 1];
-
-                            t += word[i] == word[t];
-                            PI[i] = t;
-                        }
-
-                        for (int i = 0; i < s.size(); i++)
-                        {
-                            int t = (i == 0 ? 0 : pi[i - 1]);
-
-                            while (t && (t == word.size() || s[i] != word[t]))
-                                t = PI[t - 1];
-
-                            t += word[t] == s[i];
-                            pi[i] = t;
-
-                            if (t == word.size())
-                            {
-                                if (wholeWord == 0 || ((i - word.size() + 1 == 0 || s[i - word.size()] == ' ' || s[i - word.size()] == '\n') && (i == s.size() - 1 || s[i + 1] == ' ' || s[i + 1] == '\n')))
-                                    positions.push_back(i - word.size() + 1 + 1);
-                            }
-                        }
 
                         prv.resize(positions.size(), -1);
                         nxt.resize(positions.size(), -1);
@@ -2209,7 +2214,16 @@ int main()
                         renderAgain = 1;
                         flag = 1;
                     }
-                    else break;
+                    else if (key == 86) ///go to line
+                    {
+                        string line = Windows::getStringFromUser("asdfas");
+                        int l = min(String::findNumberOfEndlines(1 , String::len(S) , S) + 1 , stoi(line));
+                        Xoffset = 0;
+                        Yoffset = (l - 1) * globalHeightLine;
+                        renderAgain = 1;
+                        flag = 1;
+                        break;
+                    }
 
                     flag = 1;
                     selectFlag = 0;
@@ -2232,7 +2246,12 @@ int main()
 
                     if (ch == 8)
                     {
-                        if (posCursor > 1)
+                        if (selectFlag == 1)
+                        {
+                            String::del(segmSelected.first, segmSelected.second, S);
+                            selectFlag = 0;
+                        }
+                        else if (posCursor > 1)
                             String::del(posCursor - 1, S);
                     }
                     else
