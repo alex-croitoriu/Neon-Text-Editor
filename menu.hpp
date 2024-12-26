@@ -16,18 +16,19 @@ class Menu
     Button *toggleButton;
 
 public:
-    Menu(Button *_toggleButton, int buttonCount, std::string buttonLabels[], sf::Vector2f position, sf::Font &font);
+    Menu(Button *_toggleButton, std::vector<std::string> buttonLabels, sf::Vector2f position);
 
-    bool isHovering(sf::RenderWindow &window);
+    bool isHovering();
 
     bool getIsOpen();
     sf::Vector2f getPosition();
     int getButtonCount();
     Button** getButtons();
+    Button* getToggleButton();
 
     void setIsOpen(bool _isOpen);
     void setPosition(sf::Vector2f position, int windowWidth, int windowHeight);
     void toggle();
 
-    void draw(sf::RenderWindow &window);
+    void draw();
 };

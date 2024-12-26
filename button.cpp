@@ -2,10 +2,12 @@
 
 #include <string>
 
+#include "globals.hpp"
 #include "button.hpp"
 
-Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, sf::Font &font, int fontSize, bool alignCenter) //, std::function<void> _onClick = nullptr
+Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, int fontSize, bool alignCenter) //, std::function<void> _onClick = nullptr
 {
+
     // onClick = _onClick;
 
     container.setSize(size);
@@ -24,11 +26,11 @@ Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, 
     else
     {
         content.setOrigin(0, content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y);
-        content.setPosition(container.getGlobalBounds().left + 16, container.getPosition().y + container.getSize().y / 2.f);
+        content.setPosition(container.getGlobalBounds().left + 20, container.getPosition().y + container.getSize().y / 2.f);
     }
 }
 
-bool Button::isHovering(sf::RenderWindow &window)
+bool Button::isHovering()
 {
     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
     return getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
@@ -48,7 +50,7 @@ void Button::setPosition(sf::Vector2f position)
 {
     container.setPosition(position);
     content.setOrigin(0, content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y);
-    content.setPosition(container.getGlobalBounds().left + 16, container.getPosition().y + container.getSize().y / 2.f);
+    content.setPosition(container.getGlobalBounds().left + 20, container.getPosition().y + container.getSize().y / 2.f);
 }
 
 void Button::setHoverState(bool isHovering)
@@ -56,7 +58,7 @@ void Button::setHoverState(bool isHovering)
     container.setFillColor(sf::Color(0, 0, 0, isHovering ? 32 : 0));
 }
 
-void Button::draw(sf::RenderWindow &window)
+void Button::draw()
 {
     window.draw(container);
     window.draw(content);

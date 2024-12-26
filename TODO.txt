@@ -21,3 +21,5 @@
 - [ ] name and logo
 
 - [ ] options menu: hide lines, go to line, time and date, switch dark/light mode
+
+- [ ] should not prompt for path when saving after opening a file

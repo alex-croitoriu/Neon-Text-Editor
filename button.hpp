@@ -13,9 +13,9 @@ class Button
     std::string label;
 
 public:
-    Button(std::string &label, sf::Vector2f &size, sf::Vector2f &position, sf::Font &font, int fontSize, bool alignCenter = true); //, std::function<void> _onClick
+    Button(std::string &label, sf::Vector2f &size, sf::Vector2f &position, int fontSize, bool alignCenter = true); //, std::function<void> _onClick
 
-    bool isHovering(sf::RenderWindow &window);
+    bool isHovering();
     
     std::string getLabel();
     sf::FloatRect getGlobalBounds();
@@ -23,6 +23,6 @@ public:
     void setPosition(sf::Vector2f position);
     void setHoverState(bool isHovering);
     
-    void draw(sf::RenderWindow &window);
+    void draw();
 
 };

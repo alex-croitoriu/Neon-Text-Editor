@@ -3,15 +3,16 @@
 #include <string>
 #include <vector>
 
+#include "globals.hpp"
 #include "button.hpp"
 #include "menu.hpp"
 
-Menu::Menu(Button *_toggleButton, int _buttonCount, std::string buttonLabels[], sf::Vector2f position, sf::Font &font)
+Menu::Menu(Button *_toggleButton, std::vector<std::string> buttonLabels, sf::Vector2f position)
 {
     isOpen = false;
 
     toggleButton = _toggleButton;
-    buttonCount = _buttonCount;
+    buttonCount = buttonLabels.size();
 
     sf::Vector2f size(150, 30);
 
@@ -19,7 +20,7 @@ Menu::Menu(Button *_toggleButton, int _buttonCount, std::string buttonLabels[], 
     for (int i = 0; i < buttonCount; i++)
     {
         sf::Vector2f pos(position.x, position.y + 30 * i);
-        buttons[i] = new Button(buttonLabels[i], size, pos, font, 12, false);
+        buttons[i] = new Button(buttonLabels[i], size, pos, 12, false);
     }
 
     container.setSize(sf::Vector2f(size.x, size.y * buttonCount)); 
@@ -27,7 +28,7 @@ Menu::Menu(Button *_toggleButton, int _buttonCount, std::string buttonLabels[], 
     container.setFillColor(sf::Color::Cyan);
 }
 
-bool Menu::isHovering(sf::RenderWindow &window)
+bool Menu::isHovering()
 {
     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
     return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
@@ -51,6 +52,11 @@ int Menu::getButtonCount()
 Button** Menu::getButtons()
 {
     return buttons;
+}
+
+Button* Menu::getToggleButton()
+{
+    return toggleButton;
 }
 
 void Menu::setIsOpen(bool _isOpen)
@@ -80,17 +86,17 @@ void Menu::toggle()
     isOpen = !isOpen;
 }
 
-void Menu::draw(sf::RenderWindow &window)
+void Menu::draw()
 {
     if (!isOpen)
-        toggleButton->draw(window);
+        toggleButton->draw();
     else
     {
-        toggleButton->draw(window);
+        toggleButton->draw();
         window.draw(container);
         for (int i = 0; i < buttonCount; i++)
         {
-            buttons[i]->draw(window);
+            buttons[i]->draw();
         }
     }
 }

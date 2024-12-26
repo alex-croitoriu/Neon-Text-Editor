@@ -6,13 +6,14 @@
 #include <chrono>
 #include <random>
 #include <windows.h>
+#include <commdlg.h>
 #include <ctime>
 #include <cassert>
 #include <set>
-#include <commdlg.h>
 #include <bitset>
 
 #include "constants.hpp"
+#include "globals.hpp"
 #include "button.hpp"
 #include "menu.hpp"
 
@@ -22,7 +23,6 @@ mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
 int windowWidth = 1000;
 int windowHeight = 1000;
-const int maxRows = 10000;
 
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
@@ -40,7 +40,6 @@ int cntRowsOffset = 60;
 int cursorInfoOffset = 100;
 int lineNumberMaxDigits = 3;
 
-
 float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
 
@@ -53,9 +52,7 @@ namespace String
     void precalculateCharDim()
     {
         sf::Text text;
-        sf::Font font;
 
-        font.loadFromFile("assets/fonts/cour.ttf");
         text.setFont(font);
 
         for (int fnt = fontUnit; fnt < maxFontSize; fnt += fontUnit)
@@ -684,9 +681,6 @@ namespace Windows
 
         sf::Event event;
         sf::Text text, pth;
-        sf::Font font;
-
-        font.loadFromFile("assets/fonts/cour.ttf");
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
@@ -749,9 +743,6 @@ namespace Windows
 
         sf::Event event;
         sf::Text text, pth;
-        sf::Font font;
-
-        font.loadFromFile("assets/fonts/cour.ttf");
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
@@ -812,9 +803,6 @@ namespace Windows
 
         sf::Event event;
         sf::Text text;
-        sf::Font font;
-
-        font.loadFromFile("assets/fonts/cour.ttf");
 
         text.setFont(font);
         text.setFillColor(sf::Color::Black);
@@ -1387,9 +1375,9 @@ namespace TimeFunction
 
 int main()
 {
-    cerr << sizeof String::Treap;
+    // cerr << sizeof String::Treap;
 
-    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
+    window.create(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
     sf::View view;
     sf::Image mainIcon;
 
@@ -1398,8 +1386,6 @@ int main()
 
     sf::Event event;
     sf::Text text, ptext1, ptext2;
-
-    sf::Font font;
 
     font.loadFromFile("assets/fonts/cour.ttf");
 
@@ -1419,40 +1405,59 @@ int main()
     ptext2.setStyle(sf::Text::Regular);
 
 
+    string zoomInButtonLabels[] = { "-", "+" };
 
     string menuLabels[] = { "File", "Edit", "Options" };
-
-    string zoomInButtonLabels[]   = { "-", "+" };
-    string fileMenuButtonLabels[] = { "Open", "Save", "Save as" };
-    string editMenuButtonLabels[] = { "Copy", "Paste", "Cut", "Find" };
+    vector<string> menuButtonLabels[] = {
+        { "Open", "Save", "Save as" },
+        { "Copy", "Paste", "Cut", "Find" },
+        { "Hide lines", "Go to line", "Time & Date", "Switch to Dark/Light mode" }
+    };
+    
+    string fileMenuButtonLabels[]    = { "Open", "Save", "Save as" };
+    string editMenuButtonLabels[]    = { "Copy", "Paste", "Cut", "Find" };
+    string optionsMenuButtonLabels[] = { "Hide lines", "Go to line", "Time & Date", "Switch to Dark/Light mode" };
 
     sf::Vector2f buttonPositions[] = 
     {
         sf::Vector2f(  0, 0),
         sf::Vector2f( 60, 0),
         sf::Vector2f(120, 0),
-        sf::Vector2f(180, 0)
+        sf::Vector2f(180, 0),
+        sf::Vector2f(240, 0),
     };
 
     sf::Vector2f menuPositions[] = 
     {
-        sf::Vector2f( 0, 20),
-        sf::Vector2f(60, 20)
+        sf::Vector2f(  0, 20),
+        sf::Vector2f( 60, 20),
+        sf::Vector2f(120, 20)
     };
 
     sf::Vector2f buttonSize(60, 20);
 
-    Button *toggleFileMenuButton = new Button(menuLabels[0], buttonSize, buttonPositions[0], font, 10);
-    Button *toggleEditMenuButton = new Button(menuLabels[1], buttonSize, buttonPositions[1], font, 10);
+    Button *toggleFileMenuButton    = new Button(menuLabels[0], buttonSize, buttonPositions[0], 10);
+    Button *toggleEditMenuButton    = new Button(menuLabels[1], buttonSize, buttonPositions[1], 10);
+    Button *toggleOptionsMenuButton = new Button(menuLabels[2], buttonSize, buttonPositions[2], 10);
 
-    Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonSize, buttonPositions[2], font, 10);
-    Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonSize, buttonPositions[3], font, 10);
+    Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonSize, buttonPositions[3], 10);
+    Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonSize, buttonPositions[4], 10);
 
-    Menu *fileMenu = new Menu(toggleFileMenuButton, 3, fileMenuButtonLabels, menuPositions[0], font);
-    Menu *editMenu = new Menu(toggleEditMenuButton, 4, editMenuButtonLabels, menuPositions[1], font);
+    Menu **menus = new Menu*[3];
 
-    Button** fileMenuButtons = fileMenu->getButtons();
-    Button** editMenuButtons = editMenu->getButtons();
+    for (int i = 0; i < 3; i++)
+    {
+        Button * toggleButton = new Button(menuLabels[i], buttonSize, buttonPositions[i], 10);
+        menus[i] = new Menu(toggleButton, menuButtonLabels[i], menuPositions[i]);
+    }
+    
+    // menus[0] = new Menu(toggleFileMenuButton, 3, fileMenuButtonLabels, menuPositions[0]);
+    // menus[1] = new Menu(toggleEditMenuButton, 4, editMenuButtonLabels, menuPositions[1]);
+    // menus[2] = new Menu(toggleOptionsMenuButton, 3, optionsMenuButtonLabels, menuPositions[2]);
+
+    Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2];
+
+    Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons();
 
 
 
@@ -1528,18 +1533,22 @@ int main()
             sf::Vector2i localPosition = sf::Mouse::getPosition(window);
             bool isAnyButtonPressed = false;
             
-            if (toggleFileMenuButton->isHovering(window) || toggleEditMenuButton->isHovering(window) || zoomOutButton->isHovering(window) || zoomOutButton->isHovering(window))
+            if (zoomOutButton->isHovering() || zoomInButton->isHovering())
                 isAnyButtonPressed = true;
 
-            if (fileMenu->getIsOpen())
-                for (int i = 0; i < fileMenu->getButtonCount(); i++) 
-                    if (fileMenuButtons[i]->isHovering(window))
-                        isAnyButtonPressed = true;
-
-            if (editMenu->getIsOpen())
-                for (int i = 0; i < editMenu->getButtonCount(); i++) 
-                    if (editMenuButtons[i]->isHovering(window))
-                        isAnyButtonPressed = true;
+            for (int i = 0; i < 3; i++)
+            {
+                if (menus[i]->getToggleButton()->isHovering())
+                    isAnyButtonPressed = true;
+                
+                if (menus[i]->getIsOpen())
+                {
+                    Button** menuButtons = menus[i]->getButtons();
+                    for (int j = 0; j < menus[i]->getButtonCount(); j++)
+                        if (menuButtons[j]->isHovering())
+                            isAnyButtonPressed = true;
+                }
+            }
             
             if (!isAnyButtonPressed) 
             {
@@ -1680,54 +1689,36 @@ int main()
             {
                 if (event.type == sf::Event::MouseMoved)
                 {
-                    if (zoomOutButton->isHovering(window))
-                        zoomOutButton->setHoverState(true);
-                    else
-                        zoomOutButton->setHoverState(false);
+                    // set hover state for zoom buttons
+                    zoomOutButton->setHoverState(zoomOutButton->isHovering());
+                    zoomInButton ->setHoverState(zoomInButton ->isHovering());
 
-                    if (zoomInButton->isHovering(window))
-                        zoomInButton->setHoverState(true);
-                    else
-                        zoomInButton->setHoverState(false);
-
-
-                    if (toggleFileMenuButton->isHovering(window))
+                    // open menus if user is hovering over them
+                    // set hover state for toggle menu buttons
+                    for (int i = 0; i < 3; i++)
                     {
-                        toggleFileMenuButton->setHoverState(true);
-                        fileMenu->setIsOpen(true);
-                    }
-                    else
-                        toggleFileMenuButton->setHoverState(false);
-
-                    if (toggleEditMenuButton->isHovering(window))
-                    {
-                        toggleEditMenuButton->setHoverState(true);
-                        editMenu->setPosition(menuPositions[1], windowWidth, windowHeight);
-                        editMenu->setIsOpen(true);
-                    }
-                    else
-                        toggleEditMenuButton->setHoverState(false);
-
-                    if (fileMenu->getIsOpen() && !fileMenu->isHovering(window) && !toggleFileMenuButton->isHovering(window))
-                        fileMenu->setIsOpen(false);
-
-                    if (editMenu->getIsOpen() && !editMenu->isHovering(window) && !toggleEditMenuButton->isHovering(window) && editMenu->getPosition() == menuPositions[1])
-                        editMenu->setIsOpen(false);
-
-                    for (int i = 0; i < fileMenu->getButtonCount(); i++)
-                    {
-                        if (fileMenuButtons[i]->isHovering(window))
-                            fileMenuButtons[i]->setHoverState(true);
+                        Button* toggleButton = menus[i]->getToggleButton();
+                        if (toggleButton->isHovering())
+                        {
+                            toggleButton->setHoverState(true);
+                            menus[i]->setIsOpen(true);
+                            menus[i]->setPosition(menuPositions[i], windowWidth, windowHeight);
+                        }
                         else
-                            fileMenuButtons[i]->setHoverState(false);
+                            toggleButton->setHoverState(false);
                     }
 
-                    for (int i = 0; i < editMenu->getButtonCount(); i++)
+                    // close menus if user isn't hovering over them anymore
+                    for (int i = 0; i < 3; i++)
+                        if (menus[i]->getIsOpen() && !menus[i]->isHovering() && !menus[i]->getToggleButton()->isHovering() && menus[i]->getPosition() == menuPositions[i])
+                            menus[i]->setIsOpen(false);
+
+                    // set hover state for menu buttons
+                    for (int i = 0; i < 3; i++)
                     {
-                        if (editMenuButtons[i]->isHovering(window))
-                            editMenuButtons[i]->setHoverState(true);
-                        else
-                            editMenuButtons[i]->setHoverState(false);
+                        Button** buttons = menus[i]->getButtons();
+                        for (int j = 0; j < menus[i]->getButtonCount(); j++)
+                            buttons[j]->setHoverState(buttons[j]->isHovering());
                     }
                 }
 
@@ -1759,12 +1750,12 @@ int main()
                 }
 
                 if (event.type == sf::Event::MouseButtonPressed)
-                {
+                { 
                     int key = event.key.code;
 
                     if (key == 0)
                     {
-                        if (zoomOutButton->isHovering(window))
+                        if (zoomOutButton->isHovering())
                         {
                             fontSize -= fontUnit;
                             fontSize = max(fontUnit, fontSize);
@@ -1773,7 +1764,7 @@ int main()
                             fontChanged = 1;
                             cursorTimer = 0;
                         }
-                        else if (zoomInButton->isHovering(window))
+                        else if (zoomInButton->isHovering())
                         {
                             fontSize += fontUnit;
                             fontSize = min(fontSize, maxFontSize - fontUnit);
@@ -1782,20 +1773,20 @@ int main()
                             fontChanged = 1;
                             cursorTimer = 0;
                         }
-                        else if (toggleFileMenuButton->isHovering(window)) 
-                        {
-                            fileMenu->toggle();
-                            editMenu->setIsOpen(false);
-                        }
-                        else if (toggleEditMenuButton->isHovering(window)) 
-                        {
-                            editMenu->setPosition(menuPositions[1], windowWidth, windowHeight);
-                            fileMenu->setIsOpen(false);
-                        }
+                        // else if (toggleFileMenuButton->isHovering()) 
+                        // {
+                        //     fileMenu->toggle();
+                        //     editMenu->setIsOpen(false);
+                        // }
+                        // else if (toggleEditMenuButton->isHovering()) 
+                        // {
+                        //     editMenu->setPosition(menuPositions[1], windowWidth, windowHeight);
+                        //     fileMenu->setIsOpen(false);
+                        // }
 
                         // TODO: de facut astea dinamice ca asa cum is acuma fac spume
 
-                        else if (fileMenu->getIsOpen() && fileMenuButtons[0]->isHovering(window))
+                        else if (fileMenu->getIsOpen() && fileMenuButtons[0]->isHovering())
                         {
                             fileMenu->setIsOpen(false);
                             
@@ -1829,7 +1820,7 @@ int main()
                             renderAgain = 1;
                             flag = 1;
                         }
-                        else if (fileMenu->getIsOpen() && fileMenuButtons[1]->isHovering(window))
+                        else if (fileMenu->getIsOpen() && fileMenuButtons[1]->isHovering())
                         {
                             fileMenu->setIsOpen(false);
 
@@ -1847,7 +1838,7 @@ int main()
                             String::saveText(fptr, S);
                             fclose(fptr);
                         }
-                        else if (fileMenu->getIsOpen() && fileMenuButtons[2]->isHovering(window))
+                        else if (fileMenu->getIsOpen() && fileMenuButtons[2]->isHovering())
                         {
                             fileMenu->setIsOpen(false);
 
@@ -1867,7 +1858,7 @@ int main()
                             String::saveText(fptr, S);
                             fclose(fptr);
                         }
-                        else if (editMenu->getIsOpen() && editMenuButtons[0]->isHovering(window))
+                        else if (editMenu->getIsOpen() && editMenuButtons[0]->isHovering())
                         {
                             if (selectFlag && ctrlC == 0)
                             {
@@ -1889,7 +1880,7 @@ int main()
                                 renderAgain = 1;
                             }
                         }
-                        else if (editMenu->getIsOpen() && editMenuButtons[1]->isHovering(window))
+                        else if (editMenu->getIsOpen() && editMenuButtons[1]->isHovering())
                         {
                             if (ctrlV == 0)
                             {
@@ -1911,7 +1902,7 @@ int main()
                                 renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                             }
                         }
-                        else if (editMenu->getIsOpen() && editMenuButtons[2]->isHovering(window))
+                        else if (editMenu->getIsOpen() && editMenuButtons[2]->isHovering())
                         {
                             if (selectFlag && ctrlX == 0)
                             {
@@ -1937,7 +1928,7 @@ int main()
                                 renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                             }
                         }
-                        else if (editMenu->getIsOpen() && editMenuButtons[3]->isHovering(window))
+                        else if (editMenu->getIsOpen() && editMenuButtons[3]->isHovering())
                         {
                             editMenu->setIsOpen(false);
                             ///apelat dupa ce faci setarile cu wholeWord si matchCase
@@ -1972,8 +1963,6 @@ int main()
                             cerr << "Found: " << positions.size() << '\n';
                             cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
                             cerr << '\n';
-                           // cerr << "Raw:" << s << '\n';
-                            cerr << "ENTERERERERERERERE";
                             currentAppearance = 0;
                             findFlag = 1;
                             renderAgain = 1;
@@ -2741,11 +2730,12 @@ int main()
                 window.draw(cursorLineHighlight);
         }
 
-        zoomOutButton->draw(window);
-        zoomInButton->draw(window);
+        zoomOutButton->draw();
+        zoomInButton ->draw();
         
-        fileMenu->draw(window);
-        editMenu->draw(window);
+        for (int i = 0; i < 3; i++)
+            menus[i]->draw();
+
 
         window.display();
     }
