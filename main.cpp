@@ -1347,7 +1347,7 @@ namespace TimeFunction
 
 int main()
 {
-    cerr << sizeof String::Treap;
+    // cerr << sizeof String::Treap;
 
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
     sf::View view;
@@ -1669,7 +1669,7 @@ int main()
                     if (fileMenu->getIsOpen() && !fileMenu->isHovering(window) && !toggleFileMenuButton->isHovering(window))
                         fileMenu->setIsOpen(false);
 
-                    if (editMenu->getIsOpen() && !editMenu->isHovering(window) && !toggleEditMenuButton->isHovering(window))
+                    if (editMenu->getIsOpen() && !editMenu->isHovering(window) && !toggleEditMenuButton->isHovering(window) && editMenu->getPosition() == menuPositions[1])
                         editMenu->setIsOpen(false);
 
                     for (int i = 0; i < fileMenu->getButtonCount(); i++)
@@ -2244,7 +2244,7 @@ int main()
                     }
 
                     flag = 1;
-                    selectFlag = 0;
+                    // selectFlag = 0;
                     
                     renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
                     renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
@@ -2375,7 +2375,6 @@ int main()
                     int p2 = String::findNextEndline(p1, S) - 1;
                     int splitedLines = 0;
 
-                  //  cerr << "here" << ' ';
                     while (p1 <= p2 && cntLine <= linesVisible)
                     {
                         splitedLines++;
@@ -2427,8 +2426,6 @@ int main()
                         cursorLineHighlight.setPosition(cntRowsOffset , navBarOffset + (cntLine - splitedLines) * globalHeightLine);
                     }
                 }
-
-                cerr << '\n';
 
                 img1.setTexture(text1.getTexture());
                 text1.display();

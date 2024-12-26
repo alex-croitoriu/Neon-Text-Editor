@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "constants.hpp"
 #include "button.hpp"
 #include "menu.hpp"
 
@@ -22,7 +23,6 @@ Menu::Menu(Button *_toggleButton, int _buttonCount, std::string buttonLabels[], 
         buttons[i] = new Button(buttonLabels[i], size, pos, font, 12, false);
     }
 
-    container.setSize(sf::Vector2f(size.x, size.y * buttonCount));
     container.setPosition(position);
     container.setFillColor(sf::Color::Cyan);
 }
@@ -36,6 +36,11 @@ bool Menu::isHovering(sf::RenderWindow &window)
 bool Menu::getIsOpen() 
 {
     return isOpen;
+}
+
+sf::Vector2f Menu::getPosition()
+{
+    return container.getPosition();
 }
 
 int Menu::getButtonCount() 
@@ -55,6 +60,13 @@ void Menu::setIsOpen(bool _isOpen)
 
 void Menu::setPosition(sf::Vector2f position)
 {
+    sf::Vector2f size(container.getGlobalBounds().width, container.getGlobalBounds().height);
+
+    if (position.x + size.x > windowWidth)
+        position.x = windowWidth - size.x;
+    if (position.y + size.y > windowHeight)
+        position.y = windowHeight - size.y;
+
     container.setPosition(position);
     for (int i = 0; i < buttonCount; i++)
     {

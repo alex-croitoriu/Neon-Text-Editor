@@ -21,6 +21,7 @@ public:
     bool isHovering(sf::RenderWindow &window);
 
     bool getIsOpen();
+    sf::Vector2f getPosition();
     int getButtonCount();
     Button** getButtons();
 
