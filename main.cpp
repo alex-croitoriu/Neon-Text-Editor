@@ -10,6 +10,7 @@
 #include <cassert>
 #include <set>
 #include <commdlg.h>
+#include <bitset>
 
 #include "constants.hpp"
 #include "button.hpp"
@@ -19,10 +20,14 @@ using namespace std;
 
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
+int windowWidth = 1000;
+int windowHeight = 1000;
+const int maxRows = 10000;
+
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
 int fontSize = 20;
-pair<int, int> segmOnScreen[windowHeight];
+pair<int, int> segmOnScreen[maxRows];
 
 float recalculateHeightLine(int fnt = fontSize)
 {
@@ -35,10 +40,11 @@ int cntRowsOffset = 60;
 int cursorInfoOffset = 100;
 int lineNumberMaxDigits = 3;
 
+
 float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
 
-vector<string> renderLines(windowHeight);
+vector<string> renderLines(maxRows);
 
 bool wordWrap = 0;
 
@@ -64,36 +70,74 @@ namespace String
         return charWidth[fontSize][ch];
     }
 
-    struct Treap
+    struct  Treap
     {
-        char ch;
         Treap *L, *R;
-        bool flagCursor = 0;
-        bool flagEndline = 0;
-        int width;
-        int sumCursor;
+        short packed;
         int sumEndline;
         int sumWidth;
         int cnt;
         int priority;
 
-        Treap(char ch = 0, bool flagCursor = 0)
+        void setSumCursor(bool b)
         {
-            this->ch = ch;
+            packed &= ((1 << 16) - 1 - (1 << 15));
+            packed |= (b * (1 << 15));
+        }
+
+        void setFlagCursor(bool b)
+        {
+            packed &= ((1 << 16) - 1 - (1 << 13));
+            packed |= (b * (1 << 13));
+        }
+
+        void setFlagEndline(bool b)
+        {
+            packed &= ((1 << 16) - 1 - (1 << 14));
+            packed |= (b * (1 << 14));
+        }
+
+
+        Treap(char ch = 0, bool cursor = 0)
+        {
+            packed = 0;
+            this->packed = ch;
             L = R = 0;
-            this->sumCursor = this->flagCursor = flagCursor;
-            this->sumEndline = this->flagEndline = (ch == 10);
-            this->width = this->sumWidth = getDim(ch) * (1 - flagCursor * wordWrap);
+            setSumCursor(cursor);
+            setFlagCursor(cursor);
+            setFlagEndline((ch == 10));
+
+          //  this-> sumCursor = this-> flagCursor = cursor;
+          //  this->sumEndline = this->flagEndline = (ch == 10);
+            this->sumEndline = (ch == 10);
+            this->sumWidth = getDim(ch) * (1 - cursor * wordWrap);
             cnt = 1;
             priority = rng();
         }
     };
 
+    vector < Treap* > freePointers;
+
+    int getFlagCursor(Treap*& T)
+    {
+        return (T->packed) >> 13 & 1;
+    }
+
+    int getFlagEndline(Treap*& T)
+    {
+        return (T->packed) >> 14 & 1;
+    }
+
+    int getCh(Treap*& T)
+    {
+        return (char)(T->packed & 255);
+    }
+
     int sumCursor(Treap *T)
     {
         if (T == 0)
             return 0;
-        return T->sumCursor;
+        return (T -> packed) >> 15 & 1;
     }
 
     int sumEndline(Treap *T)
@@ -128,9 +172,9 @@ namespace String
     {
         if (T == 0)
             cerr << "flag!!!", exit(0);
-        T->sumCursor = sumCursor(T->L) + sumCursor(T->R) + T->flagCursor;
-        T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + T->flagEndline;
-        T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + T->width;
+        T -> setSumCursor(sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
+        T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + getFlagEndline(T);
+        T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + getDim(getCh(T));
         T->cnt = cnt(T->L) + cnt(T->R) + 1;
     }
 
@@ -179,7 +223,7 @@ namespace String
         if (T == 0)
             return;
         print(T->L);
-        cerr << T->ch << ' ';
+        cerr << getCh(T) << ' ';
         print(T->R);
     }
 
@@ -191,7 +235,7 @@ namespace String
         Treap *t1 = 0, *t2 = 0, *t3 = 0;
         split(T, t2, t3, pos);
         split(t2, t1, t2, pos - 1);
-        char ch = t2->ch;
+        char ch = getCh(t2);
         merge(T, t1, t2);
         merge(T, T, t3);
         return ch;
@@ -202,7 +246,7 @@ namespace String
         Treap *t1 = 0, *t2 = 0, *t3 = 0;
         split(T, t2, t3, pos);
         split(t2, t1, t2, pos - 1);
-        if (t2) delete t2;
+        if (t2) freePointers.push_back(t2);
         merge(T, t1, t3);
     }
 
@@ -211,7 +255,7 @@ namespace String
         if (T == 0) return;
         del(T->L);
         del(T->R);
-        delete T;
+        freePointers.push_back(T);
     }
 
     void del(int l, int r, Treap*& T)
@@ -236,15 +280,30 @@ namespace String
 
     void insert(int pos, Treap *&T, char ch)
     {
-        Treap *c = new Treap(ch);
-        insert(pos, T, c);
+        Treap* c;
+
+        if (freePointers.size())
+        {
+            c = freePointers.back();
+            freePointers.pop_back();
+            *c = Treap(ch);
+            insert(pos, T, c);
+        }
+        else
+        {
+            Treap* P = new Treap[bucketSize];
+            for (int i = 0; i < bucketSize; i++)
+                freePointers.push_back(&P[i]);
+
+            insert(pos, T, ch);
+        }
     }
 
     int findCursorPosition(Treap *T, int add = 0)
     {
         int curr = add + cnt(T->L) + 1;
 
-        if (T->flagCursor == 1)
+        if (getFlagCursor(T) == 1)
             return curr;
         else if (sumCursor(T->L) == 1)
             return findCursorPosition(T->L, add);
@@ -260,7 +319,7 @@ namespace String
         int currKey = add + 1 + cnt(T->L);
 
         if (currKey <= key)
-            return findWidth(T->R, key, currKey) + sumWidth(T->L) + T->width;
+            return findWidth(T->R, key, currKey) + sumWidth(T->L) + getDim(getCh(T));
         else
             return findWidth(T->L, key, add);
     }
@@ -270,7 +329,7 @@ namespace String
         if (T == 0)
             return;
         construct(T->L, s);
-        s += T->ch;
+        s += getCh(T);
         construct(T->R, s);
     }
 
@@ -318,7 +377,7 @@ namespace String
 
         if (sumEndline(T->R))
             return findPrevEndline(T->R, currPos);
-        else if (T->ch == 10)
+        else if (getCh(T) == 10)
             return currPos;
         else
             return findPrevEndline(T->L, add);
@@ -342,7 +401,7 @@ namespace String
 
         if (sumEndline(T->L))
             return findNextEndline(T->L, add);
-        else if (T->ch == 10)
+        else if (getCh(T) == 10)
             return currPos;
         else
             return findNextEndline(T->R, currPos);
@@ -383,9 +442,9 @@ namespace String
     int findKthLine(Treap *&T, int k, int lin = 0, int add = 0)
     {
         int currPos = 1 + add + cnt(T->L);
-        int currLine = lin + sumEndline(T->L) + (T->ch == 10);
+        int currLine = lin + sumEndline(T->L) + (getCh(T) == 10);
 
-        if (currLine == k && T->ch == 10)
+        if (currLine == k && getCh(T) == 10)
             return currPos;
         else if (currLine >= k)
             return findKthLine(T->L, k, lin, add);
@@ -407,7 +466,7 @@ namespace String
             return INT_MAX;
 
         int currPos = add + 1 + cnt(T->L);
-        int currWidth = width + T->width + sumWidth(T->L);
+        int currWidth = width + getDim(getCh(T)) + sumWidth(T->L);
 
         if (currWidth >= X)
             return min(currPos, getFirstSeen(T->L, X, width, add));
@@ -439,7 +498,7 @@ namespace String
             return -1;
 
         int currPos = add + 1 + cnt(T->L);
-        int currWidth = width + T->width + sumWidth(T->L);
+        int currWidth = width + getDim(getCh(T)) + sumWidth(T->L);
 
         if (currWidth <= X)
             return max(currPos, getLastSeen(T->R, X, currWidth, currPos));
@@ -468,7 +527,7 @@ namespace String
         if (T == 0)
             return;
         traverseString(T->L, txt);
-        txt += T->ch;
+        txt += getCh(T);
         traverseString(T->R, txt);
     }
 
@@ -488,7 +547,7 @@ namespace String
     {
         if (T == 0)
             return;
-        T->width = getDim(T->ch);
+
         updateWidth(T->L);
         updateWidth(T->R);
         recalculate(T);
@@ -562,7 +621,7 @@ namespace String
             return NULL;
 
         int mid = (n - 1) / 2;
-        Treap *T = &P[mid];
+        Treap* T = &P[mid];
         T->L = build(mid , P);
         T->R = build(n - (mid + 1) , P + mid + 1);
         heapify(T);
@@ -570,7 +629,7 @@ namespace String
         return T;
     }
 
-    Treap* build(int n, const char *data)
+    Treap* build(int n , const char *data)
     {
         Treap* ptr = new Treap[n];
 
@@ -604,7 +663,7 @@ namespace String
         split(T, t2, t3, pos);
         split(t2, t1, t2, pos - 1);
 
-        t2->width = t2->sumWidth = w;
+        t2->sumWidth = w;
 
         merge(T, t1, t2);
         merge(T, T, t3);
@@ -629,7 +688,7 @@ namespace String
     {
         if (T == 0) return;
         saveText(fptr, T->L);
-        if(T -> flagCursor == 0) fprintf(fptr, "%c", T -> ch);
+        if(getFlagCursor(T) == 0) fprintf(fptr, "%c", getCh(T));
         saveText(fptr, T->R);
     }
 }
@@ -956,7 +1015,7 @@ namespace Render
         int centerConst = ((float)globalHeightLine - text.getGlobalBounds().height) / 2;
         s.pop_back();
         text.setString(s);
-        text.setPosition(startX, (float)startY + centerConst);
+        text.setPosition(startX, (int) startY + centerConst);
     }
 
     void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTexture& text2, sf::RenderTexture& text3, sf::Sprite& img1, sf::Sprite& img2, sf::Sprite& img3, int l1, int l2, int cursorLine, int scrollUnitY)
@@ -1087,8 +1146,10 @@ namespace Render
         sizeRLines = 0;
 
         for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2; i++)
+        {
             updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset, i - l1));
-
+            //cerr << renderLines[sizeRLines - 1] << ' ' << '\n';
+        }
         updateSmartRender(text, text1, text2, text3, img1, img2, img3, l1, l2, cursorLine, scrollUnitY);
     }
 }
@@ -1131,8 +1192,8 @@ namespace ReplaceFind
             }
         }
 
-        cerr << "positions are: "; for (auto i : positions) cerr << i << ' ';
-        cerr << '\n';
+       // cerr << "positions are: "; for (auto i : positions) cerr << i << ' ';
+       // cerr << '\n';
     }
 
     bool isApOnScreen(int ap, int sz)
@@ -1419,7 +1480,8 @@ int main()
     String::precalculateCharDim();
 
     String::Treap *S = new String::Treap(cursorChar, 1); /// string doar cu pointer-ul de text
-
+   // cerr << String::findCursorPosition(S);
+   // return 0;
     int Yoffset = 0, Xoffset = 0;
     int scrollUnitX = charWidth[fontSize][0], scrollUnitY = charHeight[fontSize]['a'];
 
@@ -1435,9 +1497,9 @@ int main()
     sf::RenderTexture text1, text2, text3;
     sf::Sprite img1, img2, img3;
 
-    text1.create(windowWidth, windowHeight);
-    text2.create(windowWidth, windowHeight);
-    text3.create(windowWidth, windowHeight);
+    text1.create(maxRows, maxRows);
+    text2.create(maxRows, maxRows);
+    text3.create(maxRows, maxRows);
 
     vector<sf::Color> colorCursor(2);
     colorCursor[1] = sf::Color(0, 0, 0, 255);
@@ -1579,7 +1641,8 @@ int main()
             String::split(s2, s1, s2, L - 1);
 
             buffer = String::constructString(s2);
-            delete s2;
+            //delete s2;
+            String::del(s2);
 
             String::merge(S, s1, s3);
             selectFlag = 0;
@@ -1774,6 +1837,7 @@ int main()
                             char* data = (char*) (MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
                             DWORD fileSize =  GetFileSize(fileHandle, nullptr);
 
+                            String::del(S);
                             S = String::build(fileSize , data);
                             String::insert(1, S);
 
@@ -2031,7 +2095,7 @@ int main()
                             if (pap != -1) currentAppearance = pap;
                             else break;
 
-                            renderAgain = 1;
+                           // renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2041,7 +2105,7 @@ int main()
                             currentAppearance--;
                             currentAppearance = max(0, currentAppearance);
                             cerr << "After left arrow: " << currentAppearance << '\n';
-                            renderAgain = 1;
+                           // renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2066,7 +2130,7 @@ int main()
                             if (nap != -1) currentAppearance = nap;
                             else break;
 
-                            renderAgain = 1;
+                           // renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2077,7 +2141,7 @@ int main()
                             currentAppearance = min((int)positions.size() - 1, currentAppearance);
 
                             cerr << "After right arrow: " << currentAppearance << '\n';
-                            renderAgain = 1;
+                           // renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2242,7 +2306,7 @@ int main()
                         flag = 1;
                         break;
                     }
-
+                    else break;
                     flag = 1;
                     // selectFlag = 0;
                     
@@ -2300,6 +2364,18 @@ int main()
                     renderAgain = 1;
                     flag = 1;
 
+                    break;
+                }
+
+                if (event.type == sf::Event::Resized)
+                {
+                    // update the view to the new size of the window
+                    sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                    window.setView(sf::View(visibleArea));
+                    renderAgain = 1;
+                    flag = 1;
+                    windowWidth = event.size.width;
+                    windowHeight = event.size.height;
                     break;
                 }
             }
@@ -2562,11 +2638,11 @@ int main()
 
                         int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
                         int y = i * globalHeightLine + navBarOffset;
-                        cerr << "On line " << i + 1 << ": ";
+                      //  cerr << "On line " << i + 1 << ": ";
 
                         while (p < positions.size() && positions[p] <= r)
                         {
-                            cerr << positions[p] << ' ';
+                      //      cerr << positions[p] << ' ';
                             int w = String::findWidth(l, positions[p] - 1, S);
                             int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
 
@@ -2578,10 +2654,10 @@ int main()
                             p++;
                         }
 
-                        cerr << '\n';
+                        //cerr << '\n';
                     }
 
-                    cerr << "\n\n";
+                    //cerr << "\n\n";
                 }
 
                 if (replaceFlag)
@@ -2595,7 +2671,7 @@ int main()
 
                         int p = ReplaceFind::traceFirstApToRender(l , positions, bit, notRemoved , word, rword);
                         int y = i * globalHeightLine + navBarOffset;
-                        cerr << "On line " << i + 1 << ": " << p;
+                       // cerr << "On line " << i + 1 << ": " << p;
 
                         while (p != -1 && p < positions.size() && ReplaceFind::findRealPosition(p, positions, bit, word, rword) <= r)
                         {
@@ -2609,20 +2685,20 @@ int main()
                             else box.setFillColor(sf::Color(255, 187, 0, 128));
                             selectedBoxes.push_back(box);
                             p = ReplaceFind::findNextValidAppearance(p, bit, positions, gone, rword, word , prv, nxt , notRemoved);
-                            cerr << p << ' ';
+                         //   cerr << p << ' ';
                         }
 
-                        cerr << '\n';
+                        //cerr << '\n';
                     }
 
-                   cerr << "\n\n";
+                   //cerr << "\n\n";
                 }
             }
         }
 
         if (wordWrap == 0)
         {
-            if (findFlag | replaceFlag)
+            if ((findFlag | replaceFlag) && flag == 1)
             {
                 int highlighted = 0;
 
