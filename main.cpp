@@ -1782,7 +1782,7 @@ int main()
                             {
                                 fileMenu->setIsOpen(false);
                                 
-                                string path = Windows::open();
+                                path = Windows::open();
                                 
                                 if (path.size() == 0)
                                     break;
