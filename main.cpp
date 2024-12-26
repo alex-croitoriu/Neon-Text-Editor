@@ -1361,14 +1361,15 @@ namespace TimeFunction
         struct tm datetime = *localtime(&timestamp);
 
         char data[100];
+        int len = strftime(data, sizeof(data), param.c_str(), &datetime);
 
-        int len = strftime(data, 100, param.c_str(), &datetime);
+        if (len == 0) {
+            cerr << "Error: invalid format or buffer size too small\n";
+            return "";
+        }
 
-        string currTime;
-
-        for (int i = 0; i < len; i++)
-            currTime += data[i];
-
+        string currTime(data, len); // Creeaza string direct din buffer
+        cerr << "time is: " << currTime << endl;
         return currTime;
     }
 }
@@ -1957,6 +1958,8 @@ int main()
                         {
                             if (optionsMenuButtons[0]->isHovering())
                             {
+                                optionsMenu->setIsOpen(false);
+
                                 showLines = !showLines;
                                 optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLines]);
                                 marginLeft = showLines * (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
@@ -1965,6 +1968,7 @@ int main()
                             else if (optionsMenuButtons[1]->isHovering())
                             {
                                 optionsMenu->setIsOpen(false);
+
                                 string line = Windows::getStringFromUser("Go to line");
                                 int l = min(String::findNumberOfEndlines(1 , String::len(S) , S) + 1 , stoi(line));
                                 Xoffset = 0;
@@ -1973,9 +1977,28 @@ int main()
                                 flag = 1;
                                 break;
                             }
+                            else if (optionsMenuButtons[2]->isHovering())
+                            {
+                                optionsMenu->setIsOpen(false);
+
+                                // TODO: let user customize format via modal
+                                string data = TimeFunction::getTime("%I:%M %p %m/%d/%Y");
+                                int posCursor = String::findCursorPosition(S);
+
+                                for (auto i : data)
+                                {
+                                    String::insert(posCursor, S, i);
+                                    posCursor++;
+                                }
+
+                                renderAgain = 1;
+                            }
+                            else if (optionsMenuButtons[3]->isHovering())
+                            {
+                                
+                            }
                         }
                         
-
                         // change cursor position inside text visible in the viewport
                         else
                         {
@@ -2137,19 +2160,6 @@ int main()
                                 cursorTimer = 0;
                             }
                         }
-                    }
-                    else if (key == 45) ///dummy key for test
-                    {
-                        string data = TimeFunction::getTime("%B %e, %Y");
-                        int posCursor = String::findCursorPosition(S);
-
-                        for (auto i : data)
-                        {
-                            String::insert(posCursor, S, i);
-                            posCursor++;
-                        }
-
-                        renderAgain = 1;
                     }
                     else if (key == 43) ///not functional ignora
                     {
