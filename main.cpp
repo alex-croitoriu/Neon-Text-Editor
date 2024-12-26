@@ -76,6 +76,7 @@ namespace String
 
         Treap(char ch = 0, bool cursor = 0)
         {
+           // if (ch == 13) ch = 10;
             this->ch = ch;
             L = R = 0;
             A[0] = A[1] = cursor;
@@ -664,7 +665,11 @@ namespace String
     {
         if (T == 0) return;
         saveText(fptr, T->L);
-        if(getFlagCursor(T) == 0) fprintf(fptr, "%c", getCh(T));
+        if (getFlagCursor(T) == 0)
+        {
+            char ch = getCh(T);
+            fprintf(fptr, "%c", ch);
+        }
         saveText(fptr, T->R);
     }
 }
@@ -1498,7 +1503,6 @@ int main()
     int nr = 0;
     int cntX = 0;
     FILE *fptr = NULL;
-    String::Treap** ptr;
 
     vector < int > positions , bit , gone , prv , nxt;
     int currentAppearance = 0;
@@ -1800,7 +1804,7 @@ int main()
                                 String::insert(1, S);
 
                                 cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
-                                
+
                                 UnmapViewOfFile(data);
                                 CloseHandle(mappingHandle);
                                 CloseHandle(fileHandle);
