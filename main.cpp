@@ -71,7 +71,7 @@ namespace String
     }
 
     struct Treap
-    {
+    {   
         Treap *L, *R;
         int sumEndline;
         int sumWidth;
@@ -97,22 +97,25 @@ namespace String
 
     vector < Treap* > freePointers;
 
-    int getFlagCursor(Treap*& T)
+    bool getFlagCursor(Treap*& T)
     {
+        if (T == 0) return 0;
         return T -> A[0];
     }
 
-    int getFlagEndline(Treap*& T)
+    bool getFlagEndline(Treap*& T)
     {
+        if (T == 0) return 0;
         return T -> ch == 10;
     }
 
     int getCh(Treap*& T)
     {
+        if (T == 0) return -1;
         return T -> ch;
     }
 
-    int sumCursor(Treap *T)
+    bool sumCursor(Treap *T)
     {
         if (T == 0)
             return 0;
