@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "constants.hpp"
+// #include "constants.hpp"
 #include "button.hpp"
 #include "menu.hpp"
 
@@ -23,6 +23,7 @@ Menu::Menu(Button *_toggleButton, int _buttonCount, std::string buttonLabels[], 
         buttons[i] = new Button(buttonLabels[i], size, pos, font, 12, false);
     }
 
+    container.setSize(sf::Vector2f(size.x, size.y * buttonCount)); 
     container.setPosition(position);
     container.setFillColor(sf::Color::Cyan);
 }
