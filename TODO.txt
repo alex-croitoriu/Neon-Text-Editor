@@ -10,16 +10,15 @@
 - [X] improve find functionality
 - [X] select all
 - [X] fullscreeen legit
+- [X] fix blurry buttons
 
 - [ ] scrollbar
 - [ ] stats (current cursor position - line and column, current zoom level, current file name)
 - [ ] dark/light mode
-- [ ] fix blurry buttons
 - [ ] move zoom in/out buttons to the bottom
 - [ ] modal for unsaved changes 
 - [ ] modals for find/save/open file
 - [ ] name and logo
 
 - [ ] options menu: hide lines, go to line, time and date, switch dark/light mode
-
 - [ ] should not prompt for path when saving after opening a file

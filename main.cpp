@@ -1408,7 +1408,9 @@ int main()
 
     string toggleLinesButtonLabels[] = { "Show lines", "Hide lines" };
     string menuLabels[] = { "File", "Edit", "Options" };
-    vector<string> menuButtonLabels[] = {
+
+    vector<string> menuButtonLabels[] = 
+    {
         { "Open", "Save", "Save as" },
         { "Copy", "Paste", "Cut", "Find" },
         { "Hide lines", "Go to line", "Time & Date", "Switch theme" }
@@ -1759,6 +1761,16 @@ int main()
                             cursorTimer = 0;
                         }
 
+                        else if (editMenu->getIsOpen() && editMenu->getPosition() != menuPositions[1])
+                        {
+                            bool isHovering = false;
+                            for (int i = 0; i < editMenu->getButtonCount(); i++)
+                                isHovering |= editMenuButtons[i]->isHovering();
+                            
+                            if (!isHovering)
+                                editMenu->setIsOpen(false);
+                        }
+
                         // TODO: de facut astea dinamice ca asa cum is acuma fac spume
                         else if (fileMenu->getIsOpen())
                         {
@@ -1995,16 +2007,13 @@ int main()
                             }
                             else if (optionsMenuButtons[3]->isHovering())
                             {
-                                
+
                             }
                         }
                         
                         // change cursor position inside text visible in the viewport
                         else
                         {
-                            if (editMenu->getPosition() != menuPositions[1])
-                                editMenu->setIsOpen(false);
-
                             cursorTimer = 0;
                             break;
                         }

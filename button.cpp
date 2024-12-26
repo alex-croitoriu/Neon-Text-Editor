@@ -17,13 +17,13 @@ Button::Button(const std::string &label, const sf::Vector2f &size, const sf::Vec
 
     if (alignCenter) 
     {
-        content.setOrigin(content.getGlobalBounds().getSize() / 2.f + content.getLocalBounds().getPosition());
-        content.setPosition(container.getPosition() + container.getSize() / 2.f);
+        content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
+        content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + container.getSize().y / 2.f));
     }
     else
     {
-        content.setOrigin(0, content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y);
-        content.setPosition(container.getGlobalBounds().left + 20, container.getPosition().y + container.getSize().y / 2.f);
+        content.setOrigin(0, int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
+        content.setPosition(int(container.getGlobalBounds().left + 20), int(container.getPosition().y + container.getSize().y / 2.f));
     }
 }
 
@@ -46,8 +46,8 @@ void Button::setLabel(const std::string &label)
 void Button::setPosition(const sf::Vector2f &position)
 {
     container.setPosition(position);
-    content.setOrigin(0, content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y);
-    content.setPosition(container.getGlobalBounds().left + 20, container.getPosition().y + container.getSize().y / 2.f);
+    content.setOrigin(0, int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
+    content.setPosition(int(container.getGlobalBounds().left + 20), int(container.getPosition().y + container.getSize().y / 2.f));
 }
 
 void Button::setHoverState(bool isHovering)
