@@ -16,7 +16,7 @@ class Menu
     Button *toggleButton;
 
 public:
-    Menu(Button *_toggleButton, std::vector<std::string> buttonLabels, sf::Vector2f position);
+    Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position);
 
     bool isHovering();
 
@@ -27,8 +27,7 @@ public:
     Button* getToggleButton();
 
     void setIsOpen(bool _isOpen);
-    void setPosition(sf::Vector2f position, int windowWidth, int windowHeight);
-    void toggle();
+    void setPosition(const sf::Vector2f &position);
 
     void draw();
 };

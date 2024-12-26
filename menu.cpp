@@ -7,7 +7,7 @@
 #include "button.hpp"
 #include "menu.hpp"
 
-Menu::Menu(Button *_toggleButton, std::vector<std::string> buttonLabels, sf::Vector2f position)
+Menu::Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position)
 {
     isOpen = false;
 
@@ -19,8 +19,8 @@ Menu::Menu(Button *_toggleButton, std::vector<std::string> buttonLabels, sf::Vec
     buttons = new Button*[buttonCount];
     for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f pos(position.x, position.y + 30 * i);
-        buttons[i] = new Button(buttonLabels[i], size, pos, 12, false);
+        sf::Vector2f buttonPosition(position.x, position.y + 30 * i);
+        buttons[i] = new Button(buttonLabels[i], size, buttonPosition, 12, false);
     }
 
     container.setSize(sf::Vector2f(size.x, size.y * buttonCount)); 
@@ -64,26 +64,23 @@ void Menu::setIsOpen(bool _isOpen)
     isOpen = _isOpen;
 }
 
-void Menu::setPosition(sf::Vector2f position, int windowWidth, int windowHeight)
+void Menu::setPosition(const sf::Vector2f &position)
 {
     sf::Vector2f size(container.getGlobalBounds().width, container.getGlobalBounds().height);
 
-    if (position.x + size.x > windowWidth)
-        position.x = windowWidth - size.x;
-    if (position.y + size.y > windowHeight)
-        position.y = windowHeight - size.y;
+    sf::Vector2f boundedPosition = position;
 
-    container.setPosition(position);
+    if (boundedPosition.x + size.x > windowWidth)
+        boundedPosition.x = windowWidth - size.x;
+    if (boundedPosition.y + size.y > windowHeight)
+        boundedPosition.y = windowHeight - size.y;
+
+    container.setPosition(boundedPosition);
     for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f pos(position.x, position.y + 30 * i);
-        buttons[i]->setPosition(pos);
+        sf::Vector2f buttonPosition(boundedPosition.x, boundedPosition.y + 30 * i);
+        buttons[i]->setPosition(buttonPosition);
     }
-}
-
-void Menu::toggle()
-{
-    isOpen = !isOpen;
 }
 
 void Menu::draw()

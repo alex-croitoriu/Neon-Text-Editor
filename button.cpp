@@ -5,11 +5,8 @@
 #include "globals.hpp"
 #include "button.hpp"
 
-Button::Button(std::string  &label, sf::Vector2f &size, sf::Vector2f &position, int fontSize, bool alignCenter) //, std::function<void> _onClick = nullptr
+Button::Button(const std::string &label, const sf::Vector2f &size, const sf::Vector2f &position, int fontSize, bool alignCenter)
 {
-
-    // onClick = _onClick;
-
     container.setSize(size);
     container.setPosition(position);
     container.setFillColor(sf::Color(0, 0, 0, 0));
@@ -36,17 +33,17 @@ bool Button::isHovering()
     return getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
-std::string Button::getLabel()
-{
-    return label;
-}
-
 sf::FloatRect Button::getGlobalBounds()
 {
     return container.getGlobalBounds();
 }
 
-void Button::setPosition(sf::Vector2f position)
+void Button::setLabel(const std::string &label)
+{
+    content.setString(label);
+}
+
+void Button::setPosition(const sf::Vector2f &position)
 {
     container.setPosition(position);
     content.setOrigin(0, content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y);

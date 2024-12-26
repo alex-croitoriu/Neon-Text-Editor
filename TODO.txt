@@ -9,6 +9,7 @@
 - [X] right click
 - [X] improve find functionality
 - [X] select all
+- [X] fullscreeen legit
 
 - [ ] scrollbar
 - [ ] stats (current cursor position - line and column, current zoom level, current file name)
@@ -17,7 +18,6 @@
 - [ ] move zoom in/out buttons to the bottom
 - [ ] modal for unsaved changes 
 - [ ] modals for find/save/open file
-- [ ] fullscreeen legit
 - [ ] name and logo
 
 - [ ] options menu: hide lines, go to line, time and date, switch dark/light mode

@@ -21,9 +21,6 @@ using namespace std;
 
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
-int windowWidth = 1000;
-int windowHeight = 1000;
-
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
 int fontSize = 20;
@@ -35,9 +32,9 @@ float recalculateHeightLine(int fnt = fontSize)
 }
 
 int cursorHeight = 0, cursorWidth = 0;
-int navBarOffset = 40;
-int cntRowsOffset = 60;
-int cursorInfoOffset = 100;
+int marginTop = 40;
+int marginLeft = 60;
+int marginBottom = 100;
 int lineNumberMaxDigits = 3;
 
 float globalHeightLine = recalculateHeightLine();
@@ -543,7 +540,7 @@ namespace String
         int p2 = String::findNextEndline(p1, T) - 1;
 
         int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
-        int t2 = String::getLastSeen(p1, p2, Xoffset + windowWidth - cntRowsOffset, T);
+        int t2 = String::getLastSeen(p1, p2, Xoffset + windowWidth - marginLeft, T);
 
         if (I == 0) cerr << t1 << ' ' << t2 << '\n';
         segmOnScreen[I] = {t1, t2};
@@ -919,7 +916,7 @@ namespace Render
             Xoffset -= scrollUnitX;
         Xoffset = max(0, Xoffset);
 
-        while (currLineWidth >= Xoffset + windowWidth - cntRowsOffset)
+        while (currLineWidth >= Xoffset + windowWidth - marginLeft)
             Xoffset += scrollUnitX, modif = 1;
 
         return modif;
@@ -936,7 +933,7 @@ namespace Render
 
         Yoffset = max(0, Yoffset);
 
-        while (globalHeight > Yoffset + windowHeight - cursorInfoOffset - navBarOffset)
+        while (globalHeight > Yoffset + windowHeight - marginBottom - marginTop)
             Yoffset += scrollUnitY, modif = 1;
 
         return modif;
@@ -950,13 +947,13 @@ namespace Render
 
     int findLineOnScreen(float y)
     {
-        return (int)((y - navBarOffset) / globalHeightLine) + 1;
+        return (int)((y - marginTop) / globalHeightLine) + 1;
     }
 
     int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
     {
         int l = findLineOnScreen(localPosition.y);
-        float w = localPosition.x - cntRowsOffset;
+        float w = localPosition.x - marginLeft;
 
         if (l + l1 - 1 > l2)
             return String::len(S) + 1;
@@ -977,7 +974,7 @@ namespace Render
         return p + 1;
     }
 
-    void centerText(sf::Text& text, string s, float startY, float startX = cntRowsOffset)
+    void centerText(sf::Text& text, string s, float startY, float startX = marginLeft)
     {
         bool empty = 0;
         s += "|";
@@ -1012,12 +1009,12 @@ namespace Render
             for (int j = 0; j < lineNumberMaxDigits - number.length(); j++)
                 line += " ";
             line += number;
-            centerText(text, line, navBarOffset + lastHeight + globalHeightLine, 5);
+            centerText(text, line, marginTop + lastHeight + globalHeightLine, 5);
             text3.draw(text);
             lastHeight += globalHeightLine;
         }
 
-        cntRowsOffset = (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+        marginLeft = showLines * (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
 
         text.setLetterSpacing(1);
 
@@ -1025,7 +1022,7 @@ namespace Render
 
         for (int i = 0; i < L; i++)
         {
-            centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
+            centerText(text, renderLines[i], marginTop + lastHeight + globalHeightLine);
             text1.draw(text);
             lastHeight += globalHeightLine;
         }
@@ -1042,7 +1039,7 @@ namespace Render
 
         for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
         {
-            centerText(text, renderLines[i], navBarOffset + lastHeight + globalHeightLine);
+            centerText(text, renderLines[i], marginTop + lastHeight + globalHeightLine);
             text2.draw(text);
             lastHeight += globalHeightLine;
         }
@@ -1051,7 +1048,7 @@ namespace Render
         img2.setTexture(text2.getTexture());
         img3.setTexture(text3.getTexture());
 
-        centerText(text, txt, navBarOffset + textHeight + globalHeightLine);
+        centerText(text, txt, marginTop + textHeight + globalHeightLine);
 
         text1.display();
         text2.display();
@@ -1101,7 +1098,7 @@ namespace Render
             s1 += txt[i];
 
         h1.setString(s1);
-        h1.setPosition(cntRowsOffset, text.getPosition().y);
+        h1.setPosition(marginLeft, text.getPosition().y);
 
         return w + (W - w - cW) / 2;
     }
@@ -1111,7 +1108,7 @@ namespace Render
         int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
         l1 = max(1, (Yoffset) / scrollUnitY + 1);
-        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - cursorInfoOffset - navBarOffset) / scrollUnitY));
+        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - marginBottom - marginTop) / scrollUnitY));
 
         sizeRLines = 0;
 
@@ -1378,8 +1375,6 @@ namespace TimeFunction
 
 int main()
 {
-    // cerr << sizeof String::Treap;
-
     window.create(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
     sf::View view;
     sf::Image mainIcon;
@@ -1410,16 +1405,13 @@ int main()
 
     string zoomInButtonLabels[] = { "-", "+" };
 
+    string toggleLinesButtonLabels[] = { "Show lines", "Hide lines" };
     string menuLabels[] = { "File", "Edit", "Options" };
     vector<string> menuButtonLabels[] = {
         { "Open", "Save", "Save as" },
         { "Copy", "Paste", "Cut", "Find" },
-        { "Hide lines", "Go to line", "Time & Date", "Switch to Dark/Light mode" }
+        { "Hide lines", "Go to line", "Time & Date", "Switch theme" }
     };
-    
-    string fileMenuButtonLabels[]    = { "Open", "Save", "Save as" };
-    string editMenuButtonLabels[]    = { "Copy", "Paste", "Cut", "Find" };
-    string optionsMenuButtonLabels[] = { "Hide lines", "Go to line", "Time & Date", "Switch to Dark/Light mode" };
 
     sf::Vector2f buttonPositions[] = 
     {
@@ -1439,10 +1431,6 @@ int main()
 
     sf::Vector2f buttonSize(60, 20);
 
-    Button *toggleFileMenuButton    = new Button(menuLabels[0], buttonSize, buttonPositions[0], 10);
-    Button *toggleEditMenuButton    = new Button(menuLabels[1], buttonSize, buttonPositions[1], 10);
-    Button *toggleOptionsMenuButton = new Button(menuLabels[2], buttonSize, buttonPositions[2], 10);
-
     Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonSize, buttonPositions[3], 10);
     Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonSize, buttonPositions[4], 10);
 
@@ -1453,22 +1441,15 @@ int main()
         Button * toggleButton = new Button(menuLabels[i], buttonSize, buttonPositions[i], 10);
         menus[i] = new Menu(toggleButton, menuButtonLabels[i], menuPositions[i]);
     }
-    
-    // menus[0] = new Menu(toggleFileMenuButton, 3, fileMenuButtonLabels, menuPositions[0]);
-    // menus[1] = new Menu(toggleEditMenuButton, 4, editMenuButtonLabels, menuPositions[1]);
-    // menus[2] = new Menu(toggleOptionsMenuButton, 3, optionsMenuButtonLabels, menuPositions[2]);
 
     Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2];
-
     Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons();
-
 
 
     String::precalculateCharDim();
 
     String::Treap *S = new String::Treap(cursorChar, 1); /// string doar cu pointer-ul de text
-   // cerr << String::findCursorPosition(S);
-   // return 0;
+
     int Yoffset = 0, Xoffset = 0;
     int scrollUnitX = charWidth[fontSize][0], scrollUnitY = charHeight[fontSize]['a'];
 
@@ -1536,9 +1517,11 @@ int main()
             sf::Vector2i localPosition = sf::Mouse::getPosition(window);
             bool isAnyButtonPressed = false;
             
+            // check if zoom buttons are pressed
             if (zoomOutButton->isHovering() || zoomInButton->isHovering())
                 isAnyButtonPressed = true;
 
+            // check if any menu button (including toggle buttons) is pressed
             for (int i = 0; i < 3; i++)
             {
                 if (menus[i]->getToggleButton()->isHovering())
@@ -1555,7 +1538,7 @@ int main()
             
             if (!isAnyButtonPressed) 
             {
-                if (localPosition.x >= cntRowsOffset && localPosition.y >= navBarOffset && localPosition.x < windowWidth && localPosition.y < windowHeight - cursorInfoOffset)
+                if (localPosition.x >= marginLeft && localPosition.y >= marginTop && localPosition.x < windowWidth && localPosition.y < windowHeight - marginBottom)
                 {
                     int posCursor = String::findCursorPosition(S);
                     int newPosCursor = Render::moveCursorToClick(localPosition, S, scrollUnitY, l1, l2, Xoffset);
@@ -1583,12 +1566,12 @@ int main()
                     renderAgain = 1;
                 }
 
-                if (selectFlag && localPosition.x < cntRowsOffset)
+                if (selectFlag && localPosition.x < marginLeft)
                 {
                     Xoffset -= scrollUnitX;
                     Xoffset = max(0, Xoffset);
 
-                    if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
+                    if (localPosition.y >= marginTop && localPosition.y < windowHeight - marginBottom)
                     {
                         int l = Render::findLineOnScreen(localPosition.y);
                         // segmSelected.first = segmOnScreen[l].first;
@@ -1599,20 +1582,20 @@ int main()
                 {
                     Xoffset += scrollUnitX;
 
-                    if (localPosition.y >= navBarOffset && localPosition.y < windowHeight - cursorInfoOffset)
+                    if (localPosition.y >= marginTop && localPosition.y < windowHeight - marginBottom)
                     {
                         int l = Render::findLineOnScreen(localPosition.y);
                         // segmSelected.second = segmOnScreen[l].second;
                     }
                 }
 
-                if (selectFlag && localPosition.y < navBarOffset)
+                if (selectFlag && localPosition.y < marginTop)
                 {
                     Yoffset -= scrollUnitY;
                     Yoffset = max(0, Yoffset);
                 }
 
-                if (selectFlag && localPosition.y >= windowHeight - cursorInfoOffset)
+                if (selectFlag && localPosition.y >= windowHeight - marginBottom)
                 {
                     Yoffset += scrollUnitY;
                 }
@@ -1690,6 +1673,9 @@ int main()
         else
             while (window.pollEvent(event))
             {
+                if (event.type == sf::Event::Closed)
+                    window.close();
+
                 if (event.type == sf::Event::MouseMoved)
                 {
                     // set hover state for zoom buttons
@@ -1705,7 +1691,7 @@ int main()
                         {
                             toggleButton->setHoverState(true);
                             menus[i]->setIsOpen(true);
-                            menus[i]->setPosition(menuPositions[i], windowWidth, windowHeight);
+                            menus[i]->setPosition(menuPositions[i]);
                         }
                         else
                             toggleButton->setHoverState(false);
@@ -1716,7 +1702,7 @@ int main()
                         if (menus[i]->getIsOpen() && !menus[i]->isHovering() && !menus[i]->getToggleButton()->isHovering() && menus[i]->getPosition() == menuPositions[i])
                             menus[i]->setIsOpen(false);
 
-                    // set hover state for menu buttons
+                    // set hover state for buttons inside menus
                     for (int i = 0; i < 3; i++)
                     {
                         Button** buttons = menus[i]->getButtons();
@@ -1725,14 +1711,9 @@ int main()
                     }
                 }
 
-                if (event.type == sf::Event::Closed)
-                    window.close();
-
                 if (event.type == sf::Event::MouseButtonReleased)
                 {
-                    int key = event.key.code;
-
-                    if (key == 0)
+                    if (event.key.code == 0)
                         leftButtonPressed = 0;
                     
                     ctrlC = ctrlV = ctrlX = 0;
@@ -1776,214 +1757,242 @@ int main()
                             fontChanged = 1;
                             cursorTimer = 0;
                         }
-                        // else if (toggleFileMenuButton->isHovering()) 
-                        // {
-                        //     fileMenu->toggle();
-                        //     editMenu->setIsOpen(false);
-                        // }
-                        // else if (toggleEditMenuButton->isHovering()) 
-                        // {
-                        //     editMenu->setPosition(menuPositions[1], windowWidth, windowHeight);
-                        //     fileMenu->setIsOpen(false);
-                        // }
 
                         // TODO: de facut astea dinamice ca asa cum is acuma fac spume
-
-                        else if (fileMenu->getIsOpen() && fileMenuButtons[0]->isHovering())
+                        else if (fileMenu->getIsOpen())
                         {
-                            fileMenu->setIsOpen(false);
-                            
-                            string path = Windows::open();
-                            
-                            if (path.size() == 0)
-                                break;
-
-                            HANDLE fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-
-                            if (fileHandle == INVALID_HANDLE_VALUE) 
+                            if (fileMenuButtons[0]->isHovering())
                             {
-                                Windows::throwMessage("Invalid Path");
-                                break;
-                            }
+                                fileMenu->setIsOpen(false);
+                                
+                                string path = Windows::open();
+                                
+                                if (path.size() == 0)
+                                    break;
 
-                            HANDLE mappingHandle = CreateFileMapping(fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
-                            char* data = (char*) (MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
-                            DWORD fileSize =  GetFileSize(fileHandle, nullptr);
+                                HANDLE fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-                            String::del(S);
-                            S = String::build(fileSize , data);
-                            String::insert(1, S);
-
-                            cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
-                            
-                            UnmapViewOfFile(data);
-                            CloseHandle(mappingHandle);
-                            CloseHandle(fileHandle);
-
-                            renderAgain = 1;
-                            flag = 1;
-                        }
-                        else if (fileMenu->getIsOpen() && fileMenuButtons[1]->isHovering())
-                        {
-                            fileMenu->setIsOpen(false);
-
-                            if (path.size() == 0)
-                                 path = Windows::saveAS();
-
-                            FILE *fptr = fopen(path.c_str(), "w");
-
-                            if (fptr == NULL)
-                            {
-                                Windows::throwMessage("Wrong Path!");
-                                break;
-                            }
-
-                            String::saveText(fptr, S);
-                            fclose(fptr);
-                        }
-                        else if (fileMenu->getIsOpen() && fileMenuButtons[2]->isHovering())
-                        {
-                            fileMenu->setIsOpen(false);
-
-                            path = Windows::saveAS();
-
-                            if (path.size() == 0)
-                                break;
-
-                            FILE *fptr = fopen(path.c_str(), "w");
-
-                            if (fptr == NULL)
-                            {
-                                Windows::throwMessage("Wrong Path!");
-                                break;
-                            }
-
-                            String::saveText(fptr, S);
-                            fclose(fptr);
-                        }
-                        else if (editMenu->getIsOpen() && editMenuButtons[0]->isHovering())
-                        {
-                            if (selectFlag && ctrlC == 0)
-                            {
-                                editMenu->setIsOpen(false);
-                                ctrlC = 1;
-                                int L = segmSelected.first;
-                                int R = segmSelected.second;
-
-                                String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
-                                String::split(S, s2, s3, R);
-                                String::split(s2, s1, s2, L - 1);
-
-                                buffer = String::constructString(s2);
-
-                                String::merge(S, s1, s2);
-                                String::merge(S, S, s3);
-
-                                flag = 1;
-                                renderAgain = 1;
-                            }
-                        }
-                        else if (editMenu->getIsOpen() && editMenuButtons[1]->isHovering())
-                        {
-                            if (ctrlV == 0)
-                            {
-                                editMenu->setIsOpen(false);
-                                int posCursor = String::findCursorPosition(S);
-                                ctrlV = 1;
-
-                                for (auto ch : buffer)
+                                if (fileHandle == INVALID_HANDLE_VALUE) 
                                 {
-                                    String::insert(posCursor, S, ch);
-                                    posCursor++;
+                                    Windows::throwMessage("Invalid Path");
+                                    break;
                                 }
 
-                                flag = 1;
-                                renderAgain = 1;
-                                selectFlag = findFlag = 0;
+                                HANDLE mappingHandle = CreateFileMapping(fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
+                                char* data = (char*) (MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
+                                DWORD fileSize =  GetFileSize(fileHandle, nullptr);
 
-                                renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
-                                renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
+                                String::del(S);
+                                S = String::build(fileSize , data);
+                                String::insert(1, S);
+
+                                cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
+                                
+                                UnmapViewOfFile(data);
+                                CloseHandle(mappingHandle);
+                                CloseHandle(fileHandle);
+
+                                renderAgain = 1;
+                                flag = 1;
+                            }
+                            else if (fileMenuButtons[1]->isHovering())
+                            {
+                                fileMenu->setIsOpen(false);
+
+                                if (path.size() == 0)
+                                    path = Windows::saveAS();
+
+                                FILE *fptr = fopen(path.c_str(), "w");
+
+                                if (fptr == NULL)
+                                {
+                                    Windows::throwMessage("Wrong Path!");
+                                    break;
+                                }
+
+                                String::saveText(fptr, S);
+                                fclose(fptr);
+                            }
+                            else if (fileMenuButtons[2]->isHovering())
+                            {
+                                fileMenu->setIsOpen(false);
+
+                                path = Windows::saveAS();
+
+                                if (path.size() == 0)
+                                    break;
+
+                                FILE *fptr = fopen(path.c_str(), "w");
+
+                                if (fptr == NULL)
+                                {
+                                    Windows::throwMessage("Wrong Path!");
+                                    break;
+                                }
+
+                                String::saveText(fptr, S);
+                                fclose(fptr);
                             }
                         }
-                        else if (editMenu->getIsOpen() && editMenuButtons[2]->isHovering())
+                        else if (editMenu->getIsOpen())
                         {
-                            if (selectFlag && ctrlX == 0)
+                            if (editMenuButtons[0]->isHovering())
                             {
                                 editMenu->setIsOpen(false);
-                                ctrlX = 1;
-                                int L = segmSelected.first;
-                                int R = segmSelected.second;
 
-                                String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
-                                String::split(S, s2, s3, R);
-                                String::split(s2, s1, s2, L - 1);
+                                if (selectFlag && ctrlC == 0)
+                                {
+                                    ctrlC = 1;
+                                    int L = segmSelected.first;
+                                    int R = segmSelected.second;
 
-                                buffer = String::constructString(s2);
+                                    String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
+                                    String::split(S, s2, s3, R);
+                                    String::split(s2, s1, s2, L - 1);
 
-                                String::del(s2);
+                                    buffer = String::constructString(s2);
 
-                                String::merge(S, s1, s3);
-                                selectFlag = findFlag = 0;
-                                flag = 1;
+                                    String::merge(S, s1, s2);
+                                    String::merge(S, S, s3);
+
+                                    flag = 1;
+                                    renderAgain = 1;
+                                }
+                            }
+                            else if (editMenuButtons[1]->isHovering())
+                            {
+                                editMenu->setIsOpen(false);
+
+                                if (ctrlV == 0)
+                                {
+                                    int posCursor = String::findCursorPosition(S);
+                                    ctrlV = 1;
+
+                                    for (auto ch : buffer)
+                                    {
+                                        String::insert(posCursor, S, ch);
+                                        posCursor++;
+                                    }
+
+                                    flag = 1;
+                                    renderAgain = 1;
+                                    selectFlag = findFlag = 0;
+
+                                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
+                                }
+                            }
+                            else if (editMenuButtons[2]->isHovering())
+                            {
+                                editMenu->setIsOpen(false);
+
+                                if (selectFlag && ctrlX == 0)
+                                {
+                                    ctrlX = 1;
+                                    int L = segmSelected.first;
+                                    int R = segmSelected.second;
+
+                                    String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
+                                    String::split(S, s2, s3, R);
+                                    String::split(s2, s1, s2, L - 1);
+
+                                    buffer = String::constructString(s2);
+
+                                    String::del(s2);
+
+                                    String::merge(S, s1, s3);
+                                    selectFlag = findFlag = 0;
+                                    flag = 1;
+                                    renderAgain = 1;
+
+                                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
+                                }
+                            }
+                            else if (editMenuButtons[3]->isHovering())
+                            {
+                                editMenu->setIsOpen(false);
+
+                                ///apelat dupa ce faci setarile cu wholeWord si matchCase
+                                word = Windows::getStringFromUser("Find");
+
+                                if (word.size() == 0)
+                                    break;
+
+                                string s = String::constructRawString(S);
+
+                                if (matchCase == 0)
+                                {
+                                    for (auto& i : word)
+                                        if (i >= 'A' && i <= 'Z')
+                                            i = i - 'A' + 'a';
+
+                                    for (auto& i : s)
+                                        if (i >= 'A' && i <= 'Z')
+                                            i = i - 'A' + 'a';
+                                }
+
+                                ReplaceFind::KMP(s, word, positions, wholeWord);
+                                
+                                if (positions.size() == 0)
+                                {
+                                    Windows::throwMessage("There are 0 matchings!");
+                                    renderAgain = 1;
+                                    flag = 1;
+                                    break;
+                                }
+
+                                cerr << "Found: " << positions.size() << '\n';
+                                cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
+                                cerr << '\n';
+                                currentAppearance = 0;
+                                findFlag = 1;
                                 renderAgain = 1;
-
-                                renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
-                                renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
+                                flag = 1;
+                                break;
                             }
                         }
-                        else if (editMenu->getIsOpen() && editMenuButtons[3]->isHovering())
+                        
+                        else if (optionsMenu->getIsOpen())
                         {
-                            editMenu->setIsOpen(false);
-                            ///apelat dupa ce faci setarile cu wholeWord si matchCase
-                            word = Windows::getStringFromUser("Find");
-
-                            if (word.size() == 0)
-                                break;
-
-                            string s = String::constructRawString(S);
-
-                            if (matchCase == 0)
+                            if (optionsMenuButtons[0]->isHovering())
                             {
-                                for (auto& i : word)
-                                    if (i >= 'A' && i <= 'Z')
-                                        i = i - 'A' + 'a';
-
-                                for (auto& i : s)
-                                    if (i >= 'A' && i <= 'Z')
-                                        i = i - 'A' + 'a';
+                                showLines = !showLines;
+                                optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLines]);
+                                marginLeft = showLines * (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+                                renderAgain = 1;
                             }
-
-                            ReplaceFind::KMP(s, word, positions, wholeWord);
-                            
-                            if (positions.size() == 0)
+                            else if (optionsMenuButtons[1]->isHovering())
                             {
-                                Windows::throwMessage("There are 0 matchings!");
+                                optionsMenu->setIsOpen(false);
+                                string line = Windows::getStringFromUser("Go to line");
+                                int l = min(String::findNumberOfEndlines(1 , String::len(S) , S) + 1 , stoi(line));
+                                Xoffset = 0;
+                                Yoffset = (l - 1) * globalHeightLine;
                                 renderAgain = 1;
                                 flag = 1;
                                 break;
                             }
-
-                            cerr << "Found: " << positions.size() << '\n';
-                            cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
-                            cerr << '\n';
-                            currentAppearance = 0;
-                            findFlag = 1;
-                            renderAgain = 1;
-                            flag = 1;
-                            break;
                         }
-                        else // click random pe ecran ca sa schimbi unde e cursorul
+                        
+
+                        // change cursor position inside text visible in the viewport
+                        else
                         {
-                            fileMenu->setIsOpen(false);
-                            editMenu->setIsOpen(false);
+                            if (editMenu->getPosition() != menuPositions[1])
+                                editMenu->setIsOpen(false);
+
                             cursorTimer = 0;
                             break;
                         }
                     }
+
+                    // right click
+                    // set edit menu position to cursor position and then open it
                     else if (key == 1)
                     {
                         sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-                        editMenu->setPosition(sf::Vector2f(localPosition.x, localPosition.y), windowWidth, windowHeight);
+                        editMenu->setPosition(sf::Vector2f(localPosition.x, localPosition.y));
                         editMenu->setIsOpen(true);
                         break;
                     }
@@ -2269,7 +2278,7 @@ int main()
                     }
                     else if (key == 86) ///go to line
                     {
-                        string line = Windows::getStringFromUser("asdfas");
+                        string line = Windows::getStringFromUser("Go to line");
                         int l = min(String::findNumberOfEndlines(1 , String::len(S) , S) + 1 , stoi(line));
                         Xoffset = 0;
                         Yoffset = (l - 1) * globalHeightLine;
@@ -2391,7 +2400,7 @@ int main()
                 Xoffset = 0; ///reset de fiecare data pentru ca afisezi de la inceputul liniei
                 l1 = max(1, (Yoffset) / scrollUnitY + 1);
                 firstExec = 0;
-                int linesVisible = (windowHeight - cursorInfoOffset - navBarOffset + globalHeightLine - 1) / globalHeightLine;
+                int linesVisible = (windowHeight - marginBottom - marginTop + globalHeightLine - 1) / globalHeightLine;
                 int cntLine = 0;
                 int noLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
                 int l2;
@@ -2419,11 +2428,11 @@ int main()
 
                     line += number;
 
-                    Render::centerText(text, line, navBarOffset + cntLine * globalHeightLine, 5);
+                    Render::centerText(text, line, marginTop + cntLine * globalHeightLine, 5);
                     text.setLetterSpacing(0.7);
                     text1.draw(text);
                     text.setLetterSpacing(1);
-                    cntRowsOffset = (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+                    marginLeft = showLines * (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
 
                     if (String::len(S) + 1 == p1 || String::get(p1, S) == 10)
                     {
@@ -2437,7 +2446,7 @@ int main()
                     while (p1 <= p2 && cntLine <= linesVisible)
                     {
                         splitedLines++;
-                        int p3 = String::getLastSeen(p1, p2, windowWidth - cntRowsOffset, S);
+                        int p3 = String::getLastSeen(p1, p2, windowWidth - marginLeft, S);
                        // if (p3 == posCursor && p3 < String::len(S)) p3++;
                         cerr << p3 << ' ';
                        
@@ -2454,7 +2463,7 @@ int main()
 
                             if (p3 < p1)
                             {
-                                p3 = String::getLastSeen(p1, p2, windowWidth - cntRowsOffset, S);
+                                p3 = String::getLastSeen(p1, p2, windowWidth - marginLeft, S);
                             }
                         }
 
@@ -2462,7 +2471,7 @@ int main()
 
                         cntLine++;
                         string ln = String::constructString(p1, p3, S);
-                        Render::centerText(text, ln, navBarOffset + globalHeightLine * (cntLine - 1));
+                        Render::centerText(text, ln, marginTop + globalHeightLine * (cntLine - 1));
 
                         if (p1 <= posCursor && posCursor <= p3)
                         {
@@ -2471,7 +2480,7 @@ int main()
                             cerr << "cw is" << ' ' << cw << ' ' << posCursor - p1 + 1 << '\n';
                             cursorLine = l2;
                             cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                            cursorBox.setPosition((float)cntRowsOffset + cw, (cntLine - 1)* globalHeightLine + navBarOffset);
+                            cursorBox.setPosition((float)marginLeft + cw, (cntLine - 1)* globalHeightLine + marginTop);
                             cursorOnScreen = 1;
                         }
                     
@@ -2481,8 +2490,8 @@ int main()
 
                     if (cursorLine == l2)
                     {
-                        cursorLineHighlight.setSize(sf::Vector2f(windowWidth - cntRowsOffset, splitedLines * globalHeightLine));
-                        cursorLineHighlight.setPosition(cntRowsOffset , navBarOffset + (cntLine - splitedLines) * globalHeightLine);
+                        cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, splitedLines * globalHeightLine));
+                        cursorLineHighlight.setPosition(marginLeft , marginTop + (cntLine - splitedLines) * globalHeightLine);
                     }
                 }
 
@@ -2507,7 +2516,7 @@ int main()
                 int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
                 int p = String::findKthLine(cursorLine, S);
                 int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
-                int lp = String::getLastSeen(p, posCursor, Xoffset + windowWidth - cntRowsOffset, S);
+                int lp = String::getLastSeen(p, posCursor, Xoffset + windowWidth - marginLeft, S);
                 if (lp < posCursor) fp = -1;
 
                 renderAgain |= lastCursorLine != cursorLine;
@@ -2567,15 +2576,15 @@ int main()
                 if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
                 {
                     cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                    cursorBox.setPosition((float)cntRowsOffset + cw, (cursorLine - l1) * globalHeightLine + navBarOffset);
+                    cursorBox.setPosition((float)marginLeft + cw, (cursorLine - l1) * globalHeightLine + marginTop);
 
                     cursorOnScreen = 1;
                 }
                 else
                     cursorOnScreen = 0;
 
-                cursorLineHighlight.setSize(sf::Vector2f(windowWidth - cntRowsOffset, globalHeightLine));
-                cursorLineHighlight.setPosition(cntRowsOffset, (cursorLine - l1) * globalHeightLine + navBarOffset);
+                cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, globalHeightLine));
+                cursorLineHighlight.setPosition(marginLeft, (cursorLine - l1) * globalHeightLine + marginTop);
 
                 lastCursorLine = cursorLine;
 
@@ -2597,13 +2606,13 @@ int main()
                         if (li > ri)
                             continue;
 
-                        int y = i * globalHeightLine + navBarOffset;
-                        int x = cntRowsOffset;
+                        int y = i * globalHeightLine + marginTop;
+                        int x = marginLeft;
 
                         int w = String::findWidth(l, li - 1, S);
                         int W = String::findWidth(li, ri, S);
 
-                        box.setPosition(w + cntRowsOffset + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
+                        box.setPosition(w + marginLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
                         box.setSize(sf::Vector2f(W, globalHeightLine));
                         box.setFillColor(sf::Color(0, 0, 0, 128));
                         selectedBoxes.push_back(box);
@@ -2620,7 +2629,7 @@ int main()
                         if (l == -1) continue;
 
                         int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
-                        int y = i * globalHeightLine + navBarOffset;
+                        int y = i * globalHeightLine + marginTop;
                       //  cerr << "On line " << i + 1 << ": ";
 
                         while (p < positions.size() && positions[p] <= r)
@@ -2629,7 +2638,7 @@ int main()
                             int w = String::findWidth(l, positions[p] - 1, S);
                             int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
 
-                            box.setPosition(cntRowsOffset + w, y);
+                            box.setPosition(marginLeft + w, y);
                             box.setSize(sf::Vector2f(W, globalHeightLine));
                             if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
                             else box.setFillColor(sf::Color(255, 187, 0, 128));
@@ -2653,7 +2662,7 @@ int main()
                         if (l == -1) continue;
 
                         int p = ReplaceFind::traceFirstApToRender(l , positions, bit, notRemoved , word, rword);
-                        int y = i * globalHeightLine + navBarOffset;
+                        int y = i * globalHeightLine + marginTop;
                        // cerr << "On line " << i + 1 << ": " << p;
 
                         while (p != -1 && p < positions.size() && ReplaceFind::findRealPosition(p, positions, bit, word, rword) <= r)
@@ -2662,7 +2671,7 @@ int main()
                             int w = String::findWidth(l, P - 1, S);
                             int W = String::findWidth(P, P + word.size() - 1, S);
 
-                            box.setPosition(cntRowsOffset + w, y);
+                            box.setPosition(marginLeft + w, y);
                             box.setSize(sf::Vector2f(W, globalHeightLine));
                             if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
                             else box.setFillColor(sf::Color(255, 187, 0, 128));
@@ -2717,7 +2726,9 @@ int main()
             window.draw(img1);
             window.draw(ptext1);
             window.draw(img2);
-            window.draw(img3);
+
+            if (showLines)
+                window.draw(img3);
 
             if (cursorOnScreen) window.draw(cursorBox);
             if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)  window.draw(cursorLineHighlight);
@@ -2738,7 +2749,6 @@ int main()
         
         for (int i = 0; i < 3; i++)
             menus[i]->draw();
-
 
         window.display();
     }
