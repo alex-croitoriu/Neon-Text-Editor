@@ -2338,9 +2338,21 @@ int main()
                     }
                     else
                     {
-                        if (ch == 13)
-                            ch = 10;
-                        String::insert(posCursor, S, ch);
+                        if (selectFlag == 1)
+                        {
+                            int L = segmSelected.first;
+                            int R = segmSelected.second;
+
+                            String::Treap* s1 = 0, * s2 = 0, * s3 = 0;
+                            String::split(S, s2, s3, R);
+                            String::split(s2, s1, s2, L - 1);
+
+                            String::del(s2);
+                            String::merge(S, s1, s3);
+                        }
+                        
+                        if (ch == 13) ch = 10;
+                        String::insert(String::findCursorPosition(S), S, ch);
                     }
 
                     flag = 1;
