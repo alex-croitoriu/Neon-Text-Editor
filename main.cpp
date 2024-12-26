@@ -1723,7 +1723,7 @@ int main()
                     if (toggleEditMenuButton->isHovering(window))
                     {
                         toggleEditMenuButton->setHoverState(true);
-                        editMenu->setPosition(menuPositions[1]);
+                        editMenu->setPosition(menuPositions[1], windowWidth, windowHeight);
                         editMenu->setIsOpen(true);
                     }
                     else
@@ -1810,7 +1810,7 @@ int main()
                         }
                         else if (toggleEditMenuButton->isHovering(window)) 
                         {
-                            editMenu->setPosition(menuPositions[1]);
+                            editMenu->setPosition(menuPositions[1], windowWidth, windowHeight);
                             fileMenu->setIsOpen(false);
                         }
 
@@ -2012,7 +2012,7 @@ int main()
                     else if (key == 1)
                     {
                         sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-                        editMenu->setPosition(sf::Vector2f(localPosition.x, localPosition.y));
+                        editMenu->setPosition(sf::Vector2f(localPosition.x, localPosition.y), windowWidth, windowHeight);
                         editMenu->setIsOpen(true);
                         break;
                     }

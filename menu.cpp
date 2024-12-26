@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-// #include "constants.hpp"
 #include "button.hpp"
 #include "menu.hpp"
 
@@ -59,7 +58,7 @@ void Menu::setIsOpen(bool _isOpen)
     isOpen = _isOpen;
 }
 
-void Menu::setPosition(sf::Vector2f position)
+void Menu::setPosition(sf::Vector2f position, int windowWidth, int windowHeight)
 {
     sf::Vector2f size(container.getGlobalBounds().width, container.getGlobalBounds().height);
 
