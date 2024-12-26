@@ -70,42 +70,21 @@ namespace String
         return charWidth[fontSize][ch];
     }
 
-    struct  Treap
+    struct Treap
     {
         Treap *L, *R;
-        short packed;
         int sumEndline;
         int sumWidth;
         int cnt;
         int priority;
-
-        void setSumCursor(bool b)
-        {
-            packed &= ((1 << 16) - 1 - (1 << 15));
-            packed |= (b * (1 << 15));
-        }
-
-        void setFlagCursor(bool b)
-        {
-            packed &= ((1 << 16) - 1 - (1 << 13));
-            packed |= (b * (1 << 13));
-        }
-
-        void setFlagEndline(bool b)
-        {
-            packed &= ((1 << 16) - 1 - (1 << 14));
-            packed |= (b * (1 << 14));
-        }
-
+        char ch;
+        bitset < 2 > A;
 
         Treap(char ch = 0, bool cursor = 0)
         {
-            packed = 0;
-            this->packed = ch;
+            this->ch = ch;
             L = R = 0;
-            setSumCursor(cursor);
-            setFlagCursor(cursor);
-            setFlagEndline((ch == 10));
+            A[0] = A[1] = cursor;
 
           //  this-> sumCursor = this-> flagCursor = cursor;
           //  this->sumEndline = this->flagEndline = (ch == 10);
@@ -120,24 +99,24 @@ namespace String
 
     int getFlagCursor(Treap*& T)
     {
-        return (T->packed) >> 13 & 1;
+        return T -> A[0];
     }
 
     int getFlagEndline(Treap*& T)
     {
-        return (T->packed) >> 14 & 1;
+        return T -> ch == 10;
     }
 
     int getCh(Treap*& T)
     {
-        return (char)(T->packed & 255);
+        return T -> ch;
     }
 
     int sumCursor(Treap *T)
     {
         if (T == 0)
             return 0;
-        return (T -> packed) >> 15 & 1;
+        return T -> A[1];
     }
 
     int sumEndline(Treap *T)
@@ -172,7 +151,7 @@ namespace String
     {
         if (T == 0)
             cerr << "flag!!!", exit(0);
-        T -> setSumCursor(sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
+        T -> A[1] = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
         T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + getFlagEndline(T);
         T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + getDim(getCh(T));
         T->cnt = cnt(T->L) + cnt(T->R) + 1;
@@ -1408,7 +1387,7 @@ namespace TimeFunction
 
 int main()
 {
-    // cerr << sizeof String::Treap;
+    cerr << sizeof String::Treap;
 
     sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
     sf::View view;
