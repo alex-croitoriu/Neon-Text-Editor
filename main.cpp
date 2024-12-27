@@ -2127,6 +2127,7 @@ int main()
                         findFlag = 0;
                         replaceFlag = 0;
                         renderAgain = 1;
+                        selectFlag = 0;
                         flag = 1;
 
                         renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
@@ -2153,6 +2154,7 @@ int main()
 
                         findFlag = 0;
                         replaceFlag = 0;
+                        selectFlag = 0;
                         renderAgain = 1;
                         flag = 1;
                         renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
