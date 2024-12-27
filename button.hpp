@@ -19,6 +19,7 @@ public:
     void setLabel(const std::string &_label);
     void setPosition(const sf::Vector2f &position);
     void setHoverState(bool isHovering);
+    void updateThemeColors();
     
     void draw();
 };

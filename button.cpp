@@ -6,14 +6,12 @@ Button::Button(const std::string &label, const sf::Vector2f &position, bool alig
 {
     container.setSize(small ? smallButtonSize : buttonSize);
     container.setPosition(position);
-    container.setFillColor(sf::Color(0, 0, 0, 0));
+    container.setFillColor(currentThemeColors.button);
 
     content = sf::Text(label, font, small ? smallButtonFontSize : buttonFontSize);
     content.setStyle(sf::Text::Bold);
-    content.setFillColor(sf::Color::Black);
+    content.setFillColor(currentThemeColors.text);
     content.setLetterSpacing(small ? smallButtonLetterSpacing : buttonLetterSpacing);
-
-    // container.setSize(sf::Vector2f(int(content.getGlobalBounds().getSize().x + 20), small ? smallButtonFontSize : buttonFontSize + 10));
 
     if (alignCenter) 
     {
@@ -52,7 +50,13 @@ void Button::setPosition(const sf::Vector2f &position)
 
 void Button::setHoverState(bool isHovering)
 {
-    container.setFillColor(sf::Color(0, 0, 0, isHovering ? 32 : 0));
+    container.setFillColor((isHovering ? currentThemeColors.buttonHover : currentThemeColors.button));
+}
+
+void Button::updateThemeColors()
+{
+    container.setFillColor(currentThemeColors.button);
+    content.setFillColor(currentThemeColors.text);
 }
 
 void Button::draw()

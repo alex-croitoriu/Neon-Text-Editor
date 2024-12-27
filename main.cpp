@@ -12,6 +12,7 @@
 #include <set>
 #include <bitset>
 
+#include "helpers.hpp"
 #include "globals.hpp"
 #include "config.hpp"
 #include "button.hpp"
@@ -21,10 +22,14 @@ using namespace std;
 
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
+sf::RenderTexture text1, text2, text3;
+sf::Sprite img1, img2, img3;
 
-sf::RectangleShape topSeparator;
-sf::RectangleShape bottomSeparator;
-sf::RectangleShape lineNumbersBackground;
+sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, cursorBox, cursorLineHighlight, box;
+vector<sf::RectangleShape> selectedBoxes;
+
+sf::Event event;
+sf::Text text, ptext1, ptext2;
 
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
@@ -37,7 +42,7 @@ float recalculateHeightLine(int fnt = fontSize)
 }
 
 int cursorHeight = 0, cursorWidth = 0;
-int marginTop = 40;
+int marginTop = 18;
 int marginLeft = 60;
 int paddingLeft = 5;
 int marginBottom = 100;
@@ -71,24 +76,24 @@ namespace String
     }
 
     struct Treap
-    {   
+    {
         Treap *L, *R;
         int sumEndline;
         int sumWidth;
         int cnt;
         int priority;
         char ch;
-        bitset < 2 > A;
+        bitset<2> A;
 
         Treap(char ch = 0, bool cursor = 0)
         {
-           // if (ch == 13) ch = 10;
+            // if (ch == 13) ch = 10;
             this->ch = ch;
             L = R = 0;
             A[0] = A[1] = cursor;
 
-          //  this-> sumCursor = this-> flagCursor = cursor;
-          //  this->sumEndline = this->flagEndline = (ch == 10);
+            //  this-> sumCursor = this-> flagCursor = cursor;
+            //  this->sumEndline = this->flagEndline = (ch == 10);
             this->sumEndline = (ch == 10);
             this->sumWidth = getDim(ch) * (1 - cursor * wordWrap);
             cnt = 1;
@@ -96,31 +101,34 @@ namespace String
         }
     };
 
-    vector < Treap* > freePointers;
+    vector<Treap *> freePointers;
 
-    bool getFlagCursor(Treap*& T)
+    bool getFlagCursor(Treap *&T)
     {
-        if (T == 0) return 0;
-        return T -> A[0];
+        if (T == 0)
+            return 0;
+        return T->A[0];
     }
 
-    bool getFlagEndline(Treap*& T)
+    bool getFlagEndline(Treap *&T)
     {
-        if (T == 0) return 0;
-        return T -> ch == 10;
+        if (T == 0)
+            return 0;
+        return T->ch == 10;
     }
 
-    int getCh(Treap*& T)
+    int getCh(Treap *&T)
     {
-        if (T == 0) return -1;
-        return T -> ch;
+        if (T == 0)
+            return -1;
+        return T->ch;
     }
 
     bool sumCursor(Treap *T)
     {
         if (T == 0)
             return 0;
-        return T -> A[1];
+        return T->A[1];
     }
 
     int sumEndline(Treap *T)
@@ -155,7 +163,7 @@ namespace String
     {
         if (T == 0)
             cerr << "flag!!!", exit(0);
-        T -> A[1] = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
+        T->A[1] = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
         T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + getFlagEndline(T);
         T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + getDim(getCh(T));
         T->cnt = cnt(T->L) + cnt(T->R) + 1;
@@ -229,21 +237,23 @@ namespace String
         Treap *t1 = 0, *t2 = 0, *t3 = 0;
         split(T, t2, t3, pos);
         split(t2, t1, t2, pos - 1);
-        if (t2) freePointers.push_back(t2);
+        if (t2)
+            freePointers.push_back(t2);
         merge(T, t1, t3);
     }
 
-    void del(Treap*& T)
+    void del(Treap *&T)
     {
-        if (T == 0) return;
+        if (T == 0)
+            return;
         del(T->L);
         del(T->R);
         freePointers.push_back(T);
     }
 
-    void del(int l, int r, Treap*& T)
+    void del(int l, int r, Treap *&T)
     {
-        Treap* t1 = 0, * t2 = 0, * t3 = 0;
+        Treap *t1 = 0, *t2 = 0, *t3 = 0;
 
         split(T, t2, t3, r);
         split(t2, t1, t2, l - 1);
@@ -263,7 +273,7 @@ namespace String
 
     void insert(int pos, Treap *&T, char ch)
     {
-        Treap* c;
+        Treap *c;
 
         if (freePointers.size())
         {
@@ -274,7 +284,7 @@ namespace String
         }
         else
         {
-            Treap* P = new Treap[bucketSize];
+            Treap *P = new Treap[bucketSize];
             for (int i = 0; i < bucketSize; i++)
                 freePointers.push_back(&P[i]);
 
@@ -323,9 +333,9 @@ namespace String
         return S;
     }
 
-    string constructString(int l, int r , Treap*& T)
+    string constructString(int l, int r, Treap *&T)
     {
-        Treap* t1 = 0 , * t2 = 0 , * t3 = 0;
+        Treap *t1 = 0, *t2 = 0, *t3 = 0;
 
         split(T, t2, t3, r);
         split(t2, t1, t2, l - 1);
@@ -549,11 +559,12 @@ namespace String
         int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
         int t2 = String::getLastSeen(p1, p2, Xoffset + windowWidth - marginLeft, T);
 
-        if (I == 0) cerr << t1 << ' ' << t2 << '\n';
+        if (I == 0)
+            cerr << t1 << ' ' << t2 << '\n';
         segmOnScreen[I] = {t1, t2};
 
         if (t1 == -1 || t2 == -1)
-            return segmOnScreen[I] = { -1 , -1 } , txt;
+            return segmOnScreen[I] = {-1, -1}, txt;
 
         String::traverseString(t1, t2, T, txt);
         return txt;
@@ -598,23 +609,23 @@ namespace String
         }
     }
 
-    Treap *build(int n , Treap *P)
+    Treap *build(int n, Treap *P)
     {
         if (n == 0)
             return NULL;
 
         int mid = (n - 1) / 2;
-        Treap* T = &P[mid];
-        T->L = build(mid , P);
-        T->R = build(n - (mid + 1) , P + mid + 1);
+        Treap *T = &P[mid];
+        T->L = build(mid, P);
+        T->R = build(n - (mid + 1), P + mid + 1);
         heapify(T);
         recalculate(T);
         return T;
     }
 
-    Treap* build(int n , const char *data)
+    Treap *build(int n, const char *data)
     {
-        Treap* ptr = new Treap[n];
+        Treap *ptr = new Treap[n];
 
         for (int i = 0; i < n; i++)
         {
@@ -624,24 +635,24 @@ namespace String
         return build(n, ptr);
     }
 
-    string constructRawString(Treap*& T)
+    string constructRawString(Treap *&T)
     {
         int posCursor = findCursorPosition(T);
-        Treap* t1 = 0 , * t2 = 0, * t3 = 0;
+        Treap *t1 = 0, *t2 = 0, *t3 = 0;
         split(T, t2, t3, posCursor);
         split(t2, t1, t2, posCursor - 1);
         merge(T, t1, t3);
 
         string raw = constructString(T);
 
-        insert(len(T) + 1 , T);
+        insert(len(T) + 1, T);
 
         return raw;
     }
 
-    void setW(int pos, int w, Treap*& T)
+    void setW(int pos, int w, Treap *&T)
     {
-        Treap* t1, * t2, * t3;
+        Treap *t1, *t2, *t3;
 
         split(T, t2, t3, pos);
         split(t2, t1, t2, pos - 1);
@@ -652,24 +663,25 @@ namespace String
         merge(T, T, t3);
     }
 
-    void replace(int l, int r, string& word, Treap*& T)
+    void replace(int l, int r, string &word, Treap *&T)
     {
-        Treap* t1 = 0, * t2 = 0, * t3 = 0;
+        Treap *t1 = 0, *t2 = 0, *t3 = 0;
 
         split(T, t2, t3, r);
         split(t2, t1, t2, l - 1);
 
         del(t2);
-        
-        t2 = build((int) word.size(), word.c_str());
+
+        t2 = build((int)word.size(), word.c_str());
 
         merge(T, t1, t2);
         merge(T, T, t3);
     }
 
-    void saveText(FILE* fptr, Treap*& T)
+    void saveText(FILE *fptr, Treap *&T)
     {
-        if (T == 0) return;
+        if (T == 0)
+            return;
         saveText(fptr, T->L);
         if (getFlagCursor(T) == 0)
         {
@@ -845,30 +857,32 @@ namespace Windows
     string saveAS()
     {
         OPENFILENAMEA ofn;
-        char szFile[260];       // Buffer for full file path
-        char szFileTitle[260];  // Buffer for file title (file name only)
+        char szFile[260];      // Buffer for full file path
+        char szFileTitle[260]; // Buffer for file title (file name only)
 
         // Initialize the OPENFILENAME structure
         ZeroMemory(&ofn, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = NULL;   // Handle to the owner window
+        ofn.hwndOwner = NULL; // Handle to the owner window
         ofn.lpstrFile = szFile;
-        ofn.lpstrFile[0] = '\0';  // Initialize the file buffer with an empty string
-        ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]);  // Wide chars
+        ofn.lpstrFile[0] = '\0';                           // Initialize the file buffer with an empty string
+        ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]); // Wide chars
         ofn.lpstrFileTitle = szFileTitle;
-        ofn.lpstrFileTitle[0] = '\0';  // Initialize file title buffer
-        ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]);  // Wide chars
-        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";  // Wide character filter
-        ofn.nFilterIndex = 1;   // Default filter index
-        ofn.lpstrInitialDir = NULL; // Initial directory
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT; // Overwrite prompt for save dialog
+        ofn.lpstrFileTitle[0] = '\0';                                     // Initialize file title buffer
+        ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]); // Wide chars
+        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";          // Wide character filter
+        ofn.nFilterIndex = 1;                                             // Default filter index
+        ofn.lpstrInitialDir = NULL;                                       // Initial directory
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;              // Overwrite prompt for save dialog
 
-        if (GetOpenFileNameA(&ofn) == TRUE) {
+        if (GetOpenFileNameA(&ofn) == TRUE)
+        {
             // File selected and dialog confirmed
             std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
             return ofn.lpstrFile;
         }
-        else {
+        else
+        {
             // Dialog was canceled or an error occurred
             std::cout << "Open file dialog canceled or failed." << std::endl;
             return "";
@@ -878,31 +892,33 @@ namespace Windows
     string open()
     {
         OPENFILENAMEA ofn;
-        char szFile[260];       // Buffer for full file path
-        char szFileTitle[260];  // Buffer for file title (file name only)
+        char szFile[260];      // Buffer for full file path
+        char szFileTitle[260]; // Buffer for file title (file name only)
 
         // Initialize the OPENFILENAME structure
         ZeroMemory(&ofn, sizeof(ofn));
         ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = NULL;   // Handle to the owner window
+        ofn.hwndOwner = NULL; // Handle to the owner window
         ofn.lpstrFile = szFile;
-        ofn.lpstrFile[0] = '\0';  // Initialize the file buffer with an empty string
+        ofn.lpstrFile[0] = '\0'; // Initialize the file buffer with an empty string
         ofn.nMaxFile = sizeof(szFile);
         ofn.lpstrFileTitle = szFileTitle;
-        ofn.lpstrFileTitle[0] = '\0';  // Initialize file title buffer
+        ofn.lpstrFileTitle[0] = '\0'; // Initialize file title buffer
         ofn.nMaxFileTitle = sizeof(szFileTitle);
-        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";  // ANSI character filter
-        ofn.nFilterIndex = 1;   // Default filter index
-        ofn.lpstrInitialDir = NULL; // Initial directory
+        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0"; // ANSI character filter
+        ofn.nFilterIndex = 1;                                    // Default filter index
+        ofn.lpstrInitialDir = NULL;                              // Initial directory
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
         // Display the Open dialog box
-        if (GetOpenFileNameA(&ofn) == TRUE) {
+        if (GetOpenFileNameA(&ofn) == TRUE)
+        {
             // File selected and dialog confirmed
             std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
             return ofn.lpstrFile;
         }
-        else {
+        else
+        {
             // Dialog was canceled or an error occurred
             std::cout << "Open file dialog canceled or failed." << std::endl;
             return "";
@@ -915,7 +931,7 @@ string txt1, txt2, txt, all;
 
 namespace Render
 {
-    bool updateViewX(String::Treap*& S, int& Xoffset, int scrollUnitX)
+    bool updateViewX(String::Treap *&S, int &Xoffset, int scrollUnitX)
     {
         int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
         bool modif = 0;
@@ -933,7 +949,7 @@ namespace Render
         return modif;
     }
 
-    bool updateViewY(String::Treap*& S, int& Yoffset, int scrollUnitY)
+    bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
     {
         int globalHeight = String::findCurrentHeight(S);
         int height = recalculateHeightLine();
@@ -950,10 +966,12 @@ namespace Render
         return modif;
     }
 
-    void updateTextLine(int line, vector<string>& renderLines, string L)
+    void updateTextLine(int line, vector<string> &renderLines, string L)
     {
-        if (line == sizeRLines) renderLines[sizeRLines++] = L;
-        else renderLines[line] = L;
+        if (line == sizeRLines)
+            renderLines[sizeRLines++] = L;
+        else
+            renderLines[line] = L;
     }
 
     int findLineOnScreen(float y)
@@ -961,7 +979,7 @@ namespace Render
         return (int)((y - marginTop) / globalHeightLine) + 1;
     }
 
-    int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
+    int moveCursorToClick(sf::Vector2i localPosition, String::Treap *&S, int scrollUnitY, int l1, int l2, int Xoffset)
     {
         int l = findLineOnScreen(localPosition.y);
         float w = localPosition.x - marginLeft - paddingLeft;
@@ -985,7 +1003,7 @@ namespace Render
         return p + 1;
     }
 
-    void centerText(sf::Text& text, string s, float startY, float startX = marginLeft + paddingLeft)
+    void centerText(sf::Text &text, string s, float startY, float startX = marginLeft + paddingLeft)
     {
         bool empty = 0;
         s += "|";
@@ -993,10 +1011,10 @@ namespace Render
         int centerConst = ((float)globalHeightLine - text.getGlobalBounds().height) / 2;
         s.pop_back();
         text.setString(s);
-        text.setPosition(startX, (int) startY + centerConst);
+        text.setPosition(startX, (int)startY + centerConst);
     }
 
-    void updateSmartRender(sf::Text& text, sf::RenderTexture& text1, sf::RenderTexture& text2, sf::RenderTexture& text3, sf::Sprite& img1, sf::Sprite& img2, sf::Sprite& img3, int l1, int l2, int cursorLine, int scrollUnitY)
+    void updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, int scrollUnitY)
     {
         txt1.clear(), txt2.clear(), txt.clear();
         int h1 = 0;
@@ -1067,7 +1085,7 @@ namespace Render
         text3.display();
     }
 
-    float splitCursorLine(sf::Text& text, sf::Text& h1, sf::Text& h2, string& txt, int posCursorOnScreen, int fp)
+    float splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, string &txt, int posCursorOnScreen, int fp)
     {
         if (txt.size() == 0)
         {
@@ -1081,7 +1099,6 @@ namespace Render
             return 0;
         }
 
-
         h1.setCharacterSize(fontSize);
 
         string s1, s2;
@@ -1093,8 +1110,10 @@ namespace Render
         float w = h1.getGlobalBounds().width;
         char ch;
 
-        if (posCursorOnScreen < txt.size() && txt[posCursorOnScreen] != 13) ch = txt[posCursorOnScreen];
-        else ch = '|';
+        if (posCursorOnScreen < txt.size() && txt[posCursorOnScreen] != 13)
+            ch = txt[posCursorOnScreen];
+        else
+            ch = '|';
 
         s1 += ch;
         h1.setString(s1);
@@ -1115,30 +1134,30 @@ namespace Render
         return w + (W - w - cW) / 2;
     }
 
-    void render(int &l1 , int &l2 , String::Treap *&S , int Yoffset , int Xoffset , int cursorLine , sf::Text& text, sf::RenderTexture& text1, sf::RenderTexture& text2, sf::RenderTexture& text3, sf::Sprite& img1, sf::Sprite& img2, sf::Sprite& img3, int scrollUnitY)
+    void render(int &l1, int &l2, String::Treap *&S, int Yoffset, int Xoffset, int cursorLine, sf::Text &text, int scrollUnitY)
     {
         int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
         l1 = max(1, (Yoffset) / scrollUnitY + 1);
-        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - marginBottom - marginTop) / scrollUnitY + 1));
+        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - marginBottom - marginTop) / scrollUnitY));
 
         sizeRLines = 0;
 
-        for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2; i++)
+        for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2 + (l2 < numberOfLines); i++)
         {
             updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset, i - l1));
-            //cerr << renderLines[sizeRLines - 1] << ' ' << '\n';
+            // cerr << renderLines[sizeRLines - 1] << ' ' << '\n';
         }
-        updateSmartRender(text, text1, text2, text3, img1, img2, img3, l1, l2, cursorLine, scrollUnitY);
+        updateSmartRender(text, l1, l2 + (l2 < numberOfLines), cursorLine, scrollUnitY);
     }
 }
 
 namespace ReplaceFind
 {
-    void KMP(string &s, string& word , vector < int > &positions , bool &wholeWord)
+    void KMP(string &s, string &word, vector<int> &positions, bool &wholeWord)
     {
-        vector < int > PI(word.size());
-        vector < int > pi(s.size());
+        vector<int> PI(word.size());
+        vector<int> pi(s.size());
         positions.clear();
 
         PI[0] = 0;
@@ -1171,8 +1190,8 @@ namespace ReplaceFind
             }
         }
 
-       // cerr << "positions are: "; for (auto i : positions) cerr << i << ' ';
-       // cerr << '\n';
+        // cerr << "positions are: "; for (auto i : positions) cerr << i << ' ';
+        // cerr << '\n';
     }
 
     bool isApOnScreen(int ap, int sz)
@@ -1202,13 +1221,13 @@ namespace ReplaceFind
 
     namespace BIT
     {
-        void reset(vector < int >& bit)
+        void reset(vector<int> &bit)
         {
             for (int i = 0; i < bit.size(); i++)
                 bit[i] = 0;
         }
 
-        void upd(int p, int v, vector < int >& bit)
+        void upd(int p, int v, vector<int> &bit)
         {
             if (p == 0)
                 bit[p] += v;
@@ -1217,7 +1236,7 @@ namespace ReplaceFind
                 bit[p] += v;
         }
 
-        int get(int p, vector < int >& bit)
+        int get(int p, vector<int> &bit)
         {
             int ans = bit[0];
 
@@ -1228,7 +1247,7 @@ namespace ReplaceFind
         }
     }
 
-    void delAp(int idx, vector < int >& prv, vector < int >& nxt, vector < int >& bit, vector < int >& gone, set < int >& notRemoved, int vl = 1)
+    void delAp(int idx, vector<int> &prv, vector<int> &nxt, vector<int> &bit, vector<int> &gone, set<int> &notRemoved, int vl = 1)
     {
         BIT::upd(idx, vl, bit);
 
@@ -1238,13 +1257,15 @@ namespace ReplaceFind
         int P = prv[idx];
         int N = nxt[idx];
 
-        if (P != -1) nxt[P] = N;
-        if (N != -1) prv[N] = P;
+        if (P != -1)
+            nxt[P] = N;
+        if (N != -1)
+            prv[N] = P;
 
-        //prv[idx] = nxt[idx] = -1;
+        // prv[idx] = nxt[idx] = -1;
     }
 
-    int findLastReplace(int idx, vector < int >& bit)
+    int findLastReplace(int idx, vector<int> &bit)
     {
         int l = 0, r = idx - 1, ans = -1, mid = 0;
         int value = BIT::get(idx, bit);
@@ -1258,13 +1279,14 @@ namespace ReplaceFind
 
             if (BIT::get(mid, bit) >= value)
                 ans = mid, r = mid - 1;
-            else l = mid + 1;
+            else
+                l = mid + 1;
         }
 
         return ans;
     }
 
-    int findNextReplace(int idx, vector < int >& bit)
+    int findNextReplace(int idx, vector<int> &bit)
     {
         int l = idx + 1, r = bit.size() - 1, mid = 0, ans = -1;
         int value = BIT::get(idx, bit) + 1;
@@ -1275,38 +1297,39 @@ namespace ReplaceFind
 
             if (BIT::get(mid, bit) >= value)
                 ans = mid, r = mid - 1;
-            else l = mid + 1;
+            else
+                l = mid + 1;
         }
 
         return ans;
     }
 
-    bool canReplace(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word)
+    bool canReplace(int idx, vector<int> &bit, vector<int> &positions, vector<int> &gone, string &rword, string &word)
     {
         if (gone[idx])
             return 0;
 
         int p1 = findLastReplace(idx, bit);
-     //   cerr << "              working\n" << '\n';
+        //   cerr << "              working\n" << '\n';
         int p2 = findNextReplace(idx, bit);
-      //  cerr << idx << ' ' << p1 << ' ' << p2 << '\n';
+        //  cerr << idx << ' ' << p1 << ' ' << p2 << '\n';
 
         if (p1 != -1)
         {
-            if (positions[p1] + (int) word.size() - 1 >= positions[idx])
+            if (positions[p1] + (int)word.size() - 1 >= positions[idx])
                 return 0;
         }
 
         if (p2 != -1)
         {
-            if (positions[idx] + (int) word.size() - 1 >= positions[p2])
+            if (positions[idx] + (int)word.size() - 1 >= positions[p2])
                 return 0;
         }
 
         return 1;
     }
 
-    int findNextValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word, vector < int >& prv, vector < int >& nxt, set < int >& notRemoved)
+    int findNextValidAppearance(int idx, vector<int> &bit, vector<int> &positions, vector<int> &gone, string &rword, string &word, vector<int> &prv, vector<int> &nxt, set<int> &notRemoved)
     {
         int x = nxt[idx];
 
@@ -1320,7 +1343,7 @@ namespace ReplaceFind
         return x;
     }
 
-    int findPrevValidAppearance(int idx, vector < int >& bit, vector < int >& positions, vector < int >& gone, string& rword, string& word, vector < int >& prv, vector < int >& nxt, set <int>& notRemoved)
+    int findPrevValidAppearance(int idx, vector<int> &bit, vector<int> &positions, vector<int> &gone, string &rword, string &word, vector<int> &prv, vector<int> &nxt, set<int> &notRemoved)
     {
         int x = prv[idx];
 
@@ -1334,13 +1357,13 @@ namespace ReplaceFind
         return x;
     }
 
-    int findRealPosition(int idx, vector < int >& positions, vector < int >& bit, string& word, string& rword)
+    int findRealPosition(int idx, vector<int> &positions, vector<int> &bit, string &word, string &rword)
     {
         int sub = BIT::get(idx, bit);
         return positions[idx] - sub * word.size() + sub * rword.size();
     }
 
-    int traceFirstApToRender(int idx, vector < int >& positions, vector < int >& bit, set < int >& notRemoved, string& word, string& rword)
+    int traceFirstApToRender(int idx, vector<int> &positions, vector<int> &bit, set<int> &notRemoved, string &word, string &rword)
     {
         int l = 0, r = positions.size() - 1, mid = 0, ans = -1;
 
@@ -1357,7 +1380,8 @@ namespace ReplaceFind
                 --it;
                 if (findRealPosition(*it, positions, bit, word, rword) >= idx)
                     ans = mid, r = mid - 1;
-                else l = mid + 1;
+                else
+                    l = mid + 1;
             }
         }
 
@@ -1375,7 +1399,8 @@ namespace TimeFunction
         char data[100];
         int len = strftime(data, sizeof(data), param.c_str(), &datetime);
 
-        if (len == 0) {
+        if (len == 0)
+        {
             cerr << "Error: invalid format or buffer size too small\n";
             return "";
         }
@@ -1395,40 +1420,36 @@ int main()
     mainIcon.loadFromFile("assets/images/main_icon.png");
     window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
-    sf::Event event;
-    sf::Text text, ptext1, ptext2;
-
     font.loadFromFile("assets/fonts/cour.ttf");
 
     text.setFont(font);
-    text.setFillColor(sf::Color::Black);
+    text.setFillColor(currentThemeColors.text);
     text.setCharacterSize(fontSize);
     text.setStyle(sf::Text::Regular);
 
     ptext1.setFont(font);
-    ptext1.setFillColor(sf::Color::Black);
+    ptext1.setFillColor(currentThemeColors.text);
     ptext1.setCharacterSize(fontSize);
     ptext1.setStyle(sf::Text::Regular);
 
     ptext2.setFont(font);
-    ptext2.setFillColor(sf::Color::Black);
+    ptext2.setFillColor(currentThemeColors.text);
     ptext2.setCharacterSize(fontSize);
     ptext2.setStyle(sf::Text::Regular);
 
+    string zoomInButtonLabels[] = {"-", "+"};
 
-    string zoomInButtonLabels[] = { "-", "+" };
+    string toggleLinesButtonLabels[] = {"Show lines", "Hide lines"};
+    string menuLabels[] = {"File", "Edit", "Options"};
 
-    string toggleLinesButtonLabels[] = { "Show lines", "Hide lines" };
-    string menuLabels[] = { "File", "Edit", "Options" };
-
-    vector<string> menuButtonLabels[] = 
+    vector<string> menuButtonLabels[] =
     {
-        { "Open", "Save", "Save as" },
-        { "Copy", "Paste", "Cut", "Find", "Replace" },
-        { "Hide lines", "Go to line", "Time & Date", "Switch theme" }
+        {"Open", "Save", "Save as"},
+        {"Copy", "Paste", "Cut", "Find", "Replace"},
+        {"Hide lines", "Go to line", "Time & Date", "Switch theme"}
     };
 
-    vector<sf::Vector2f> menuPositions, buttonPositions ;
+    vector<sf::Vector2f> menuPositions, buttonPositions;
 
     for (int i = 0; i < 3; i++)
         menuPositions.push_back(sf::Vector2f(i * smallButtonSize.x, smallButtonSize.y));
@@ -1436,10 +1457,10 @@ int main()
     for (int i = 0; i < 5; i++)
         buttonPositions.push_back(sf::Vector2f(i * smallButtonSize.x, 0));
 
-    Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonPositions[3]);
-    Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonPositions[4]);
+    zoomOutButton = new Button(zoomInButtonLabels[0], buttonPositions[3]);
+    zoomInButton = new Button(zoomInButtonLabels[1], buttonPositions[4]);
 
-    Menu **menus = new Menu*[3];
+    menus = new Menu *[3];
 
     for (int i = 0; i < 3; i++)
     {
@@ -1449,7 +1470,6 @@ int main()
 
     Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2];
     Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons();
-
 
     String::precalculateCharDim();
 
@@ -1467,26 +1487,15 @@ int main()
     int l1 = 0, l2 = 0;
     int lastCursorLine = 0;
 
-    sf::RenderTexture text1, text2, text3;
-    sf::Sprite img1, img2, img3;
-    
-    lineNumbersBackground.setFillColor(sf::Color(161, 163, 166, 100));
+    lineNumbersBackground.setFillColor(currentThemeColors.lineNumbersBackground);
     lineNumbersBackground.setPosition(0, marginTop);
     lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
+
+    cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
 
     text1.create(maxRows, maxRows);
     text2.create(maxRows, maxRows);
     text3.create(maxRows, maxRows);
-
-    vector<sf::Color> colorCursor(2);
-    colorCursor[1] = sf::Color(0, 0, 0, 255);
-    colorCursor[0] = sf::Color(0, 0, 0, 0);
-
-    sf::RectangleShape cursorBox;
-    sf::RectangleShape cursorLineHighlight;
-    vector<sf::RectangleShape> selectedBoxes;
-    sf::RectangleShape box;
-    cursorLineHighlight.setFillColor(sf::Color(0, 0, 0, 30));
 
     string path = "", buffer = "";
     int timer = 0;
@@ -1505,12 +1514,12 @@ int main()
     int cntX = 0;
     FILE *fptr = NULL;
 
-    vector < int > positions , bit , gone , prv , nxt;
+    vector<int> positions, bit, gone, prv, nxt;
     int currentAppearance = 0;
-    bool matchCase = 0, wholeWord = 0 , findFlag = 0 , replaceFlag = 0 , replaceAllFlag = 0;
-    string word , rword;
+    bool matchCase = 0, wholeWord = 0, findFlag = 0, replaceFlag = 0, replaceAllFlag = 0;
+    string word, rword;
     string param;
-    set < int > notRemoved;
+    set<int> notRemoved;
 
     wordWrap = 0;
 
@@ -1524,7 +1533,7 @@ int main()
         {
             sf::Vector2i localPosition = sf::Mouse::getPosition(window);
             bool isAnyButtonPressed = false;
-            
+
             // check if zoom buttons are pressed
             if (zoomOutButton->isHovering() || zoomInButton->isHovering())
                 isAnyButtonPressed = true;
@@ -1534,17 +1543,17 @@ int main()
             {
                 if (menus[i]->getToggleButton()->isHovering())
                     isAnyButtonPressed = true;
-                
+
                 if (menus[i]->getIsOpen())
                 {
-                    Button** menuButtons = menus[i]->getButtons();
+                    Button **menuButtons = menus[i]->getButtons();
                     for (int j = 0; j < menus[i]->getButtonCount(); j++)
                         if (menuButtons[j]->isHovering())
                             isAnyButtonPressed = true;
                 }
             }
-            
-            if (!isAnyButtonPressed) 
+
+            if (!isAnyButtonPressed)
             {
                 if (localPosition.x >= marginLeft && localPosition.y >= marginTop && localPosition.x < windowWidth && localPosition.y < windowHeight - marginBottom)
                 {
@@ -1616,7 +1625,7 @@ int main()
             String::split(s2, s1, s2, L - 1);
 
             buffer = String::constructString(s2);
-            //delete s2;
+            // delete s2;
             String::del(s2);
 
             String::merge(S, s1, s3);
@@ -1657,7 +1666,7 @@ int main()
             renderAgain = 1;
             selectFlag = 0;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) 
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
             segmSelected = {1, String::len(S) - 1};
             buffer = String::constructRawString(S);
@@ -1674,13 +1683,13 @@ int main()
                 {
                     // set hover state for zoom buttons
                     zoomOutButton->setHoverState(zoomOutButton->isHovering());
-                    zoomInButton ->setHoverState(zoomInButton ->isHovering());
+                    zoomInButton->setHoverState(zoomInButton->isHovering());
 
                     // open menus if user is hovering over them
                     // set hover state for toggle menu buttons
                     for (int i = 0; i < 3; i++)
                     {
-                        Button* toggleButton = menus[i]->getToggleButton();
+                        Button *toggleButton = menus[i]->getToggleButton();
                         if (toggleButton->isHovering())
                         {
                             toggleButton->setHoverState(true);
@@ -1699,7 +1708,7 @@ int main()
                     // set hover state for buttons inside menus
                     for (int i = 0; i < 3; i++)
                     {
-                        Button** buttons = menus[i]->getButtons();
+                        Button **buttons = menus[i]->getButtons();
                         for (int j = 0; j < menus[i]->getButtonCount(); j++)
                             buttons[j]->setHoverState(buttons[j]->isHovering());
                     }
@@ -1709,7 +1718,7 @@ int main()
                 {
                     if (event.key.code == 0)
                         leftButtonPressed = 0;
-                    
+
                     ctrlC = ctrlV = ctrlX = 0;
                 }
 
@@ -1728,7 +1737,7 @@ int main()
                 }
 
                 if (event.type == sf::Event::MouseButtonPressed)
-                { 
+                {
                     int key = event.key.code;
 
                     if (key == 0)
@@ -1757,7 +1766,7 @@ int main()
                             bool isHovering = false;
                             for (int i = 0; i < editMenu->getButtonCount(); i++)
                                 isHovering |= editMenuButtons[i]->isHovering();
-                            
+
                             if (!isHovering)
                                 editMenu->close();
                         }
@@ -1768,26 +1777,26 @@ int main()
                             if (fileMenuButtons[0]->isHovering())
                             {
                                 fileMenu->close();
-                                
+
                                 path = Windows::open();
-                                
+
                                 if (path.size() == 0)
                                     break;
 
                                 HANDLE fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-                                if (fileHandle == INVALID_HANDLE_VALUE) 
+                                if (fileHandle == INVALID_HANDLE_VALUE)
                                 {
                                     Windows::throwMessage("Invalid Path");
                                     break;
                                 }
 
                                 HANDLE mappingHandle = CreateFileMapping(fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
-                                char* data = (char*) (MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
-                                DWORD fileSize =  GetFileSize(fileHandle, nullptr);
+                                char *data = (char *)(MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
+                                DWORD fileSize = GetFileSize(fileHandle, nullptr);
 
                                 String::del(S);
-                                S = String::build(fileSize , data);
+                                S = String::build(fileSize, data);
                                 String::insert(1, S);
 
                                 cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
@@ -1908,7 +1917,7 @@ int main()
                             {
                                 editMenu->close();
 
-                                ///apelat dupa ce faci setarile cu wholeWord si matchCase
+                                /// apelat dupa ce faci setarile cu wholeWord si matchCase
                                 word = Windows::getStringFromUser("Find");
 
                                 if (word.size() == 0)
@@ -1918,17 +1927,17 @@ int main()
 
                                 if (matchCase == 0)
                                 {
-                                    for (auto& i : word)
+                                    for (auto &i : word)
                                         if (i >= 'A' && i <= 'Z')
                                             i = i - 'A' + 'a';
 
-                                    for (auto& i : s)
+                                    for (auto &i : s)
                                         if (i >= 'A' && i <= 'Z')
                                             i = i - 'A' + 'a';
                                 }
 
                                 ReplaceFind::KMP(s, word, positions, wholeWord);
-                                
+
                                 if (positions.size() == 0)
                                 {
                                     Windows::throwMessage("There are 0 matchings!");
@@ -1938,7 +1947,9 @@ int main()
                                 }
 
                                 cerr << "Found: " << positions.size() << '\n';
-                                cerr << "Positions: "; for (auto i : positions) cerr << i << ' ';
+                                cerr << "Positions: ";
+                                for (auto i : positions)
+                                    cerr << i << ' ';
                                 cerr << '\n';
                                 currentAppearance = 0;
                                 findFlag = 1;
@@ -1960,11 +1971,11 @@ int main()
 
                                 if (matchCase == 0)
                                 {
-                                    for (auto& i : word)
+                                    for (auto &i : word)
                                         if (i >= 'A' && i <= 'Z')
                                             i = i - 'A' + 'a';
 
-                                    for (auto& i : s)
+                                    for (auto &i : s)
                                         if (i >= 'A' && i <= 'Z')
                                             i = i - 'A' + 'a';
                                 }
@@ -2010,7 +2021,7 @@ int main()
                                 break;
                             }
                         }
-                        
+
                         else if (optionsMenu->getIsOpen())
                         {
                             if (optionsMenuButtons[0]->isHovering())
@@ -2027,7 +2038,7 @@ int main()
                                 optionsMenu->close();
 
                                 string line = Windows::getStringFromUser("Go to line");
-                                int l = min(String::findNumberOfEndlines(1 , String::len(S) , S) + 1 , stoi(line));
+                                int l = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, stoi(line));
                                 Xoffset = 0;
                                 Yoffset = (l - 1) * globalHeightLine;
                                 renderAgain = 1;
@@ -2053,12 +2064,14 @@ int main()
                             }
                             else if (optionsMenuButtons[3]->isHovering())
                             {
-                                lightTheme = !lightTheme;
-                                
+                                optionsMenu->close();
+
+                                Helpers::switchTheme(text, ptext1, ptext2);
+
                                 renderAgain = 1;
                             }
                         }
-                        
+
                         // change cursor position inside text visible in the viewport
                         else
                         {
@@ -2104,7 +2117,8 @@ int main()
                         {
                             findFlag = 0;
                         }
-                        else window.close();
+                        else
+                            window.close();
 
                         break;
                     }
@@ -2167,8 +2181,10 @@ int main()
                         if (replaceFlag == 1)
                         {
                             int pap = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                            if (pap != -1) currentAppearance = pap;
-                            else break;
+                            if (pap != -1)
+                                currentAppearance = pap;
+                            else
+                                break;
 
                             renderAgain = 1;
                             flag = 1;
@@ -2211,10 +2227,12 @@ int main()
                         if (replaceFlag == 1)
                         {
                             int nap = ReplaceFind::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                            if (nap != -1) currentAppearance = nap;
-                            else break;
+                            if (nap != -1)
+                                currentAppearance = nap;
+                            else
+                                break;
 
-                           // renderAgain = 1;
+                            // renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2225,7 +2243,7 @@ int main()
                             currentAppearance = min((int)positions.size() - 1, currentAppearance);
 
                             cerr << "After right arrow: " << currentAppearance << '\n';
-                           // renderAgain = 1;
+                            // renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2250,7 +2268,7 @@ int main()
 
                         break;
                     }
-                    else if (key == 43) ///not functional ignora
+                    else if (key == 43) /// not functional ignora
                     {
                         flag = 1;
                         renderAgain = 1;
@@ -2280,11 +2298,11 @@ int main()
 
                         if (matchCase == 0)
                         {
-                            for (auto& i : word)
+                            for (auto &i : word)
                                 if (i >= 'A' && i <= 'Z')
                                     i = i - 'A' + 'a';
 
-                            for (auto& i : s)
+                            for (auto &i : s)
                                 if (i >= 'A' && i <= 'Z')
                                     i = i - 'A' + 'a';
                         }
@@ -2331,7 +2349,8 @@ int main()
                     }
                     else if (key == 58)
                     {
-                        if (replaceFlag == 0) break;
+                        if (replaceFlag == 0)
+                            break;
                         if (currentAppearance == -1)
                         {
                             Windows::throwMessage("There are no more matchings!");
@@ -2346,7 +2365,7 @@ int main()
                         ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                         int nxtAppearance = ReplaceFind::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                         int prvAppearance = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                        
+
                         nxt[currentAppearance] = prv[currentAppearance] = -1;
                         currentAppearance = max(nxtAppearance, prvAppearance);
 
@@ -2358,7 +2377,7 @@ int main()
                     {
                         replaceAllFlag = 1;
 
-                        set < int > snapshot = notRemoved;
+                        set<int> snapshot = notRemoved;
 
                         for (auto currentAppearance : snapshot)
                         {
@@ -2409,7 +2428,7 @@ int main()
                             int L = segmSelected.first;
                             int R = segmSelected.second;
 
-                            String::Treap* s1 = 0, * s2 = 0, * s3 = 0;
+                            String::Treap *s1 = 0, *s2 = 0, *s3 = 0;
                             String::split(S, s2, s3, R);
                             String::split(s2, s1, s2, L - 1);
 
@@ -2417,8 +2436,9 @@ int main()
                             String::merge(S, s1, s3);
                             renderAgain = 1;
                         }
-                        
-                        if (ch == 13) ch = 10;
+
+                        if (ch == 13)
+                            ch = 10;
                         String::insert(String::findCursorPosition(S), S, ch);
                     }
 
@@ -2459,7 +2479,7 @@ int main()
                 }
             }
 
-        window.clear(sf::Color::White);
+        window.clear(currentThemeColors.background);
 
         timer++;
         timer %= timeUnit;
@@ -2468,9 +2488,9 @@ int main()
         cursorTimer %= timeUnit * 2;
 
         if (cursorTimer % (timeUnit * 2) <= timeUnit)
-            cursorBox.setFillColor(colorCursor[1]);
+            cursorBox.setFillColor(currentThemeColors.cursor[0]);
         else if (cursorTimer % (timeUnit * 2) != 0)
-            cursorBox.setFillColor(colorCursor[0]);
+            cursorBox.setFillColor(currentThemeColors.cursor[1]);
 
         if (flag || firstExec)
         {
@@ -2484,7 +2504,7 @@ int main()
                     cursorWidth = 1;
                 }
 
-                Xoffset = 0; ///reset de fiecare data pentru ca afisezi de la inceputul liniei
+                Xoffset = 0; /// reset de fiecare data pentru ca afisezi de la inceputul liniei
                 l1 = max(1, (Yoffset) / scrollUnitY + 1);
                 firstExec = 0;
                 int linesVisible = (windowHeight - marginBottom - marginTop + globalHeightLine - 1) / globalHeightLine;
@@ -2498,11 +2518,11 @@ int main()
                 text1.clear(sf::Color(0, 0, 0, 0));
                 cursorLineOnScreen = 0;
                 cursorOnScreen = 0;
-                
-                for (l2 = l1; l2 <= noLines && cntLine <= linesVisible ; l2++)
+
+                for (l2 = l1; l2 <= noLines && cntLine <= linesVisible; l2++)
                 {
                     int p1 = String::findKthLine(l2, S);
-                    ///S[p1] == '\n' caz special
+                    /// S[p1] == '\n' caz special
 
                     string line = "";
                     string number = to_string(l2);
@@ -2534,9 +2554,9 @@ int main()
                     {
                         splitedLines++;
                         int p3 = String::getLastSeen(p1, p2, windowWidth - marginLeft, S);
-                       // if (p3 == posCursor && p3 < String::len(S)) p3++;
+                        // if (p3 == posCursor && p3 < String::len(S)) p3++;
                         cerr << p3 << ' ';
-                       
+
                         if (p3 != p2)
                         {
                             char ch1 = String::get(p3, S);
@@ -2567,10 +2587,10 @@ int main()
                             cerr << "cw is" << ' ' << cw << ' ' << posCursor - p1 + 1 << '\n';
                             cursorLine = l2;
                             cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                            cursorBox.setPosition((float)marginLeft + paddingLeft + cw, (cntLine - 1)* globalHeightLine + marginTop);
+                            cursorBox.setPosition((float)marginLeft + paddingLeft + cw, (cntLine - 1) * globalHeightLine + marginTop);
                             cursorOnScreen = 1;
                         }
-                    
+
                         text1.draw(text);
                         p1 = p3 + 1;
                     }
@@ -2604,7 +2624,8 @@ int main()
                 int p = String::findKthLine(cursorLine, S);
                 int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
                 int lp = String::getLastSeen(p, posCursor, Xoffset + windowWidth - marginLeft, S);
-                if (lp < posCursor) fp = -1;
+                if (lp < posCursor)
+                    fp = -1;
 
                 renderAgain |= lastCursorLine != cursorLine;
 
@@ -2625,9 +2646,9 @@ int main()
                 if (replaceFlag == 1)
                 {
 
-                    Render::render(l1, l2, S, Yoffset, Xoffset , cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
+                    Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
 
-                    if (currentAppearance != -1 && currentAppearance < positions.size() && !ReplaceFind::isApOnScreen(ReplaceFind::findRealPosition(currentAppearance , positions , bit , word , rword) , word.size()))
+                    if (currentAppearance != -1 && currentAppearance < positions.size() && !ReplaceFind::isApOnScreen(ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword), word.size()))
                     {
                         int P = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
                         int L = String::findNumberOfEndlines(1, P, S) + 1;
@@ -2641,7 +2662,7 @@ int main()
 
                 if (renderAgain == 1)
                 {
-                    Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, text1, text2, text3, img1, img2, img3, scrollUnitY);
+                    Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
                 }
                 else
                 {
@@ -2701,7 +2722,7 @@ int main()
 
                         box.setPosition(w + marginLeft + paddingLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
                         box.setSize(sf::Vector2f(W, globalHeightLine));
-                        box.setFillColor(sf::Color(0, 0, 0, 128));
+                        box.setFillColor(currentThemeColors.selectHighlight);
                         selectedBoxes.push_back(box);
                     }
                 }
@@ -2713,30 +2734,33 @@ int main()
                         int l = segmOnScreen[i].first;
                         int r = segmOnScreen[i].second;
 
-                        if (l == -1) continue;
+                        if (l == -1)
+                            continue;
 
                         int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
                         int y = i * globalHeightLine + marginTop;
-                      //  cerr << "On line " << i + 1 << ": ";
+                        //  cerr << "On line " << i + 1 << ": ";
 
                         while (p < positions.size() && positions[p] <= r)
                         {
-                      //      cerr << positions[p] << ' ';
+                            //      cerr << positions[p] << ' ';
                             int w = String::findWidth(l, positions[p] - 1, S);
                             int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
 
                             box.setPosition(marginLeft + w + paddingLeft, y);
                             box.setSize(sf::Vector2f(W, globalHeightLine));
-                            if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
-                            else box.setFillColor(sf::Color(255, 187, 0, 128));
+                            if (p != currentAppearance)
+                                box.setFillColor(sf::Color(255, 255, 0, 128));
+                            else
+                                box.setFillColor(sf::Color(255, 187, 0, 128));
                             selectedBoxes.push_back(box);
                             p++;
                         }
 
-                        //cerr << '\n';
+                        // cerr << '\n';
                     }
 
-                    //cerr << "\n\n";
+                    // cerr << "\n\n";
                 }
 
                 if (replaceFlag)
@@ -2746,11 +2770,12 @@ int main()
                         int l = segmOnScreen[i].first;
                         int r = segmOnScreen[i].second;
 
-                        if (l == -1) continue;
+                        if (l == -1)
+                            continue;
 
-                        int p = ReplaceFind::traceFirstApToRender(l , positions, bit, notRemoved , word, rword);
+                        int p = ReplaceFind::traceFirstApToRender(l, positions, bit, notRemoved, word, rword);
                         int y = i * globalHeightLine + marginTop;
-                       // cerr << "On line " << i + 1 << ": " << p;
+                        // cerr << "On line " << i + 1 << ": " << p;
 
                         while (p != -1 && p < positions.size() && ReplaceFind::findRealPosition(p, positions, bit, word, rword) <= r)
                         {
@@ -2760,17 +2785,19 @@ int main()
 
                             box.setPosition(marginLeft + w + paddingLeft, y);
                             box.setSize(sf::Vector2f(W, globalHeightLine));
-                            if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
-                            else box.setFillColor(sf::Color(255, 187, 0, 128));
+                            if (p != currentAppearance)
+                                box.setFillColor(sf::Color(255, 255, 0, 128));
+                            else
+                                box.setFillColor(sf::Color(255, 187, 0, 128));
                             selectedBoxes.push_back(box);
-                            p = ReplaceFind::findNextValidAppearance(p, bit, positions, gone, rword, word , prv, nxt , notRemoved);
-                         //   cerr << p << ' ';
+                            p = ReplaceFind::findNextValidAppearance(p, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                            //   cerr << p << ' ';
                         }
 
-                        //cerr << '\n';
+                        // cerr << '\n';
                     }
 
-                   //cerr << "\n\n";
+                    // cerr << "\n\n";
                 }
             }
         }
@@ -2791,7 +2818,7 @@ int main()
                 {
                     if (selectedBoxes[i].getPosition().y == selectedBoxes[i + 1].getPosition().y)
                     {
-                        selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x , selectedBoxes[i].getSize().x), globalHeightLine));
+                        selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x, selectedBoxes[i].getSize().x), globalHeightLine));
                     }
                 }
 
@@ -2800,7 +2827,7 @@ int main()
                     if (selectedBoxes[i].getPosition().y == selectedBoxes[i - 1].getPosition().y)
                     {
                         int oldX = selectedBoxes[i].getPosition().x;
-                        selectedBoxes[i].setPosition(max(selectedBoxes[i].getPosition().x , selectedBoxes[i - 1].getPosition().x + selectedBoxes[i - 1].getSize().x) , selectedBoxes[i].getPosition().y);
+                        selectedBoxes[i].setPosition(max(selectedBoxes[i].getPosition().x, selectedBoxes[i - 1].getPosition().x + selectedBoxes[i - 1].getSize().x), selectedBoxes[i].getPosition().y);
                         selectedBoxes[i].setSize(sf::Vector2f(selectedBoxes[i].getSize().x - (selectedBoxes[i].getPosition().x - oldX), globalHeightLine));
                     }
                 }
@@ -2818,8 +2845,10 @@ int main()
             if (showLineNumbers)
                 window.draw(img3);
 
-            if (cursorOnScreen) window.draw(cursorBox);
-            if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)  window.draw(cursorLineHighlight);
+            if (cursorOnScreen)
+                window.draw(cursorBox);
+            if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)
+                window.draw(cursorLineHighlight);
         }
         else
         {
@@ -2833,8 +2862,8 @@ int main()
         }
 
         zoomOutButton->draw();
-        zoomInButton ->draw();
-        
+        zoomInButton->draw();
+
         for (int i = 0; i < 3; i++)
             menus[i]->draw();
 

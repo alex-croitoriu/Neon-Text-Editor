@@ -13,6 +13,8 @@
 - [X] fix blurry buttons
 - [X] options menu: hide lines, go to line, time and date, switch dark/light mode
 - [X] should not prompt for path when saving after opening a file
+- [X] change background for margin left
+- [ ] add padding to the left
 
 - [ ] scrollbar
 - [ ] current file name top right
@@ -26,8 +28,7 @@
 - [ ] modal for error
 - [ ] name and logo
 
-- [ ] change background for margin left
 - [ ] add separator between buttons
 - [ ] add navbar separator
-- [ ] add padding to the left
+- [ ] add additional fonts
  
