@@ -3,16 +3,14 @@
 #include <SFML/Graphics.hpp>
 
 #include <string>
-#include <functional>
 
 class Button
 {
     sf::RectangleShape container;
     sf::Text content;
-    sf::Texture texture;
 
 public:
-    Button(const std::string &label, const sf::Vector2f &size, const sf::Vector2f &position, int fontSize, bool alignCenter = true);
+    Button(const std::string &label, const sf::Vector2f &position, bool alignCenter = true, bool small = true);
 
     bool isHovering();
     
@@ -23,5 +21,4 @@ public:
     void setHoverState(bool isHovering);
     
     void draw();
-
 };
