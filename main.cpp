@@ -1577,38 +1577,31 @@ int main()
                 {
                     Xoffset -= scrollUnitX;
                     Xoffset = max(0, Xoffset);
-
-                    if (localPosition.y >= marginTop && localPosition.y < windowHeight - marginBottom)
-                    {
-                        int l = Render::findLineOnScreen(localPosition.y);
-                        // segmSelected.first = segmOnScreen[l].first;
-                    }
+                    flag = 1;
+                    renderAgain = 1;
                 }
 
                 if (selectFlag && localPosition.x >= windowWidth)
                 {
                     Xoffset += scrollUnitX;
-
-                    if (localPosition.y >= marginTop && localPosition.y < windowHeight - marginBottom)
-                    {
-                        int l = Render::findLineOnScreen(localPosition.y);
-                        // segmSelected.second = segmOnScreen[l].second;
-                    }
+                    flag = 1;
+                    renderAgain = 1;
                 }
 
                 if (selectFlag && localPosition.y < marginTop)
                 {
                     Yoffset -= scrollUnitY;
                     Yoffset = max(0, Yoffset);
+                    flag = 1;
+                    renderAgain = 1;
                 }
 
                 if (selectFlag && localPosition.y >= windowHeight - marginBottom)
                 {
                     Yoffset += scrollUnitY;
+                    flag = 1;
+                    renderAgain = 1;
                 }
-
-                flag = 1;
-                renderAgain = 1;
             }
         }
         else if (selectFlag && ctrlX == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::X))
@@ -1627,11 +1620,11 @@ int main()
 
             String::merge(S, s1, s3);
             selectFlag = 0;
+            findFlag = 0;
+            replaceFlag = 0;
+
             flag = 1;
             renderAgain = 1;
-
-            renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
-            renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
         }
         else if (selectFlag && ctrlC == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::C))
         {
@@ -1647,9 +1640,6 @@ int main()
 
             String::merge(S, s1, s2);
             String::merge(S, S, s3);
-
-            flag = 1;
-            renderAgain = 1;
         }
         else if (ctrlV == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::V))
         {
@@ -1665,17 +1655,12 @@ int main()
             flag = 1;
             renderAgain = 1;
             selectFlag = 0;
-
-            renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
-            renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
         }
         else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A)) 
         {
             segmSelected = {1, String::len(S) - 1};
             buffer = String::constructRawString(S);
             selectFlag = 1;
-            flag = 1;
-            renderAgain = 1;
         }
         else
             while (window.pollEvent(event))
@@ -1871,9 +1856,6 @@ int main()
 
                                     String::merge(S, s1, s2);
                                     String::merge(S, S, s3);
-
-                                    flag = 1;
-                                    renderAgain = 1;
                                 }
                             }
                             else if (editMenuButtons[1]->isHovering())
@@ -1894,9 +1876,6 @@ int main()
                                     flag = 1;
                                     renderAgain = 1;
                                     selectFlag = findFlag = 0;
-
-                                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
-                                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                                 }
                             }
                             else if (editMenuButtons[2]->isHovering())
@@ -1921,9 +1900,6 @@ int main()
                                     selectFlag = findFlag = 0;
                                     flag = 1;
                                     renderAgain = 1;
-
-                                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
-                                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                                 }
                             }
                             else if (editMenuButtons[3]->isHovering())
@@ -2006,7 +1982,8 @@ int main()
                                     String::insert(posCursor, S, i);
                                     posCursor++;
                                 }
-
+                                
+                                flag = 1;
                                 renderAgain = 1;
                             }
                             else if (optionsMenuButtons[3]->isHovering())
@@ -2136,7 +2113,16 @@ int main()
                                 String::insert(posCursor - 1, S);
                                 cursorTimer = 0;
                             }
+
+                            flag = 1;
+                            selectFlag = 0;
+
+                            renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                            renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                         }
+                        
+
+                        break;
                     }
                     else if (key == 72) /// right arrow
                     {
@@ -2172,7 +2158,15 @@ int main()
                                 String::insert(posCursor + 1, S);
                                 cursorTimer = 0;
                             }
+
+                            flag = 1;
+                            selectFlag = 0;
+
+                            renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                            renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                         }
+
+                        break;
                     }
                     else if (key == 43) ///not functional ignora
                     {
@@ -2310,11 +2304,6 @@ int main()
                         break;
                     }
                     else break;
-                    flag = 1;
-                    // selectFlag = 0;
-                    
-                    renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
-                    renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
 
                     break;
                 }
