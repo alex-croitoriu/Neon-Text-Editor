@@ -8,8 +8,8 @@ const ThemeColors themeColors[] =
     {
         sf::Color(0, 0, 0, 30), 
         sf::Color::White, 
-        sf::Color::White, 
-        sf::Color(255, 255, 255, 128),
+        sf::Color(110, 110, 110, 255),
+        sf::Color(110, 110, 110, 255),
         sf::Color(255, 255, 255, 30), 
         sf::Color(80, 80, 80), 
         sf::Color(0, 0, 0, 255), 
@@ -19,7 +19,7 @@ const ThemeColors themeColors[] =
         {
         sf::Color::White, 
         sf::Color::Black, 
-        sf::Color::Black, 
+        sf::Color(0, 0, 0, 128),
         sf::Color(0, 0, 0, 128),
         sf::Color(0, 0, 0, 30),
         sf::Color(200, 200, 200),

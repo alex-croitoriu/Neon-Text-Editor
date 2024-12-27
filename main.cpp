@@ -30,6 +30,7 @@ vector<sf::RectangleShape> selectedBoxes;
 
 sf::Event event;
 sf::Text text, ptext1, ptext2;
+sf::Text lineColumnIndicator, zoomLevelIndicator, fontSizeIndicator;
 
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
@@ -42,10 +43,7 @@ float recalculateHeightLine(int fnt = fontSize)
 }
 
 int cursorHeight = 0, cursorWidth = 0;
-int marginTop = 18;
-int marginLeft = 60;
-int paddingLeft = 5;
-int marginBottom = 100;
+int marginTop = 18, marginBottom = 18, marginLeft = 60, paddingLeft = 5;
 int lineNumbersMaxDigits = 3;
 
 float globalHeightLine = recalculateHeightLine();
@@ -1044,6 +1042,7 @@ namespace Render
         }
 
         marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['a'];
+        paddingLeft = 0.25 * charWidth[fontSize]['a'];
         lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight - marginTop - marginBottom));
 
         text.setLetterSpacing(1);
@@ -1492,6 +1491,14 @@ int main()
     lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
 
     cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
+
+    topSeparator.setPosition(0, marginTop);
+    topSeparator.setSize(sf::Vector2f(windowWidth, 1));
+    topSeparator.setFillColor(currentThemeColors.separator);
+
+    bottomSeparator.setPosition(0, windowHeight - marginBottom);
+    bottomSeparator.setSize(sf::Vector2f(windowWidth, 1));
+    bottomSeparator.setFillColor(currentThemeColors.separator);
 
     text1.create(maxRows, maxRows);
     text2.create(maxRows, maxRows);
@@ -2030,7 +2037,6 @@ int main()
 
                                 showLineNumbers = !showLineNumbers;
                                 optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLineNumbers]);
-                                marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['a'];
                                 renderAgain = 1;
                             }
                             else if (optionsMenuButtons[1]->isHovering())
@@ -2475,6 +2481,7 @@ int main()
                     flag = 1;
                     windowWidth = event.size.width;
                     windowHeight = event.size.height;
+                    bottomSeparator.setPosition(0, windowHeight - marginBottom);
                     break;
                 }
             }
@@ -2540,6 +2547,7 @@ int main()
                     text1.draw(text);
                     text.setLetterSpacing(1);
                     marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['a'];
+                    paddingLeft = 0.25 * charWidth[fontSize]['a'];
 
                     if (String::len(S) + 1 == p1 || String::get(p1, S) == 10)
                     {
@@ -2866,6 +2874,9 @@ int main()
 
         for (int i = 0; i < 3; i++)
             menus[i]->draw();
+
+        window.draw(topSeparator);
+        window.draw(bottomSeparator);
 
         window.display();
     }
