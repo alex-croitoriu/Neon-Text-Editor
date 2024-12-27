@@ -927,7 +927,7 @@ namespace Render
             Xoffset -= scrollUnitX;
         Xoffset = max(0, Xoffset);
 
-        while (currLineWidth >= Xoffset + windowWidth - marginLeft)
+        while (currLineWidth >= Xoffset + windowWidth - marginLeft - scrollUnitX)
             Xoffset += scrollUnitX, modif = 1;
 
         return modif;
@@ -1120,7 +1120,7 @@ namespace Render
         int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
         l1 = max(1, (Yoffset) / scrollUnitY + 1);
-        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - marginBottom - marginTop) / scrollUnitY));
+        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - marginBottom - marginTop) / scrollUnitY + 1));
 
         sizeRLines = 0;
 
@@ -1661,6 +1661,7 @@ int main()
         {
             segmSelected = {1, String::len(S) - 1};
             buffer = String::constructRawString(S);
+            flag = 1;
             selectFlag = 1;
         }
         else
@@ -2125,6 +2126,13 @@ int main()
 
                         findFlag = 0;
                         replaceFlag = 0;
+                        renderAgain = 1;
+                        flag = 1;
+
+                        renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                        renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
+
+                        break;
                     }
                     else if (key == 74) /// down arrow
                     {
@@ -2145,6 +2153,12 @@ int main()
 
                         findFlag = 0;
                         replaceFlag = 0;
+                        renderAgain = 1;
+                        flag = 1;
+                        renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
+                        renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
+
+                        break;
                     }
                     else if (key == 71) /// left arrow
                     {
@@ -2154,7 +2168,7 @@ int main()
                             if (pap != -1) currentAppearance = pap;
                             else break;
 
-                           // renderAgain = 1;
+                            renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2164,7 +2178,7 @@ int main()
                             currentAppearance--;
                             currentAppearance = max(0, currentAppearance);
                             cerr << "After left arrow: " << currentAppearance << '\n';
-                           // renderAgain = 1;
+                            renderAgain = 1;
                             flag = 1;
                             selectFlag = 0;
                             break;
@@ -2383,6 +2397,8 @@ int main()
                         }
                         else if (posCursor > 1)
                             String::del(posCursor - 1, S);
+
+                        renderAgain = 1;
                     }
                     else
                     {
@@ -2397,6 +2413,7 @@ int main()
 
                             String::del(s2);
                             String::merge(S, s1, s3);
+                            renderAgain = 1;
                         }
                         
                         if (ch == 13) ch = 10;
