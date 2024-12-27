@@ -2116,8 +2116,6 @@ int main()
                         if (replaceFlag == 1)
                         {
                             replaceFlag = 0;
-                            renderAgain = 1;
-                            flag = 1;
                         }
                         else if (findFlag == 1)
                         {
@@ -2146,8 +2144,10 @@ int main()
 
                         findFlag = 0;
                         replaceFlag = 0;
-                        renderAgain = 1;
+                      
                         selectFlag = 0;
+                        
+                        renderAgain = 1;
                         flag = 1;
 
                         renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
@@ -2175,8 +2175,10 @@ int main()
                         findFlag = 0;
                         replaceFlag = 0;
                         selectFlag = 0;
+                        
                         renderAgain = 1;
                         flag = 1;
+
                         renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
                         renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
 
@@ -2187,6 +2189,7 @@ int main()
                         if (replaceFlag == 1)
                         {
                             int pap = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                            
                             if (pap != -1)
                                 currentAppearance = pap;
                             else
@@ -2194,7 +2197,10 @@ int main()
 
                             renderAgain = 1;
                             flag = 1;
+                            
                             selectFlag = 0;
+                            findFlag = 0;
+
                             break;
                         }
                         else if (findFlag == 1)
@@ -2202,9 +2208,13 @@ int main()
                             currentAppearance--;
                             currentAppearance = max(0, currentAppearance);
                             cerr << "After left arrow: " << currentAppearance << '\n';
+                            
                             renderAgain = 1;
                             flag = 1;
+
                             selectFlag = 0;
+                            replaceFlag = 0;
+
                             break;
                         }
                         else
@@ -2238,9 +2248,12 @@ int main()
                             else
                                 break;
 
-                            // renderAgain = 1;
+                            renderAgain = 1;
                             flag = 1;
+                           
                             selectFlag = 0;
+                            findFlag = 0;
+
                             break;
                         }
                         else if (findFlag == 1)
@@ -2249,9 +2262,13 @@ int main()
                             currentAppearance = min((int)positions.size() - 1, currentAppearance);
 
                             cerr << "After right arrow: " << currentAppearance << '\n';
-                            // renderAgain = 1;
+                           
+                            renderAgain = 1;
                             flag = 1;
+                            
                             selectFlag = 0;
+                            replaceFlag = 0;
+
                             break;
                         }
                         else
@@ -2292,71 +2309,11 @@ int main()
 
                         break;
                     }
-                    else if (key == 41)
-                    {
-                        word = Windows::getStringFromUser("word");
-                        rword = Windows::getStringFromUser("word");
-
-                        if (word.size() == 0)
-                            break;
-
-                        string s = String::constructRawString(S);
-
-                        if (matchCase == 0)
-                        {
-                            for (auto &i : word)
-                                if (i >= 'A' && i <= 'Z')
-                                    i = i - 'A' + 'a';
-
-                            for (auto &i : s)
-                                if (i >= 'A' && i <= 'Z')
-                                    i = i - 'A' + 'a';
-                        }
-
-                        ReplaceFind::KMP(s, word, positions, wholeWord);
-
-                        if (positions.size() == 0)
-                        {
-                            Windows::throwMessage("There are 0 matchings!");
-                            renderAgain = 1;
-                            flag = 1;
-                            break;
-                        }
-
-                        prv.clear();
-                        bit.clear();
-                        nxt.clear();
-                        gone.clear();
-
-                        prv.resize(positions.size(), -1);
-                        nxt.resize(positions.size(), -1);
-                        gone.resize(positions.size(), 0);
-                        bit.resize(positions.size(), 0);
-                        notRemoved.clear();
-
-                        for (int i = 1; i < positions.size(); i++)
-                        {
-                            prv[i] = i - 1;
-                        }
-
-                        for (int i = 0; i + 1 < positions.size(); i++)
-                        {
-                            nxt[i] = i + 1;
-                        }
-
-                        for (int i = 0; i < positions.size(); i++)
-                            notRemoved.insert(i);
-
-                        currentAppearance = 0;
-                        replaceFlag = 1;
-                        renderAgain = 1;
-                        flag = 1;
-                        break;
-                    }
                     else if (key == 58)
                     {
                         if (replaceFlag == 0)
                             break;
+                        
                         if (currentAppearance == -1)
                         {
                             Windows::throwMessage("There are no more matchings!");
