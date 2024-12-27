@@ -19,14 +19,15 @@ public:
     Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position);
 
     bool isHovering();
-
     bool getIsOpen();
+
     sf::Vector2f getPosition();
     int getButtonCount();
-    Button** getButtons();
     Button* getToggleButton();
+    Button** getButtons();
 
-    void setIsOpen(bool _isOpen);
+    void open();
+    void close();
     void setPosition(const sf::Vector2f &position);
 
     void draw();

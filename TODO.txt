@@ -11,14 +11,23 @@
 - [X] select all
 - [X] fullscreeen legit
 - [X] fix blurry buttons
+- [X] options menu: hide lines, go to line, time and date, switch dark/light mode
+- [X] should not prompt for path when saving after opening a file
 
 - [ ] scrollbar
-- [ ] stats (current cursor position - line and column, current zoom level, current file name)
-- [ ] dark/light mode
+- [ ] current file name top right
+- [ ] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
+- [WIP] dark/light mode 
 - [ ] move zoom in/out buttons to the bottom
 - [ ] modal for unsaved changes 
-- [ ] modals for find/save/open file
+- [ ] modal for find
+- [ ] modal for replace
+- [ ] modal for time and date
+- [ ] modal for error
 - [ ] name and logo
 
-- [ ] options menu: hide lines, go to line, time and date, switch dark/light mode
-- [ ] should not prompt for path when saving after opening a file
+- [ ] change background for margin left
+- [ ] add separator between buttons
+- [ ] add navbar separator
+- [ ] add padding to the left
+ 

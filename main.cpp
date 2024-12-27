@@ -12,14 +12,19 @@
 #include <set>
 #include <bitset>
 
-#include "constants.hpp"
 #include "globals.hpp"
+#include "config.hpp"
 #include "button.hpp"
 #include "menu.hpp"
 
 using namespace std;
 
 mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+
+
+sf::RectangleShape topSeparator;
+sf::RectangleShape bottomSeparator;
+sf::RectangleShape lineNumbersBackground;
 
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
@@ -34,8 +39,9 @@ float recalculateHeightLine(int fnt = fontSize)
 int cursorHeight = 0, cursorWidth = 0;
 int marginTop = 40;
 int marginLeft = 60;
+int paddingLeft = 5;
 int marginBottom = 100;
-int lineNumberMaxDigits = 3;
+int lineNumbersMaxDigits = 3;
 
 float globalHeightLine = recalculateHeightLine();
 float centerConst = 0;
@@ -958,7 +964,7 @@ namespace Render
     int moveCursorToClick(sf::Vector2i localPosition, String::Treap*& S, int scrollUnitY, int l1, int l2, int Xoffset)
     {
         int l = findLineOnScreen(localPosition.y);
-        float w = localPosition.x - marginLeft;
+        float w = localPosition.x - marginLeft - paddingLeft;
 
         if (l + l1 - 1 > l2)
             return String::len(S) + 1;
@@ -979,7 +985,7 @@ namespace Render
         return p + 1;
     }
 
-    void centerText(sf::Text& text, string s, float startY, float startX = marginLeft)
+    void centerText(sf::Text& text, string s, float startY, float startX = marginLeft + paddingLeft)
     {
         bool empty = 0;
         s += "|";
@@ -1009,9 +1015,9 @@ namespace Render
         {
             string line = "";
             string number = to_string(i);
-            if (number.length() > lineNumberMaxDigits)
-                lineNumberMaxDigits = number.length();
-            for (int j = 0; j < lineNumberMaxDigits - number.length(); j++)
+            if (number.length() > lineNumbersMaxDigits)
+                lineNumbersMaxDigits = number.length();
+            for (int j = 0; j < lineNumbersMaxDigits - number.length(); j++)
                 line += " ";
             line += number;
             centerText(text, line, marginTop + lastHeight + globalHeightLine, 5);
@@ -1019,7 +1025,8 @@ namespace Render
             lastHeight += globalHeightLine;
         }
 
-        marginLeft = showLines * (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+        marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['a'];
+        lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight - marginTop - marginBottom));
 
         text.setLetterSpacing(1);
 
@@ -1103,7 +1110,7 @@ namespace Render
             s1 += txt[i];
 
         h1.setString(s1);
-        h1.setPosition(marginLeft, text.getPosition().y);
+        h1.setPosition(marginLeft + paddingLeft, text.getPosition().y);
 
         return w + (W - w - cW) / 2;
     }
@@ -1417,36 +1424,26 @@ int main()
     vector<string> menuButtonLabels[] = 
     {
         { "Open", "Save", "Save as" },
-        { "Copy", "Paste", "Cut", "Find" },
+        { "Copy", "Paste", "Cut", "Find", "Replace" },
         { "Hide lines", "Go to line", "Time & Date", "Switch theme" }
     };
 
-    sf::Vector2f buttonPositions[] = 
-    {
-        sf::Vector2f(  0, 0),
-        sf::Vector2f( 60, 0),
-        sf::Vector2f(120, 0),
-        sf::Vector2f(180, 0),
-        sf::Vector2f(240, 0),
-    };
+    vector<sf::Vector2f> menuPositions, buttonPositions ;
 
-    sf::Vector2f menuPositions[] = 
-    {
-        sf::Vector2f(  0, 20),
-        sf::Vector2f( 60, 20),
-        sf::Vector2f(120, 20)
-    };
+    for (int i = 0; i < 3; i++)
+        menuPositions.push_back(sf::Vector2f(i * smallButtonSize.x, smallButtonSize.y));
 
-    sf::Vector2f buttonSize(60, 20);
+    for (int i = 0; i < 5; i++)
+        buttonPositions.push_back(sf::Vector2f(i * smallButtonSize.x, 0));
 
-    Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonSize, buttonPositions[3], 10);
-    Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonSize, buttonPositions[4], 10);
+    Button *zoomOutButton = new Button(zoomInButtonLabels[0], buttonPositions[3]);
+    Button *zoomInButton  = new Button(zoomInButtonLabels[1], buttonPositions[4]);
 
     Menu **menus = new Menu*[3];
 
     for (int i = 0; i < 3; i++)
     {
-        Button * toggleButton = new Button(menuLabels[i], buttonSize, buttonPositions[i], 10);
+        Button *toggleButton = new Button(menuLabels[i], buttonPositions[i]);
         menus[i] = new Menu(toggleButton, menuButtonLabels[i], menuPositions[i]);
     }
 
@@ -1472,6 +1469,10 @@ int main()
 
     sf::RenderTexture text1, text2, text3;
     sf::Sprite img1, img2, img3;
+    
+    lineNumbersBackground.setFillColor(sf::Color(161, 163, 166, 100));
+    lineNumbersBackground.setPosition(0, marginTop);
+    lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
 
     text1.create(maxRows, maxRows);
     text2.create(maxRows, maxRows);
@@ -1697,7 +1698,7 @@ int main()
                         if (toggleButton->isHovering())
                         {
                             toggleButton->setHoverState(true);
-                            menus[i]->setIsOpen(true);
+                            menus[i]->open();
                             menus[i]->setPosition(menuPositions[i]);
                         }
                         else
@@ -1707,7 +1708,7 @@ int main()
                     // close menus if user isn't hovering over them anymore
                     for (int i = 0; i < 3; i++)
                         if (menus[i]->getIsOpen() && !menus[i]->isHovering() && !menus[i]->getToggleButton()->isHovering() && menus[i]->getPosition() == menuPositions[i])
-                            menus[i]->setIsOpen(false);
+                            menus[i]->close();
 
                     // set hover state for buttons inside menus
                     for (int i = 0; i < 3; i++)
@@ -1772,7 +1773,7 @@ int main()
                                 isHovering |= editMenuButtons[i]->isHovering();
                             
                             if (!isHovering)
-                                editMenu->setIsOpen(false);
+                                editMenu->close();
                         }
 
                         // TODO: de facut astea dinamice ca asa cum is acuma fac spume
@@ -1780,7 +1781,7 @@ int main()
                         {
                             if (fileMenuButtons[0]->isHovering())
                             {
-                                fileMenu->setIsOpen(false);
+                                fileMenu->close();
                                 
                                 path = Windows::open();
                                 
@@ -1814,7 +1815,7 @@ int main()
                             }
                             else if (fileMenuButtons[1]->isHovering())
                             {
-                                fileMenu->setIsOpen(false);
+                                fileMenu->close();
 
                                 if (path.size() == 0)
                                     path = Windows::saveAS();
@@ -1832,7 +1833,7 @@ int main()
                             }
                             else if (fileMenuButtons[2]->isHovering())
                             {
-                                fileMenu->setIsOpen(false);
+                                fileMenu->close();
 
                                 path = Windows::saveAS();
 
@@ -1855,7 +1856,7 @@ int main()
                         {
                             if (editMenuButtons[0]->isHovering())
                             {
-                                editMenu->setIsOpen(false);
+                                editMenu->close();
 
                                 if (selectFlag && ctrlC == 0)
                                 {
@@ -1878,7 +1879,7 @@ int main()
                             }
                             else if (editMenuButtons[1]->isHovering())
                             {
-                                editMenu->setIsOpen(false);
+                                editMenu->close();
 
                                 if (ctrlV == 0)
                                 {
@@ -1901,7 +1902,7 @@ int main()
                             }
                             else if (editMenuButtons[2]->isHovering())
                             {
-                                editMenu->setIsOpen(false);
+                                editMenu->close();
 
                                 if (selectFlag && ctrlX == 0)
                                 {
@@ -1928,7 +1929,7 @@ int main()
                             }
                             else if (editMenuButtons[3]->isHovering())
                             {
-                                editMenu->setIsOpen(false);
+                                editMenu->close();
 
                                 ///apelat dupa ce faci setarile cu wholeWord si matchCase
                                 word = Windows::getStringFromUser("Find");
@@ -1968,22 +1969,85 @@ int main()
                                 flag = 1;
                                 break;
                             }
+                            else if (editMenuButtons[4]->isHovering())
+                            {
+                                editMenu->close();
+
+                                word = Windows::getStringFromUser("word");
+                                rword = Windows::getStringFromUser("word");
+
+                                if (word.size() == 0)
+                                    break;
+
+                                string s = String::constructRawString(S);
+
+                                if (matchCase == 0)
+                                {
+                                    for (auto& i : word)
+                                        if (i >= 'A' && i <= 'Z')
+                                            i = i - 'A' + 'a';
+
+                                    for (auto& i : s)
+                                        if (i >= 'A' && i <= 'Z')
+                                            i = i - 'A' + 'a';
+                                }
+
+                                ReplaceFind::KMP(s, word, positions, wholeWord);
+
+                                if (positions.size() == 0)
+                                {
+                                    Windows::throwMessage("There are 0 matchings!");
+                                    renderAgain = 1;
+                                    flag = 1;
+                                    break;
+                                }
+
+                                prv.clear();
+                                bit.clear();
+                                nxt.clear();
+                                gone.clear();
+
+                                prv.resize(positions.size(), -1);
+                                nxt.resize(positions.size(), -1);
+                                gone.resize(positions.size(), 0);
+                                bit.resize(positions.size(), 0);
+                                notRemoved.clear();
+
+                                for (int i = 1; i < positions.size(); i++)
+                                {
+                                    prv[i] = i - 1;
+                                }
+
+                                for (int i = 0; i + 1 < positions.size(); i++)
+                                {
+                                    nxt[i] = i + 1;
+                                }
+
+                                for (int i = 0; i < positions.size(); i++)
+                                    notRemoved.insert(i);
+
+                                currentAppearance = 0;
+                                replaceFlag = 1;
+                                renderAgain = 1;
+                                flag = 1;
+                                break;
+                            }
                         }
                         
                         else if (optionsMenu->getIsOpen())
                         {
                             if (optionsMenuButtons[0]->isHovering())
                             {
-                                optionsMenu->setIsOpen(false);
+                                optionsMenu->close();
 
-                                showLines = !showLines;
-                                optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLines]);
-                                marginLeft = showLines * (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+                                showLineNumbers = !showLineNumbers;
+                                optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLineNumbers]);
+                                marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['a'];
                                 renderAgain = 1;
                             }
                             else if (optionsMenuButtons[1]->isHovering())
                             {
-                                optionsMenu->setIsOpen(false);
+                                optionsMenu->close();
 
                                 string line = Windows::getStringFromUser("Go to line");
                                 int l = min(String::findNumberOfEndlines(1 , String::len(S) , S) + 1 , stoi(line));
@@ -1995,7 +2059,7 @@ int main()
                             }
                             else if (optionsMenuButtons[2]->isHovering())
                             {
-                                optionsMenu->setIsOpen(false);
+                                optionsMenu->close();
 
                                 // TODO: let user customize format via modal
                                 string data = TimeFunction::getTime("%I:%M %p %m/%d/%Y");
@@ -2011,7 +2075,9 @@ int main()
                             }
                             else if (optionsMenuButtons[3]->isHovering())
                             {
-
+                                lightTheme = !lightTheme;
+                                
+                                renderAgain = 1;
                             }
                         }
                         
@@ -2029,7 +2095,7 @@ int main()
                     {
                         sf::Vector2i localPosition = sf::Mouse::getPosition(window);
                         editMenu->setPosition(sf::Vector2f(localPosition.x, localPosition.y));
-                        editMenu->setIsOpen(true);
+                        editMenu->open();
                         break;
                     }
 
@@ -2299,16 +2365,6 @@ int main()
                         renderAgain = 1;
                         flag = 1;
                     }
-                    else if (key == 86) ///go to line
-                    {
-                        string line = Windows::getStringFromUser("Go to line");
-                        int l = min(String::findNumberOfEndlines(1 , String::len(S) , S) + 1 , stoi(line));
-                        Xoffset = 0;
-                        Yoffset = (l - 1) * globalHeightLine;
-                        renderAgain = 1;
-                        flag = 1;
-                        break;
-                    }
                     else break;
                     flag = 1;
                     // selectFlag = 0;
@@ -2443,10 +2499,10 @@ int main()
                     string line = "";
                     string number = to_string(l2);
 
-                    if (number.length() > lineNumberMaxDigits)
-                        lineNumberMaxDigits = number.length();
+                    if (number.length() > lineNumbersMaxDigits)
+                        lineNumbersMaxDigits = number.length();
 
-                    for (int j = 0; j < lineNumberMaxDigits - number.length(); j++)
+                    for (int j = 0; j < lineNumbersMaxDigits - number.length(); j++)
                         line += " ";
 
                     line += number;
@@ -2455,7 +2511,7 @@ int main()
                     text.setLetterSpacing(0.7);
                     text1.draw(text);
                     text.setLetterSpacing(1);
-                    marginLeft = showLines * (lineNumberMaxDigits + 1) * charWidth[fontSize]['a'];
+                    marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['a'];
 
                     if (String::len(S) + 1 == p1 || String::get(p1, S) == 10)
                     {
@@ -2503,7 +2559,7 @@ int main()
                             cerr << "cw is" << ' ' << cw << ' ' << posCursor - p1 + 1 << '\n';
                             cursorLine = l2;
                             cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                            cursorBox.setPosition((float)marginLeft + cw, (cntLine - 1)* globalHeightLine + marginTop);
+                            cursorBox.setPosition((float)marginLeft + paddingLeft + cw, (cntLine - 1)* globalHeightLine + marginTop);
                             cursorOnScreen = 1;
                         }
                     
@@ -2514,7 +2570,7 @@ int main()
                     if (cursorLine == l2)
                     {
                         cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, splitedLines * globalHeightLine));
-                        cursorLineHighlight.setPosition(marginLeft , marginTop + (cntLine - splitedLines) * globalHeightLine);
+                        cursorLineHighlight.setPosition(marginLeft, marginTop + (cntLine - splitedLines) * globalHeightLine);
                     }
                 }
 
@@ -2599,7 +2655,7 @@ int main()
                 if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
                 {
                     cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                    cursorBox.setPosition((float)marginLeft + cw, (cursorLine - l1) * globalHeightLine + marginTop);
+                    cursorBox.setPosition((float)marginLeft + cw + paddingLeft, (cursorLine - l1) * globalHeightLine + marginTop);
 
                     cursorOnScreen = 1;
                 }
@@ -2635,7 +2691,7 @@ int main()
                         int w = String::findWidth(l, li - 1, S);
                         int W = String::findWidth(li, ri, S);
 
-                        box.setPosition(w + marginLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
+                        box.setPosition(w + marginLeft + paddingLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
                         box.setSize(sf::Vector2f(W, globalHeightLine));
                         box.setFillColor(sf::Color(0, 0, 0, 128));
                         selectedBoxes.push_back(box);
@@ -2661,7 +2717,7 @@ int main()
                             int w = String::findWidth(l, positions[p] - 1, S);
                             int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
 
-                            box.setPosition(marginLeft + w, y);
+                            box.setPosition(marginLeft + w + paddingLeft, y);
                             box.setSize(sf::Vector2f(W, globalHeightLine));
                             if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
                             else box.setFillColor(sf::Color(255, 187, 0, 128));
@@ -2694,7 +2750,7 @@ int main()
                             int w = String::findWidth(l, P - 1, S);
                             int W = String::findWidth(P, P + word.size() - 1, S);
 
-                            box.setPosition(marginLeft + w, y);
+                            box.setPosition(marginLeft + w + paddingLeft, y);
                             box.setSize(sf::Vector2f(W, globalHeightLine));
                             if (p != currentAppearance) box.setFillColor(sf::Color(255, 255, 0, 128));
                             else box.setFillColor(sf::Color(255, 187, 0, 128));
@@ -2750,7 +2806,8 @@ int main()
             window.draw(ptext1);
             window.draw(img2);
 
-            if (showLines)
+            window.draw(lineNumbersBackground);
+            if (showLineNumbers)
                 window.draw(img3);
 
             if (cursorOnScreen) window.draw(cursorBox);

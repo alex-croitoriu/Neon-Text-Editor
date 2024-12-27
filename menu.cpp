@@ -1,8 +1,5 @@
 #include <SFML/Graphics.hpp>
 
-#include <string>
-#include <vector>
-
 #include "globals.hpp"
 #include "button.hpp"
 #include "menu.hpp"
@@ -20,7 +17,7 @@ Menu::Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, 
     for (int i = 0; i < buttonCount; i++)
     {
         sf::Vector2f buttonPosition(position.x, position.y + 30 * i);
-        buttons[i] = new Button(buttonLabels[i], size, buttonPosition, 12, false);
+        buttons[i] = new Button(buttonLabels[i], buttonPosition, false, false);
     }
 
     container.setSize(sf::Vector2f(size.x, size.y * buttonCount)); 
@@ -49,19 +46,24 @@ int Menu::getButtonCount()
     return buttonCount;
 }
 
-Button** Menu::getButtons()
-{
-    return buttons;
-}
-
 Button* Menu::getToggleButton()
 {
     return toggleButton;
 }
 
-void Menu::setIsOpen(bool _isOpen)
+Button** Menu::getButtons()
 {
-    isOpen = _isOpen;
+    return buttons;
+}
+
+void Menu::open()
+{
+    isOpen = true;
+}
+
+void Menu::close()
+{
+    isOpen = false;
 }
 
 void Menu::setPosition(const sf::Vector2f &position)

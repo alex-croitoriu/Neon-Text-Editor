@@ -1,19 +1,19 @@
-#include <SFML/Graphics.hpp>
-
-#include <string>
-
 #include "globals.hpp"
 #include "button.hpp"
+#include "config.hpp"
 
-Button::Button(const std::string &label, const sf::Vector2f &size, const sf::Vector2f &position, int fontSize, bool alignCenter)
+Button::Button(const std::string &label, const sf::Vector2f &position, bool alignCenter, bool small)
 {
-    container.setSize(size);
+    container.setSize(small ? smallButtonSize : buttonSize);
     container.setPosition(position);
     container.setFillColor(sf::Color(0, 0, 0, 0));
 
-    content = sf::Text(label, font, fontSize);
+    content = sf::Text(label, font, small ? smallButtonFontSize : buttonFontSize);
     content.setStyle(sf::Text::Bold);
     content.setFillColor(sf::Color::Black);
+    content.setLetterSpacing(small ? smallButtonLetterSpacing : buttonLetterSpacing);
+
+    // container.setSize(sf::Vector2f(int(content.getGlobalBounds().getSize().x + 20), small ? smallButtonFontSize : buttonFontSize + 10));
 
     if (alignCenter) 
     {
