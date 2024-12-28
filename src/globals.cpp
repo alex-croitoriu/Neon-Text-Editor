@@ -12,6 +12,10 @@ int windowHeight = 1000;
 bool showLineNumbers = true;
 bool lightTheme = true;
 
+int fontSize = 20;
+
+TextBox *lineColumnTextBox, *zoomLevelTextBox, *fontSizeTextBox, *selectedCharactersTextBox, *lineCountTextBox;
+
 Button *zoomOutButton, *zoomInButton;
 
 Menu **menus;

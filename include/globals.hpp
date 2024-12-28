@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "textBox.hpp"
 #include "button.hpp"
 #include "menu.hpp"
 
@@ -29,6 +30,10 @@ extern int windowHeight;
 
 extern bool showLineNumbers;
 extern bool lightTheme;
+
+extern int fontSize;
+
+extern TextBox *lineColumnTextBox, *zoomLevelTextBox, *fontSizeTextBox, *selectedCharactersTextBox, *lineCountTextBox;
 
 extern Button *zoomOutButton, *zoomInButton;
 

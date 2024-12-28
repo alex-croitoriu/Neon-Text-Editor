@@ -30,23 +30,17 @@ vector<sf::RectangleShape> selectedBoxes;
 
 sf::Event event;
 sf::Text text, ptext1, ptext2;
-sf::Text fileNameIndicator, lineColumnIndicator, zoomLevelIndicator, fontSizeIndicator;
 
 vector<char> input;
 float charHeight[maxFontSize][maxFontSize];
-int fontSize = 20;
 pair<int, int> segmOnScreen[maxRows];
 
-float recalculateHeightLine(int fnt = fontSize)
-{
-    return fnt * 1.5;
-}
-
 int cursorHeight = 0, cursorWidth = 0;
-int marginTop = 18, marginBottom = 18, marginLeft = 60, paddingLeft = 5;
+int marginTop = 18, marginBottom = 18;
+float marginLeft, paddingLeft;
 int lineNumbersMaxDigits = 3;
 
-float globalHeightLine = recalculateHeightLine();
+float globalLineHeight = Helpers::computedLineHeight();
 float centerConst = 0;
 
 vector<string> renderLines(maxRows);
@@ -64,7 +58,7 @@ namespace String
         for (int fnt = fontUnit; fnt < maxFontSize; fnt += fontUnit)
         {
             for (int i = 0; i <= 255; i++)
-                charHeight[fnt][i] = recalculateHeightLine(fnt);
+                charHeight[fnt][i] = Helpers::computedLineHeight(fnt);
         }
     }
 
@@ -426,7 +420,7 @@ namespace String
     int findCurrentHeight(Treap *&T)
     {
         int lines = findNumberOfEndlines(1, findCursorPosition(T), T) + 1;
-        int globalHeight = lines * globalHeightLine;
+        int globalHeight = lines * globalLineHeight;
         return globalHeight;
     }
 
@@ -950,7 +944,7 @@ namespace Render
     bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
     {
         int globalHeight = String::findCurrentHeight(S);
-        int height = recalculateHeightLine();
+        int height = Helpers::computedLineHeight();
         bool modif = 0;
 
         while (globalHeight - height < Yoffset)
@@ -974,7 +968,7 @@ namespace Render
 
     int findLineOnScreen(float y)
     {
-        return (int)((y - marginTop) / globalHeightLine) + 1;
+        return (int)((y - marginTop) / globalLineHeight) + 1;
     }
 
     int moveCursorToClick(sf::Vector2i localPosition, String::Treap *&S, int scrollUnitY, int l1, int l2, int Xoffset)
@@ -1006,7 +1000,7 @@ namespace Render
         bool empty = 0;
         s += "|";
         text.setString(s);
-        int centerConst = ((float)globalHeightLine - text.getGlobalBounds().height) / 2;
+        int centerConst = ((float)globalLineHeight - text.getGlobalBounds().height) / 2;
         s.pop_back();
         text.setString(s);
         text.setPosition(startX, (int)startY + centerConst);
@@ -1025,7 +1019,7 @@ namespace Render
         text2.clear(sf::Color(0, 0, 0, 0));
         text3.clear(sf::Color(0, 0, 0, 0));
 
-        int lastHeight = -globalHeightLine;
+        int lastHeight = -globalLineHeight;
 
         for (int i = l1; i <= l2; i++)
         {
@@ -1036,24 +1030,24 @@ namespace Render
             for (int j = 0; j < lineNumbersMaxDigits - number.length(); j++)
                 line += " ";
             line += number;
-            centerText(text, line, marginTop + lastHeight + globalHeightLine, 5);
+            centerText(text, line, marginTop + lastHeight + globalLineHeight, 5);
             text3.draw(text);
-            lastHeight += globalHeightLine;
+            lastHeight += globalLineHeight;
         }
 
-        marginLeft = showLineNumbers * (lineNumbersMaxDigits + 0.5) * charWidth[fontSize]['a'];
-        paddingLeft = 0.25 * charWidth[fontSize]['a'];
+        marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['9'];
+        paddingLeft = 0.5 * charWidth[fontSize]['a'];
         lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight - marginTop - marginBottom));
 
         text.setLetterSpacing(1);
 
-        lastHeight = -globalHeightLine;
+        lastHeight = -globalLineHeight;
 
         for (int i = 0; i < L; i++)
         {
-            centerText(text, renderLines[i], marginTop + lastHeight + globalHeightLine);
+            centerText(text, renderLines[i], marginTop + lastHeight + globalLineHeight);
             text1.draw(text);
-            lastHeight += globalHeightLine;
+            lastHeight += globalLineHeight;
         }
 
         int textHeight = lastHeight;
@@ -1064,20 +1058,20 @@ namespace Render
             txt = "";
 
         if (txt.size())
-            lastHeight += globalHeightLine;
+            lastHeight += globalLineHeight;
 
         for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
         {
-            centerText(text, renderLines[i], marginTop + lastHeight + globalHeightLine);
+            centerText(text, renderLines[i], marginTop + lastHeight + globalLineHeight);
             text2.draw(text);
-            lastHeight += globalHeightLine;
+            lastHeight += globalLineHeight;
         }
 
         img1.setTexture(text1.getTexture());
         img2.setTexture(text2.getTexture());
         img3.setTexture(text3.getTexture());
 
-        centerText(text, txt, marginTop + textHeight + globalHeightLine);
+        centerText(text, txt, marginTop + textHeight + globalLineHeight);
 
         text1.display();
         text2.display();
@@ -1385,28 +1379,6 @@ namespace ReplaceFind
         }
 
         return ans;
-    }
-}
-
-namespace TimeFunction
-{
-    string getTime(string param)
-    {
-        time_t timestamp = time(NULL);
-        struct tm datetime = *localtime(&timestamp);
-
-        char data[100];
-        int len = strftime(data, sizeof(data), param.c_str(), &datetime);
-
-        if (len == 0)
-        {
-            cerr << "Error: invalid format or buffer size too small\n";
-            return "";
-        }
-
-        string currTime(data, len); // Creeaza string direct din buffer
-        cerr << "time is: " << currTime << endl;
-        return currTime;
     }
 }
 
@@ -1722,7 +1694,7 @@ int main()
                             fontSize -= fontUnit;
                             fontSize = max(fontUnit, fontSize);
                             String::updateWidth(S);
-                            globalHeightLine = recalculateHeightLine();
+                            globalLineHeight = Helpers::computedLineHeight();
                             fontChanged = 1;
                             cursorTimer = 0;
                         }
@@ -1731,18 +1703,15 @@ int main()
                             fontSize += fontUnit;
                             fontSize = min(fontSize, maxFontSize - fontUnit);
                             String::updateWidth(S);
-                            globalHeightLine = recalculateHeightLine();
+                            globalLineHeight = Helpers::computedLineHeight();
                             fontChanged = 1;
                             cursorTimer = 0;
                         }
 
-                        // TODO: de facut astea dinamice ca asa cum is acuma fac spume
                         else if (fileMenu->getIsOpen())
                         {
                             if (fileMenuButtons[0]->isHovering())
                             {
-                                fileMenu->close();
-
                                 path = Windows::open();
 
                                 if (path.size() == 0)
@@ -1775,8 +1744,6 @@ int main()
                             }
                             else if (fileMenuButtons[1]->isHovering())
                             {
-                                fileMenu->close();
-
                                 if (path.size() == 0)
                                     path = Windows::saveAS();
 
@@ -1793,8 +1760,6 @@ int main()
                             }
                             else if (fileMenuButtons[2]->isHovering())
                             {
-                                fileMenu->close();
-
                                 path = Windows::saveAS();
 
                                 if (path.size() == 0)
@@ -1811,13 +1776,13 @@ int main()
                                 String::saveText(fptr, S);
                                 fclose(fptr);
                             }
+
+                            fileMenu->close();
                         }
                         else if (editMenu->getIsOpen())
                         {
                             if (editMenuButtons[0]->isHovering())
                             {
-                                editMenu->close();
-
                                 if (selectFlag && ctrlC == 0)
                                 {
                                     ctrlC = 1;
@@ -1836,8 +1801,6 @@ int main()
                             }
                             else if (editMenuButtons[1]->isHovering())
                             {
-                                editMenu->close();
-
                                 if (ctrlV == 0)
                                 {
                                     int posCursor = String::findCursorPosition(S);
@@ -1856,8 +1819,6 @@ int main()
                             }
                             else if (editMenuButtons[2]->isHovering())
                             {
-                                editMenu->close();
-
                                 if (selectFlag && ctrlX == 0)
                                 {
                                     ctrlX = 1;
@@ -1880,8 +1841,6 @@ int main()
                             }
                             else if (editMenuButtons[3]->isHovering())
                             {
-                                editMenu->close();
-
                                 /// apelat dupa ce faci setarile cu wholeWord si matchCase
                                 word = Windows::getStringFromUser("Find");
 
@@ -1920,12 +1879,11 @@ int main()
                                 findFlag = 1;
                                 renderAgain = 1;
                                 flag = 1;
+
                                 break;
                             }
                             else if (editMenuButtons[4]->isHovering())
                             {
-                                editMenu->close();
-
                                 word = Windows::getStringFromUser("word");
                                 rword = Windows::getStringFromUser("word");
 
@@ -1979,49 +1937,44 @@ int main()
                                 replaceFlag = 1;
                                 renderAgain = 1;
                                 flag = 1;
+
                                 break;
                             }
                             else if (editMenuButtons[5]->isHovering())
                             {
-                                editMenu->close();
                                 segmSelected = {1, String::len(S) - 1};
                                 buffer = String::constructRawString(S);
                                 flag = 1;
                                 selectFlag = 1;
                                 renderAgain = 1;
+
                                 break;
                             }
-                            else
-                            {
-                                editMenu->close();
-                            }
-                        }
 
+                            editMenu->close();
+                        }
                         else if (optionsMenu->getIsOpen())
                         {
                             if (optionsMenuButtons[0]->isHovering())
                             {
-                                optionsMenu->close();
                                 showLineNumbers = !showLineNumbers;
                                 optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLineNumbers]);
                                 renderAgain = 1;
                             }
                             else if (optionsMenuButtons[1]->isHovering())
                             {
-                                optionsMenu->close();
                                 string line = Windows::getStringFromUser("Go to line");
                                 int l = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, stoi(line));
                                 Xoffset = 0;
-                                Yoffset = (l - 1) * globalHeightLine;
+                                Yoffset = (l - 1) * globalLineHeight;
                                 renderAgain = 1;
                                 flag = 1;
                                 break;
                             }
                             else if (optionsMenuButtons[2]->isHovering())
                             {
-                                optionsMenu->close();
                                 // TODO: let user customize format via modal
-                                string data = TimeFunction::getTime("%I:%M %p %m/%d/%Y");
+                                string data = Helpers::getTime("%I:%M %p %m/%d/%Y");
                                 int posCursor = String::findCursorPosition(S);
 
                                 for (auto i : data)
@@ -2029,22 +1982,22 @@ int main()
                                     String::insert(posCursor, S, i);
                                     posCursor++;
                                 }
-                                
+
                                 flag = 1;
                                 renderAgain = 1;
                             }
                             else if (optionsMenuButtons[3]->isHovering())
                             {
-                                optionsMenu->close();
                                 Helpers::switchTheme(text, ptext1, ptext2);
                                 renderAgain = 1;
                             }
+
+                            optionsMenu->close();
                         }
                         // change cursor position inside text visible in the viewport
                         else
                         {
                             cursorTimer = 0;
-                            editMenu->close();
                             break;
                         }
                     }
@@ -2107,9 +2060,9 @@ int main()
 
                         findFlag = 0;
                         replaceFlag = 0;
-                      
+
                         selectFlag = 0;
-                        
+
                         renderAgain = 1;
                         flag = 1;
 
@@ -2138,7 +2091,7 @@ int main()
                         findFlag = 0;
                         replaceFlag = 0;
                         selectFlag = 0;
-                        
+
                         renderAgain = 1;
                         flag = 1;
 
@@ -2152,7 +2105,7 @@ int main()
                         if (replaceFlag == 1)
                         {
                             int pap = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                            
+
                             if (pap != -1)
                                 currentAppearance = pap;
                             else
@@ -2160,7 +2113,7 @@ int main()
 
                             renderAgain = 1;
                             flag = 1;
-                            
+
                             selectFlag = 0;
                             findFlag = 0;
 
@@ -2171,7 +2124,7 @@ int main()
                             currentAppearance--;
                             currentAppearance = max(0, currentAppearance);
                             cerr << "After left arrow: " << currentAppearance << '\n';
-                            
+
                             renderAgain = 1;
                             flag = 1;
 
@@ -2197,7 +2150,6 @@ int main()
                             renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
                             renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
                         }
-                        
 
                         break;
                     }
@@ -2213,7 +2165,7 @@ int main()
 
                             renderAgain = 1;
                             flag = 1;
-                           
+
                             selectFlag = 0;
                             findFlag = 0;
 
@@ -2225,10 +2177,10 @@ int main()
                             currentAppearance = min((int)positions.size() - 1, currentAppearance);
 
                             cerr << "After right arrow: " << currentAppearance << '\n';
-                           
+
                             renderAgain = 1;
                             flag = 1;
-                            
+
                             selectFlag = 0;
                             replaceFlag = 0;
 
@@ -2276,7 +2228,7 @@ int main()
                     {
                         if (replaceFlag == 0)
                             break;
-                        
+
                         if (currentAppearance == -1)
                         {
                             Windows::throwMessage("There are no more matchings!");
@@ -2320,7 +2272,8 @@ int main()
                         renderAgain = 1;
                         flag = 1;
                     }
-                    else break;
+                    else
+                        break;
 
                     break;
                 }
@@ -2431,14 +2384,14 @@ int main()
             {
                 if (fontChanged || firstExec)
                 {
-                    cursorHeight = globalHeightLine - 2;
+                    cursorHeight = globalLineHeight - 2;
                     cursorWidth = 1;
                 }
 
                 Xoffset = 0; /// reset de fiecare data pentru ca afisezi de la inceputul liniei
                 l1 = max(1, (Yoffset) / scrollUnitY + 1);
                 firstExec = 0;
-                int linesVisible = (windowHeight - marginBottom - marginTop + globalHeightLine - 1) / globalHeightLine;
+                int linesVisible = (windowHeight - marginBottom - marginTop + globalLineHeight - 1) / globalLineHeight;
                 int cntLine = 0;
                 int noLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
                 int l2;
@@ -2466,12 +2419,12 @@ int main()
 
                     line += number;
 
-                    Render::centerText(text, line, marginTop + cntLine * globalHeightLine, 5);
+                    Render::centerText(text, line, marginTop + cntLine * globalLineHeight, 5);
                     text.setLetterSpacing(0.7);
                     text1.draw(text);
                     text.setLetterSpacing(1);
-                    marginLeft = showLineNumbers * (lineNumbersMaxDigits + 0.5) * charWidth[fontSize]['a'];
-                    paddingLeft = 0.25 * charWidth[fontSize]['a'];
+                    marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['9'];
+                    paddingLeft = 0.5 * charWidth[fontSize]['a'];
 
                     if (String::len(S) + 1 == p1 || String::get(p1, S) == 10)
                     {
@@ -2510,7 +2463,7 @@ int main()
 
                         cntLine++;
                         string ln = String::constructString(p1, p3, S);
-                        Render::centerText(text, ln, marginTop + globalHeightLine * (cntLine - 1));
+                        Render::centerText(text, ln, marginTop + globalLineHeight * (cntLine - 1));
 
                         if (p1 <= posCursor && posCursor <= p3)
                         {
@@ -2519,7 +2472,7 @@ int main()
                             cerr << "cw is" << ' ' << cw << ' ' << posCursor - p1 + 1 << '\n';
                             cursorLine = l2;
                             cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                            cursorBox.setPosition((float)marginLeft + paddingLeft + cw, (cntLine - 1) * globalHeightLine + marginTop);
+                            cursorBox.setPosition((float)marginLeft + paddingLeft + cw, (cntLine - 1) * globalLineHeight + marginTop);
                             cursorOnScreen = 1;
                         }
 
@@ -2529,8 +2482,8 @@ int main()
 
                     if (cursorLine == l2)
                     {
-                        cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, splitedLines * globalHeightLine));
-                        cursorLineHighlight.setPosition(marginLeft, marginTop + (cntLine - splitedLines) * globalHeightLine);
+                        cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, splitedLines * globalLineHeight));
+                        cursorLineHighlight.setPosition(marginLeft, marginTop + (cntLine - splitedLines) * globalLineHeight);
                     }
                 }
 
@@ -2544,7 +2497,7 @@ int main()
 
                 if (fontChanged || firstExec)
                 {
-                    cursorHeight = globalHeightLine - 2;
+                    cursorHeight = globalLineHeight - 2;
                     cursorWidth = 1;
                 }
 
@@ -2568,7 +2521,7 @@ int main()
                         int P = positions[currentAppearance];
                         int L = String::findNumberOfEndlines(1, P, S) + 1;
                         int F = String::findKthLine(L, S);
-                        Yoffset = (L - 1) * globalHeightLine;
+                        Yoffset = (L - 1) * globalLineHeight;
                         Xoffset = String::findWidth(F, P - 1, S);
                     }
 
@@ -2585,7 +2538,7 @@ int main()
                         int P = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
                         int L = String::findNumberOfEndlines(1, P, S) + 1;
                         int F = String::findKthLine(L, S);
-                        Yoffset = (L - 1) * globalHeightLine;
+                        Yoffset = (L - 1) * globalLineHeight;
                         Xoffset = String::findWidth(F, P - 1, S);
                     }
 
@@ -2616,15 +2569,15 @@ int main()
                 if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
                 {
                     cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                    cursorBox.setPosition((float)marginLeft + cw + paddingLeft, (cursorLine - l1) * globalHeightLine + marginTop);
+                    cursorBox.setPosition((float)marginLeft + cw + paddingLeft, (cursorLine - l1) * globalLineHeight + marginTop);
 
                     cursorOnScreen = 1;
                 }
                 else
                     cursorOnScreen = 0;
 
-                cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, globalHeightLine));
-                cursorLineHighlight.setPosition(marginLeft, (cursorLine - l1) * globalHeightLine + marginTop);
+                cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, globalLineHeight));
+                cursorLineHighlight.setPosition(marginLeft, (cursorLine - l1) * globalLineHeight + marginTop);
 
                 lastCursorLine = cursorLine;
 
@@ -2646,14 +2599,14 @@ int main()
                         if (li > ri)
                             continue;
 
-                        int y = i * globalHeightLine + marginTop;
+                        int y = i * globalLineHeight + marginTop;
                         int x = marginLeft;
 
                         int w = String::findWidth(l, li - 1, S);
                         int W = String::findWidth(li, ri, S);
 
                         box.setPosition(w + marginLeft + paddingLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
-                        box.setSize(sf::Vector2f(W, globalHeightLine));
+                        box.setSize(sf::Vector2f(W, globalLineHeight));
                         box.setFillColor(currentThemeColors.selectHighlight);
                         selectedBoxes.push_back(box);
                     }
@@ -2670,7 +2623,7 @@ int main()
                             continue;
 
                         int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
-                        int y = i * globalHeightLine + marginTop;
+                        int y = i * globalLineHeight + marginTop;
                         //  cerr << "On line " << i + 1 << ": ";
 
                         while (p < positions.size() && positions[p] <= r)
@@ -2680,7 +2633,7 @@ int main()
                             int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
 
                             box.setPosition(marginLeft + w + paddingLeft, y);
-                            box.setSize(sf::Vector2f(W, globalHeightLine));
+                            box.setSize(sf::Vector2f(W, globalLineHeight));
                             if (p != currentAppearance)
                                 box.setFillColor(sf::Color(255, 255, 0, 128));
                             else
@@ -2706,7 +2659,7 @@ int main()
                             continue;
 
                         int p = ReplaceFind::traceFirstApToRender(l, positions, bit, notRemoved, word, rword);
-                        int y = i * globalHeightLine + marginTop;
+                        int y = i * globalLineHeight + marginTop;
                         // cerr << "On line " << i + 1 << ": " << p;
 
                         while (p != -1 && p < positions.size() && ReplaceFind::findRealPosition(p, positions, bit, word, rword) <= r)
@@ -2716,7 +2669,7 @@ int main()
                             int W = String::findWidth(P, P + word.size() - 1, S);
 
                             box.setPosition(marginLeft + w + paddingLeft, y);
-                            box.setSize(sf::Vector2f(W, globalHeightLine));
+                            box.setSize(sf::Vector2f(W, globalLineHeight));
                             if (p != currentAppearance)
                                 box.setFillColor(sf::Color(255, 255, 0, 128));
                             else
@@ -2748,7 +2701,7 @@ int main()
                 {
                     if (selectedBoxes[i].getPosition().y == selectedBoxes[i + 1].getPosition().y)
                     {
-                        selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x, selectedBoxes[i].getSize().x), globalHeightLine));
+                        selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x, selectedBoxes[i].getSize().x), globalLineHeight));
                     }
                 }
 
@@ -2758,7 +2711,7 @@ int main()
                     {
                         int oldX = selectedBoxes[i].getPosition().x;
                         selectedBoxes[i].setPosition(max(selectedBoxes[i].getPosition().x, selectedBoxes[i - 1].getPosition().x + selectedBoxes[i - 1].getSize().x), selectedBoxes[i].getPosition().y);
-                        selectedBoxes[i].setSize(sf::Vector2f(selectedBoxes[i].getSize().x - (selectedBoxes[i].getPosition().x - oldX), globalHeightLine));
+                        selectedBoxes[i].setSize(sf::Vector2f(selectedBoxes[i].getSize().x - (selectedBoxes[i].getPosition().x - oldX), globalLineHeight));
                     }
                 }
             }
