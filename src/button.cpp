@@ -2,11 +2,15 @@
 #include "button.hpp"
 #include "config.hpp"
 
-Button::Button(const std::string &label, const sf::Vector2f &position, bool alignCenter, bool small)
+Button::Button(const std::string &label, const sf::Vector2f &position, bool alignCenter, bool _small)
 {
+    small = _small;
+
     container.setSize(small ? smallButtonSize : buttonSize);
     container.setPosition(position);
     container.setFillColor(currentThemeColors.button);
+    container.setOutlineColor(currentThemeColors.buttonOutline);
+    container.setOutlineThickness(small ? 0 : -1);
 
     content = sf::Text(label, font, small ? smallButtonFontSize : buttonFontSize);
     content.setStyle(sf::Text::Bold);
@@ -28,12 +32,7 @@ Button::Button(const std::string &label, const sf::Vector2f &position, bool alig
 bool Button::isHovering()
 {
     sf::Vector2i localPosition = sf::Mouse::getPosition(window);
-    return getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
-}
-
-sf::FloatRect Button::getGlobalBounds()
-{
-    return container.getGlobalBounds();
+    return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
 void Button::setLabel(const std::string &label)
@@ -50,7 +49,7 @@ void Button::setPosition(const sf::Vector2f &position)
 
 void Button::setHoverState(bool isHovering)
 {
-    container.setFillColor((isHovering ? currentThemeColors.buttonHover : currentThemeColors.button));
+    container.setFillColor(isHovering ? currentThemeColors.buttonHover : currentThemeColors.button);
 }
 
 void Button::updateThemeColors()

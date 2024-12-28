@@ -18,10 +18,10 @@ struct ThemeColors
     sf::Color selectHighlight;
     sf::Color button;
     sf::Color buttonHover;
+    sf::Color buttonOutline;
     std::vector<sf::Color> cursor;
 };
 
-extern const ThemeColors themeColors[];
 extern ThemeColors currentThemeColors;
 
 extern int windowWidth;

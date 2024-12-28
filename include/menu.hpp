@@ -20,15 +20,12 @@ public:
 
     bool isHovering();
     bool getIsOpen();
-
     sf::Vector2f getPosition();
     int getButtonCount();
     Button* getToggleButton();
     Button** getButtons();
-
     void open();
     void close();
     void setPosition(const sf::Vector2f &position);
-
     void draw();
 };

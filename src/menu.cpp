@@ -21,7 +21,7 @@ Menu::Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, 
 
     container.setSize(sf::Vector2f(buttonSize.x, buttonSize.y * buttonCount)); 
     container.setPosition(position);
-    container.setFillColor(sf::Color::Cyan);
+    container.setFillColor(sf::Color(141, 171, 204));
 }
 
 bool Menu::isHovering()
@@ -79,7 +79,7 @@ void Menu::setPosition(const sf::Vector2f &position)
     container.setPosition(boundedPosition);
     for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f buttonPosition(boundedPosition.x, boundedPosition.y + 24 * i);
+        sf::Vector2f buttonPosition(boundedPosition.x, boundedPosition.y + buttonSize.y * i);
         buttons[i]->setPosition(buttonPosition);
     }
 }
