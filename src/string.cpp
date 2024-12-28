@@ -3,6 +3,7 @@
 #include <random>
 
 #include "string.hpp"
+#include <windows.h>
 
 std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
 
@@ -615,4 +616,78 @@ void String::saveText(FILE *fptr, Treap *&T)
         fprintf(fptr, "%c", ch);
     }
     saveText(fptr, T->R);
+}
+
+void String::copyTextToClipboard(const char* text) {
+    // Open the clipboard
+    if (!OpenClipboard(NULL)) {
+        std::cerr << "Failed to open clipboard!" << std::endl;
+        return;
+    }
+
+    // Empty the clipboard
+    EmptyClipboard();
+
+    // Calculate the size of the memory to allocate for the text
+    size_t len = strlen(text) + 1;  // +1 for the null terminator
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
+
+    if (!hMem) {
+        std::cerr << "Failed to allocate memory!" << std::endl;
+        CloseClipboard();
+        return;
+    }
+
+    // Lock the allocated memory and copy the text to it
+    memcpy(GlobalLock(hMem), text, len);
+    GlobalUnlock(hMem);
+
+    // Set the clipboard data to the allocated memory (CF_TEXT is the format for text data)
+    SetClipboardData(CF_TEXT, hMem);
+
+    // Close the clipboard
+    CloseClipboard();
+
+    std::cout << "Text copied to clipboard: " << text << std::endl;
+}
+
+// Function to retrieve text from the clipboard
+std::string String::getTextFromClipboard() {
+    // Open the clipboard
+    if (!OpenClipboard(NULL)) {
+        std::cerr << "Failed to open clipboard!" << std::endl;
+        return "";
+    }
+
+    // Get the clipboard data in the CF_TEXT format
+    HANDLE hData = GetClipboardData(CF_TEXT);
+    if (hData == NULL) {
+        std::cerr << "No text in clipboard or failed to retrieve data!" << std::endl;
+        CloseClipboard();
+        return "";
+    }
+
+    // Lock the clipboard data to get a pointer to the text
+    char* pszText = static_cast<char*>(GlobalLock(hData));
+    if (pszText == NULL) {
+        std::cerr << "Failed to lock clipboard data!" << std::endl;
+        CloseClipboard();
+        return "";
+    }
+
+    // Output the clipboard text
+    int len = strlen(pszText);
+    std::string clipboardText;
+
+    for (int i = 0; i < len; i++)
+    {
+        clipboardText += pszText[i];
+    }
+
+    std::cout << "Clipboard contains: " << pszText << std::endl;
+
+    // Unlock the clipboard data and close the clipboard
+    GlobalUnlock(hData);
+    CloseClipboard();
+    return clipboardText;
 }

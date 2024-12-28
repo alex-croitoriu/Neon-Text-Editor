@@ -105,4 +105,7 @@ namespace String
     void setW(int pos, int w, Treap *&T);
     void replace(int l, int r, std::string &word, Treap *&T);
     void saveText(FILE *fptr, Treap *&T);
+
+    void copyTextToClipboard(const char* text);
+    std::string getTextFromClipboard();
 }

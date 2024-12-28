@@ -267,6 +267,18 @@ namespace Windows
             return "";
         }
     }
+    
+    int saveModal() 
+    { ///am invatat de la cei mai buni
+        int result = MessageBox(
+            NULL,                            
+            L"Do you want to save changes?",  
+            L"Save Changes",                  
+            MB_YESNOCANCEL | MB_ICONQUESTION 
+        );
+
+        return result;
+    }
 }
 
 int sizeRLines = 0;
@@ -833,7 +845,7 @@ int main()
     string word, rword;
     string param;
     set<int> notRemoved;
-
+    bool fileSaved = 1;
     wordWrap = 0;
 
     while (window.isOpen())
@@ -918,6 +930,7 @@ int main()
             String::split(s2, s1, s2, L - 1);
 
             buffer = String::constructString(s2);
+            String::copyTextToClipboard(buffer.c_str());
             // delete s2;
             String::del(s2);
 
@@ -940,6 +953,7 @@ int main()
             String::split(s2, s1, s2, L - 1);
 
             buffer = String::constructString(s2);
+            String::copyTextToClipboard(buffer.c_str());
 
             String::merge(S, s1, s2);
             String::merge(S, S, s3);
@@ -948,6 +962,7 @@ int main()
         {
             int posCursor = String::findCursorPosition(S);
             ctrlV = 1;
+            buffer = String::getTextFromClipboard();
 
             for (auto ch : buffer)
             {
@@ -973,7 +988,43 @@ int main()
             while (window.pollEvent(event))
             {
                 if (event.type == sf::Event::Closed)
-                    window.close();
+                {
+                    if (fileSaved == 1)
+                    {
+                        window.close();
+                        break;
+                    }
+
+                    int closeOption = Windows::saveModal();
+
+                    if (closeOption == IDCANCEL)
+                    {
+                        break;
+                    }
+                    else if (closeOption == IDYES)
+                    {
+                        if (path.size() == 0)
+                            path = Windows::saveAS();
+
+                        FILE* fptr = fopen(path.c_str(), "w");
+
+                        if (fptr == NULL)
+                        {
+                            Windows::throwMessage("Wrong Path!");
+                            break;
+                        }
+
+                        String::saveText(fptr, S);
+                        fileSaved = 1;
+                        fclose(fptr);
+                        break;
+                    }
+                    else if (closeOption == IDNO)
+                    {
+                        window.close();
+                        break;
+                    }
+                }
 
                 if (event.type == sf::Event::MouseMoved)
                 {
@@ -1090,6 +1141,7 @@ int main()
                                 String::del(S);
                                 S = String::build(fileSize, data);
                                 String::insert(1, S);
+                                
 
                                 cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
 
@@ -1098,6 +1150,7 @@ int main()
                                 CloseHandle(fileHandle);
 
                                 renderAgain = 1;
+                                fileSaved = 1;
                                 flag = 1;
                             }
                             else if (fileMenuButtons[1]->isHovering())
@@ -1116,6 +1169,7 @@ int main()
                                 }
 
                                 String::saveText(fptr, S);
+                                fileSaved = 1;
                                 fclose(fptr);
                             }
                             else if (fileMenuButtons[2]->isHovering())
@@ -1136,6 +1190,7 @@ int main()
                                 }
 
                                 String::saveText(fptr, S);
+                                fileSaved = 1;
                                 fclose(fptr);
                             }
                         }
@@ -1156,6 +1211,7 @@ int main()
                                     String::split(s2, s1, s2, L - 1);
 
                                     buffer = String::constructString(s2);
+                                    String::copyTextToClipboard(buffer.c_str());
 
                                     String::merge(S, s1, s2);
                                     String::merge(S, S, s3);
@@ -1170,6 +1226,8 @@ int main()
                                     int posCursor = String::findCursorPosition(S);
                                     ctrlV = 1;
 
+                                    buffer = String::getTextFromClipboard();
+
                                     for (auto ch : buffer)
                                     {
                                         String::insert(posCursor, S, ch);
@@ -1178,6 +1236,7 @@ int main()
 
                                     flag = 1;
                                     renderAgain = 1;
+                                    fileSaved = 0;
                                     selectFlag = findFlag = 0;
                                 }
                             }
@@ -1196,11 +1255,13 @@ int main()
                                     String::split(s2, s1, s2, L - 1);
 
                                     buffer = String::constructString(s2);
+                                    String::copyTextToClipboard(buffer.c_str());
 
                                     String::del(s2);
 
                                     String::merge(S, s1, s3);
                                     selectFlag = findFlag = 0;
+                                    fileSaved = 0;
                                     flag = 1;
                                     renderAgain = 1;
                                 }
@@ -1318,6 +1379,7 @@ int main()
                                 {
                                     segmSelected = {1, String::len(S) - 1};
                                     buffer = String::constructRawString(S);
+                                    String::copyTextToClipboard(buffer.c_str());
                                     flag = 1;
                                     selectFlag = 1;
                                     renderAgain = 1;
@@ -1366,6 +1428,7 @@ int main()
 
                                 flag = 1;
                                 renderAgain = 1;
+                                fileSaved = 0;
                             }
                             else if (optionsMenuButtons[3]->isHovering())
                             {
@@ -1628,6 +1691,7 @@ int main()
                         nxt[currentAppearance] = prv[currentAppearance] = -1;
                         currentAppearance = max(nxtAppearance, prvAppearance);
 
+                        fileSaved = 0;
                         renderAgain = 1;
                         flag = 1;
                         break;
@@ -1650,6 +1714,7 @@ int main()
                             ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                         }
 
+                        fileSaved = 0;
                         renderAgain = 1;
                         flag = 1;
                     }
@@ -1702,6 +1767,7 @@ int main()
                         String::insert(String::findCursorPosition(S), S, ch);
                     }
 
+                    fileSaved = 0;
                     flag = 1;
                     selectFlag = findFlag = 0;
 
