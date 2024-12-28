@@ -3,7 +3,7 @@
 #include "helpers.hpp"
 #include "config.hpp"
 
-float Helpers::computedLineHeight(int fnt)
+float Helpers::getLineHeight(int fnt)
 {
     return fnt * 1.5;
 }
@@ -11,8 +11,11 @@ float Helpers::computedLineHeight(int fnt)
 // TODO: make strings global so no need for prop drilling
 void Helpers::switchTheme(sf::Text &t1, sf::Text &t2, sf::Text &t3)
 {
-    lightTheme = !lightTheme;
-    currentThemeColors = themeColors[lightTheme];
+    if (theme == Theme::LIGHT)
+        theme = Theme::DARK;
+    else
+        theme = Theme::LIGHT;
+    currentThemeColors = themeColorsMapping.at(theme);
 
     // update text fields
     t1.setFillColor(currentThemeColors.text);
@@ -72,4 +75,31 @@ std::string Helpers::getTime(std::string format)
 
     std::string currTime(data, len);
     return currTime;
+}
+
+std::vector<sf::Vector2f> Helpers::getToolBarPositions()
+{
+    ButtonProperties properties = buttonSizeMapping.at(ButtonSize::MEDIUM);
+    return 
+    {
+        // first 3 positions represent the top left corner of the menus themselves, not the top left corner of the toggle menu button
+        sf::Vector2f(0, properties.size.y),
+        sf::Vector2f(properties.size.x, properties.size.y),
+        sf::Vector2f(2 * properties.size.x, properties.size.y),
+    };
+}
+
+std::vector<sf::Vector2f> Helpers::getStatusBarPositions()
+{
+    ButtonProperties properties = buttonSizeMapping.at(ButtonSize::SMALL);
+    return 
+    {
+        sf::Vector2f(windowWidth - 12 * properties.size.x, windowHeight - properties.size.y),
+        sf::Vector2f(windowWidth - 10 * properties.size.x, windowHeight - properties.size.y),
+        sf::Vector2f(windowWidth - 8 * properties.size.x, windowHeight - properties.size.y),
+        sf::Vector2f(windowWidth - 6 * properties.size.x, windowHeight - properties.size.y),
+        sf::Vector2f(windowWidth - 4 * properties.size.x, windowHeight - properties.size.y),
+        sf::Vector2f(windowWidth - 2 * properties.size.x, windowHeight - properties.size.y),
+        sf::Vector2f(windowWidth - properties.size.x, windowHeight - properties.size.y)
+    };
 }

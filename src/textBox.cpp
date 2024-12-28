@@ -4,16 +4,16 @@
 
 TextBox::TextBox(const std::string &_content, const sf::Vector2f &position)
 {
-    container.setSize(smallButtonSize);
+    container.setSize(textBoxSize);
     container.setPosition(position);
-    container.setFillColor(currentThemeColors.button);
-    container.setOutlineColor(currentThemeColors.buttonOutline);
+    container.setFillColor(currentThemeColors.textBox);
+    container.setOutlineColor(currentThemeColors.textBoxOutline);
     // container.setOutlineThickness(-1);
 
-    content = sf::Text(_content, font, smallButtonFontSize);
+    content = sf::Text(_content, font, textBoxFontSize);
     content.setStyle(sf::Text::Bold);
     content.setFillColor(currentThemeColors.text);
-    content.setLetterSpacing(smallButtonLetterSpacing);
+    content.setLetterSpacing(textBoxLetterSpacing);
 
     content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
     content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + container.getSize().y / 2.f));
@@ -33,7 +33,7 @@ void TextBox::setPosition(const sf::Vector2f &position)
 
 void TextBox::updateThemeColors()
 {
-    container.setFillColor(currentThemeColors.button);
+    container.setFillColor(currentThemeColors.textBox);
     content.setFillColor(currentThemeColors.text);
 }
 
