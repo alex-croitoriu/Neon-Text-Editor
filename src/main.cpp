@@ -142,6 +142,7 @@ int main()
         bool flag = 0;
         bool fontChanged = 0;
         bool renderAgain = 0;
+        bool updateFindReplace = 0;
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
@@ -593,6 +594,8 @@ int main()
                                 for (auto i : positions)
                                     cerr << i << ' ';
                                 cerr << '\n';
+
+                                updateFindReplace = 1;
                                 currentAppearance = 0;
                                 findFlag = 1;
                                 renderAgain = 1;
@@ -656,6 +659,7 @@ int main()
                                 currentAppearance = 0;
                                 replaceFlag = 1;
                                 renderAgain = 1;
+                                updateFindReplace = 1;
                                 flag = 1;
 
                                 break;
@@ -765,10 +769,12 @@ int main()
                         if (replaceFlag == 1)
                         {
                             replaceFlag = 0;
+                            updateFindReplace = 1;
                         }
                         else if (findFlag == 1)
                         {
                             findFlag = 0;
+                            updateFindReplace = 1;
                         }
                         else
                             window.close();
@@ -847,6 +853,7 @@ int main()
                             renderAgain = 1;
                             flag = 1;
 
+                            updateFindReplace = 1;
                             selectFlag = 0;
                             findFlag = 0;
 
@@ -863,6 +870,7 @@ int main()
 
                             selectFlag = 0;
                             replaceFlag = 0;
+                            updateFindReplace = 1;
 
                             break;
                         }
@@ -901,6 +909,7 @@ int main()
 
                             selectFlag = 0;
                             findFlag = 0;
+                            updateFindReplace = 1;
 
                             break;
                         }
@@ -916,6 +925,7 @@ int main()
 
                             selectFlag = 0;
                             replaceFlag = 0;
+                            updateFindReplace = 1;
 
                             break;
                         }
@@ -983,6 +993,7 @@ int main()
                         fileSaved = 0;
                         renderAgain = 1;
                         flag = 1;
+                        updateFindReplace = 1;
                         break;
                     }
                     else if (key == 85)
@@ -1006,6 +1017,7 @@ int main()
                         fileSaved = 0;
                         renderAgain = 1;
                         flag = 1;
+                        updateFindReplace = 1;
                     }
                     else
                         break;
@@ -1073,7 +1085,12 @@ int main()
                     if (direction == +1)
                         Yoffset -= scrollUnitY, Yoffset = max(0, Yoffset);
                     if (direction == -1)
+                    {
                         Yoffset += scrollUnitY;
+                        
+                        if (Yoffset / lineHeight + 1 > String::findNumberOfEndlines(1, String::len(S), S) + 1)
+                            Yoffset -= scrollUnitY;
+                    }
 
                     renderAgain = 1;
                     flag = 1;
@@ -1258,7 +1275,7 @@ int main()
 
                 renderAgain |= lastCursorLine != cursorLine;
 
-                if (findFlag == 1)
+                if (findFlag == 1 && updateFindReplace == 1)
                 {
                     if (currentAppearance < positions.size() && !Replace::isApOnScreen(positions[currentAppearance], word.size()))
                     {
@@ -1272,7 +1289,7 @@ int main()
                     renderAgain = 1;
                 }
 
-                if (replaceFlag == 1)
+                if (replaceFlag == 1 && updateFindReplace == 1)
                 {
 
                     Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
