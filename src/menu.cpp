@@ -17,11 +17,11 @@ Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabel
     buttons = new Button*[buttonCount];
     for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f buttonPosition(position.x + buttonSizeMapping.at(ButtonSize::MEDIUM).size.x, position.y + properties.size.y * i);
+        sf::Vector2f buttonPosition(position.x + buttonSizeMapping.at(ButtonSize::MEDIUM).size.x, position.y + (properties.size.y - 1) * i);
         buttons[i] = new Button(buttonLabels[i], buttonPosition, ButtonSize::LARGE, false);
     }
 
-    container.setSize(sf::Vector2f(properties.size.x, properties.size.y * buttonCount)); 
+    container.setSize(sf::Vector2f(properties.size.x, (properties.size.y - 1) * buttonCount + 1)); 
     container.setPosition(position);
     container.setFillColor(sf::Color(141, 171, 204));
 }
@@ -83,7 +83,7 @@ void Menu::setPosition(const sf::Vector2f &position)
     container.setPosition(boundedPosition);
     for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f buttonPosition(boundedPosition.x, boundedPosition.y + properties.size.y * i);
+        sf::Vector2f buttonPosition(boundedPosition.x, boundedPosition.y + (properties.size.y - 1) * i);
         buttons[i]->setPosition(buttonPosition);
     }
 }

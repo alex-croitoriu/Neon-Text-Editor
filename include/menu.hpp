@@ -29,3 +29,5 @@ public:
     void setPosition(const sf::Vector2f &position);
     void draw();
 };
+
+extern Menu **menus;

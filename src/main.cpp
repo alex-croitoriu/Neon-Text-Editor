@@ -24,7 +24,6 @@ using namespace std;
 sf::RenderTexture text1, text2, text3;
 sf::Sprite img1, img2, img3;
 
-sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, cursorBox, cursorLineHighlight, box;
 vector<sf::RectangleShape> selectedBoxes;
 
 sf::Event event;
@@ -32,8 +31,6 @@ sf::Text text, ptext1, ptext2;
 
 int cursorHeight = 0, cursorWidth = 0;
 int lineNumbersMaxDigits = 3;
-
-float centerConst = 0;
 
 vector<string> renderLines(maxRows);
 
@@ -377,6 +374,7 @@ namespace Render
 
         text.setCharacterSize(fontSize);
         text.setLetterSpacing(0.7);
+        text.setFillColor(currentThemeColors.lineNumbersText);
 
         text1.clear(sf::Color(0, 0, 0, 0));
         text2.clear(sf::Color(0, 0, 0, 0));
@@ -400,9 +398,12 @@ namespace Render
 
         marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['9'];
         paddingLeft = 0.5 * charWidth[fontSize]['a'];
-        lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight - marginTop - marginBottom));
+
+        lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
+        statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
 
         text.setLetterSpacing(1);
+        text.setFillColor(currentThemeColors.text);
 
         lastHeight = -lineHeight;
 
@@ -782,13 +783,12 @@ int main()
     Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2];
     Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons();
 
-    lineColumnTextBox = new TextBox("Ln " + to_string(1) + ", Col " + to_string(1), statusBarPositions[0]);
-    selectedCharactersTextBox = new TextBox(to_string(1) + " selected", statusBarPositions[1]);
-    lineCountTextBox = new TextBox(to_string(1) + " lines", statusBarPositions[2]);
-    fontSizeTextBox = new TextBox("Font size: " + to_string(fontSize), statusBarPositions[3]);
-    zoomLevelTextBox = new TextBox(to_string(zoomLevel) + "%", statusBarPositions[4]);
-    zoomOutButton = new Button(zoomButtonLabels[0], statusBarPositions[5], ButtonSize::SMALL);
-    zoomInButton = new Button(zoomButtonLabels[1], statusBarPositions[6], ButtonSize::SMALL);
+    lineCountTextBox = new TextBox("", statusBarPositions[0]);
+    lineColumnTextBox = new TextBox("", statusBarPositions[1]);
+    selectedCharacterCountTextBox = new TextBox("", statusBarPositions[2]);
+    zoomOutButton = new Button(zoomButtonLabels[0], statusBarPositions[3], ButtonSize::SMALL);
+    zoomLevelTextBox = new TextBox("", statusBarPositions[4]);
+    zoomInButton = new Button(zoomButtonLabels[1], statusBarPositions[5], ButtonSize::SMALL);
 
     cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
 
@@ -796,7 +796,7 @@ int main()
     topSeparator.setSize(sf::Vector2f(windowWidth, 1));
     topSeparator.setFillColor(currentThemeColors.separator);
 
-    bottomSeparator.setPosition(0, windowHeight - marginBottom - 1);
+    bottomSeparator.setPosition(0, windowHeight - marginBottom);
     bottomSeparator.setSize(sf::Vector2f(windowWidth, 1));
     bottomSeparator.setFillColor(currentThemeColors.separator);
 
@@ -804,7 +804,9 @@ int main()
     lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
     lineNumbersBackground.setFillColor(currentThemeColors.lineNumbersBackground);
 
-    String::Treap *S = new String::Treap(cursorChar, 1); /// string doar cu pointer-ul de text
+    statusBarBackground.setPosition(0, windowHeight - marginBottom);
+    statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
+    statusBarBackground.setFillColor(currentThemeColors.background);
 
     int Yoffset = 0, Xoffset = 0;
     int scrollUnitX = charWidth[fontSize][0], scrollUnitY = Helpers::getLineHeight();
@@ -822,6 +824,10 @@ int main()
     text2.create(maxRows, maxRows);
     text3.create(maxRows, maxRows);
 
+    text1.setSmooth(true);
+    text2.setSmooth(true);
+    text3.setSmooth(true);
+
     string path = "", buffer = "";
     int timer = 0;
     int cursorTimer = 0;
@@ -832,7 +838,6 @@ int main()
     bool ctrlX = 0, ctrlV = 0, ctrlC = 0;
 
     int posCursorOnHold = -1;
-    pair<int, int> segmSelected;
 
     int lastDone = 0;
     int nr = 0;
@@ -1434,7 +1439,7 @@ int main()
                             {
                                 optionsMenu->close();
 
-                                Helpers::switchTheme(text, ptext1, ptext2);
+                                Helpers::changeTheme(text, ptext1, ptext2);
                                 renderAgain = 1;
                             }
                         }
@@ -1805,16 +1810,12 @@ int main()
                     bottomSeparator.setSize(sf::Vector2f(windowWidth, 1));
                     bottomSeparator.setPosition(0, windowHeight - marginBottom);
                     topSeparator.setSize(sf::Vector2f(windowWidth, 1));
+                    topSeparator.setPosition(sf::Vector2f(0, marginTop));
 
-                    statusBarPositions = Helpers::getStatusBarPositions();
-
-                    lineColumnTextBox->setPosition(statusBarPositions[0]);
-                    selectedCharactersTextBox->setPosition(statusBarPositions[1]);
-                    lineCountTextBox->setPosition(statusBarPositions[2]);
-                    fontSizeTextBox->setPosition(statusBarPositions[3]);
-                    zoomLevelTextBox->setPosition(statusBarPositions[4]);
-                    zoomOutButton->setPosition(statusBarPositions[5]);
-                    zoomInButton->setPosition(statusBarPositions[6]);
+                    lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
+                    lineNumbersBackground.setPosition(0, marginTop);
+                    statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
+                    statusBarBackground.setPosition(sf::Vector2f(0, windowHeight - marginBottom));
 
                     break;
                 }
@@ -1939,8 +1940,8 @@ int main()
 
                     if (cursorLine == l2)
                     {
-                        cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, splitedLines * lineHeight));
-                        cursorLineHighlight.setPosition(marginLeft, marginTop + (cntLine - splitedLines) * lineHeight);
+                        cursorLineHighlight.setSize(sf::Vector2f(windowWidth, splitedLines * lineHeight));
+                        cursorLineHighlight.setPosition(0, marginTop + (cntLine - splitedLines) * lineHeight);
                     }
                 }
 
@@ -2033,8 +2034,8 @@ int main()
                 else
                     cursorOnScreen = 0;
 
-                cursorLineHighlight.setSize(sf::Vector2f(windowWidth - marginLeft, lineHeight));
-                cursorLineHighlight.setPosition(marginLeft, (cursorLine - l1) * lineHeight + marginTop);
+                cursorLineHighlight.setSize(sf::Vector2f(windowWidth, lineHeight));
+                cursorLineHighlight.setPosition(0, (cursorLine - l1) * lineHeight + marginTop);
 
                 lastCursorLine = cursorLine;
 
@@ -2201,10 +2202,14 @@ int main()
             window.draw(img1);
         }
 
-        lineColumnTextBox->draw();
-        selectedCharactersTextBox->draw();
+        Helpers::updateStatusBarInfo();
+        Helpers::updateStatusBarPositions();
+    
+        window.draw(statusBarBackground);
         lineCountTextBox->draw();
-        fontSizeTextBox->draw();
+        lineColumnTextBox->draw();
+        if (selectedBoxes.size())
+            selectedCharacterCountTextBox->draw();
         zoomLevelTextBox->draw();
 
         zoomOutButton->draw();

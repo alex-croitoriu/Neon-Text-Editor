@@ -28,3 +28,5 @@ public:
     void updateThemeColors();
     void draw();
 };
+
+extern Button *zoomOutButton, *zoomInButton;

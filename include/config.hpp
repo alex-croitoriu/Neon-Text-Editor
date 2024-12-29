@@ -8,16 +8,18 @@ constexpr int maxFontSize = 100;
 constexpr int maxRows = 10000;
 
 const int marginTop = 21;
-const int marginBottom = 21;
+const int marginBottom = 24;
 
 const int initialFontSize = 20;
 const int fontUnit = 2;
 const int timeUnit = 2000;
 const int bucketSize = 1e5;
 
-const sf::Vector2f textBoxSize(54, 21);
-const float textBoxFontSize = 10;
+const float textBoxFontSize = 11;
 const float textBoxLetterSpacing = 0.8;
+const float textBoxHeight = 24;
+const float textBoxPaddingX = 10;
+const float textBoxPaddingY = 5;
 
 const std::string zoomButtonLabels[] = { "-", "+" };
 const std::string toggleLinesButtonLabels[] = { "Show lines", "Hide lines" };
@@ -29,6 +31,37 @@ const std::vector<std::string> menuButtonLabels[] =
     { "Hide lines", "Go to line", "Time & Date", "Switch theme" }
 };
 
+enum Theme
+{
+    LIGHT,
+    DARK
+};
+
+struct ThemeColors 
+{
+    sf::Color background;
+    sf::Color text;
+    sf::Color separator;
+    sf::Color lineNumbersText; 
+    sf::Color lineNumbersBackground;
+    sf::Color cursorLineHighlight;
+    sf::Color selectHighlight;
+    sf::Color buttonBackground;
+    sf::Color buttonHover;
+    sf::Color buttonOutline;
+    sf::Color textBoxBackground;
+    sf::Color textBoxOutline;
+    std::vector<sf::Color> cursor;
+};
+
+struct ButtonProperties
+{
+    sf::Vector2f size;
+    float fontSize;
+    float letterSpacing;
+    float outlineThickness;
+};
+
 const std::map<Theme, ThemeColors> themeColorsMapping = 
 {
     {
@@ -37,13 +70,14 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
             sf::Color::White,                       // background               
             sf::Color::Black,                       // text
             sf::Color(48, 48, 48, 255),             // separator
-            sf::Color(130, 130, 130, 255),          // lineNumbersBackground
+            sf::Color(130, 130, 130, 255),          // lineNumbersText
+            sf::Color(200, 200, 200, 255),          // lineNumbersBackground
             sf::Color(0, 0, 0, 30),                 // cursorLineHighlight
             sf::Color(0, 0, 0, 40),                 // selectHighlight
-            sf::Color::White,                       // button
+            sf::Color::White,                       // buttonBackground
             sf::Color(0, 0, 0, 30),                 // buttonHover 
             sf::Color(48, 48, 48, 255),             // buttonOutline
-            sf::Color::White,                       // textBox
+            sf::Color::White,                       // textBoxBackground
             sf::Color(48, 48, 48, 255),             // textBoxOutline
             { sf::Color::Black, sf::Color::White }  // cursor
         }
@@ -51,17 +85,18 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
     {
         Theme::DARK,
         {
-            sf::Color(0, 0, 0, 30),                 // background                       
-            sf::Color::White,                       // text
-            sf::Color(110, 110, 110, 255),          // separator
-            sf::Color(48, 48, 48, 255),             // lineNumbersBackground
-            sf::Color(255, 255, 255, 30),           // cursorLineHighlight
+            sf::Color(15, 28, 48, 255),             // background                       
+            sf::Color(184, 187, 191, 255),          // text
+            sf::Color(69, 71, 74, 255),             // separator
+            sf::Color(212, 214, 217, 255),          // lineNumbersText
+            sf::Color(20, 33, 54, 255),             // lineNumbersBackground
+            sf::Color(255, 255, 255, 100),          // cursorLineHighlight
             sf::Color(80, 80, 80),                  // selectHighlight
-            sf::Color(0, 0, 0, 255),                // button
-            sf::Color(0, 0, 0, 50),                 // buttonHover   
-            sf::Color(0, 0, 0, 30),                 // buttonOutline
-            sf::Color(0, 0, 0, 255),                // textBox
-            sf::Color(0, 0, 0, 30),                 // textBoxOutline
+            sf::Color(15, 28, 48, 255),             // buttonBackground
+            sf::Color(15, 28, 48, 255),             // buttonHover   
+            sf::Color(15, 28, 48, 255),             // buttonOutline
+            sf::Color(15, 28, 48, 255),             // textBoxBackground
+            sf::Color(15, 28, 48, 255),                 // textBoxOutline
             { sf::Color::White, sf::Color::Black }  // cursor
         }
     }
@@ -72,7 +107,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
     {
         ButtonSize::SMALL,
         {
-            sf::Vector2f(36, 21),   // size
+            sf::Vector2f(36, 24),   // size
             10,                     // fontSize
             1,                      // letterSpacing
             -1                      // outlineThickness

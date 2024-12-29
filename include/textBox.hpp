@@ -15,5 +15,8 @@ public:
     void setContent(const std::string &_content);
     void setPosition(const sf::Vector2f &position);
     void updateThemeColors();
+    sf::Vector2f getSize();
     void draw();
 };
+
+extern TextBox *lineColumnTextBox, *zoomLevelTextBox, *selectedCharacterCountTextBox, *lineCountTextBox;

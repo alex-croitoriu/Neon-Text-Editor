@@ -1,6 +1,7 @@
 #include "globals.hpp"
 #include "button.hpp"
 #include "config.hpp"
+#include "helpers.hpp"
 
 Button::Button(const std::string &label, const sf::Vector2f &position, const ButtonSize &_size, const bool &_alignCenter)
 {
@@ -11,7 +12,7 @@ Button::Button(const std::string &label, const sf::Vector2f &position, const But
 
     container.setSize(properties.size);
     container.setPosition(position);
-    container.setFillColor(currentThemeColors.button);
+    container.setFillColor(currentThemeColors.buttonBackground);
     container.setOutlineColor(currentThemeColors.buttonOutline);
     container.setOutlineThickness(properties.outlineThickness);
 
@@ -21,15 +22,9 @@ Button::Button(const std::string &label, const sf::Vector2f &position, const But
     content.setLetterSpacing(properties.letterSpacing);
 
     if (alignCenter) 
-    {
-        content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
-        content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + container.getSize().y / 2.f));
-    }
+        Helpers::centerContentInsideContainer(container, content);
     else
-    {
-        content.setOrigin(0, int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
-        content.setPosition(int(container.getGlobalBounds().left + 20), int(container.getPosition().y + container.getSize().y / 2.f));
-    }
+        Helpers::centerContentInsideContainer(container, content, true, false, 0, 20);
 }
 
 bool Button::isHovering()
@@ -47,25 +42,20 @@ void Button::setPosition(const sf::Vector2f &position)
 {
     container.setPosition(position);
     if (alignCenter) 
-    {
-        content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
-        content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + container.getSize().y / 2.f));
-    }
+        Helpers::centerContentInsideContainer(container, content);
     else
-    {
-        content.setOrigin(0, int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
-        content.setPosition(int(container.getGlobalBounds().left + 20), int(container.getPosition().y + container.getSize().y / 2.f));
-    }
+        Helpers::centerContentInsideContainer(container, content, true, false, 0, 20);
 }
 
 void Button::setHoverState(bool isHovering)
 {
-    container.setFillColor(isHovering ? currentThemeColors.buttonHover : currentThemeColors.button);
+    container.setFillColor(isHovering ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
 }
 
 void Button::updateThemeColors()
 {
-    container.setFillColor(currentThemeColors.button);
+    container.setFillColor(currentThemeColors.buttonBackground);
+    container.setOutlineColor(currentThemeColors.buttonOutline);
     content.setFillColor(currentThemeColors.text);
 }
 

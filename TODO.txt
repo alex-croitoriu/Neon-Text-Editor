@@ -18,10 +18,10 @@
 - [X] add navbar separator
 - [X] add padding to the left
 - [X] move zoom in/out buttons to the bottom
+- [X] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
 
 - [ ] scrollbar
 - [ ] current file name top right
-- [ ] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
 - [WIP] dark/light mode 
 - [ ] modal for unsaved changes 
 - [ ] modal for find
