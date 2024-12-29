@@ -122,16 +122,16 @@ std::vector<sf::Vector2f> Helpers::getStatusBarPositions()
 
 void Helpers::updateStatusBarInfo()
 {
-    int posCursor = String::findCursorPosition(S);
-    int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
+    int cursorPosition = String::findCursorPosition(S);
+    int cursorLine = String::findNumberOfEndlines(1, cursorPosition, S) + 1;
 
-    int currentLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
-    int currentCol = String::findCursorPosition(S) - String::findKthLine(cursorLine , S);
+    int currentLine = String::findNumberOfEndlines(1, cursorPosition, S) + 1;
+    int currentColumn = String::findCursorPosition(S) - String::findKthLine(cursorLine , S);
     int selectedCharacterCount = segmSelected.second - segmSelected.first + 1 - String::findNumberOfEndlines(segmSelected.first, segmSelected.second, S);
     int lineCount = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
     lineCountTextBox->setContent(std::to_string(lineCount) + (lineCount == 1 ? " line" : " lines"));
-    lineColumnTextBox->setContent("Ln " + std::to_string(currentLine) + ", Col " + std::to_string(currentCol));
+    lineColumnTextBox->setContent("Ln " + std::to_string(currentLine) + ", Col " + std::to_string(currentColumn));
     selectedCharacterCountTextBox->setContent(std::to_string(selectedCharacterCount) + " selected");
     zoomLevelTextBox->setContent(std::to_string(zoomLevel) + "%");
 }
