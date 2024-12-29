@@ -130,7 +130,6 @@ int main()
     string param;
     set<int> notRemoved;
     bool fileSaved = 1;
-    wordWrap = 0;
 
     while (window.isOpen())
     {
@@ -944,24 +943,6 @@ int main()
 
                         break;
                     }
-                    else if (key == 43) /// not functional ignora
-                    {
-                        flag = 1;
-                        renderAgain = 1;
-
-                        wordWrap ^= 1;
-
-                        if (wordWrap == 1)
-                        {
-                            String::setW(String::findCursorPosition(S), 0, S);
-                        }
-                        else
-                        {
-                            String::setW(String::findCursorPosition(S), charWidth[fontSize][' '], S);
-                        }
-
-                        break;
-                    }
                     else if (key == 58)
                     {
                         if (replaceFlag == 0)
@@ -1136,370 +1117,244 @@ int main()
         {
             scrollUnitX = charWidth[fontSize][0], scrollUnitY = Helpers::getLineHeight();
 
-            if (wordWrap == 1)
+            renderAgain |= firstExec;
+            renderAgain |= fontChanged;
+
+            if (fontChanged || firstExec)
             {
-                if (fontChanged || firstExec)
+                cursorHeight = lineHeight - 2;
+                cursorWidth = 1;
+            }
+
+            fontChanged = 0;
+            firstExec = 0;
+
+            int posCursor = String::findCursorPosition(S);
+            int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
+            int p = String::findKthLine(cursorLine, S);
+            int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
+            int lp = String::getLastSeen(p, posCursor, Xoffset + windowWidth - marginLeft, S);
+            if (lp < posCursor)
+                fp = -1;
+
+            renderAgain |= lastCursorLine != cursorLine;
+
+            if (findFlag == 1 && updateFindReplace == 1)
+            {
+                if (currentAppearance < positions.size() && !Replace::isApOnScreen(positions[currentAppearance], word.size()))
                 {
-                    cursorHeight = lineHeight - 2;
-                    cursorWidth = 1;
+                    int P = positions[currentAppearance];
+                    int L = String::findNumberOfEndlines(1, P, S) + 1;
+                    int F = String::findKthLine(L, S);
+                    Yoffset = (L - 1) * lineHeight;
+                    Xoffset = String::findWidth(F, P - 1, S);
                 }
 
-                Xoffset = 0; /// reset de fiecare data pentru ca afisezi de la inceputul liniei
-                l1 = max(1, (Yoffset) / scrollUnitY + 1);
-                firstExec = 0;
-                int linesVisible = (windowHeight - marginBottom - marginTop + lineHeight - 1) / lineHeight;
-                int cntLine = 0;
-                int noLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
-                int l2;
-                int posCursor = String::findCursorPosition(S);
-                int cursorLine = 0;
+                renderAgain = 1;
+            }
 
-                text.setCharacterSize(fontSize);
-                text1.clear(sf::Color(0, 0, 0, 0));
-                cursorLineOnScreen = 0;
-                cursorOnScreen = 0;
+            if (replaceFlag == 1 && updateFindReplace == 1)
+            {
 
-                for (l2 = l1; l2 <= noLines && cntLine <= linesVisible; l2++)
+                Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
+
+                if (currentAppearance != -1 && currentAppearance < positions.size() && !Replace::isApOnScreen(Replace::findRealPosition(currentAppearance, positions, bit, word, rword), word.size()))
                 {
-                    int p1 = String::findKthLine(l2, S);
-                    /// S[p1] == '\n' caz special
-
-                    string line = "";
-                    string number = to_string(l2);
-
-                    if (number.length() > lineNumbersMaxDigits)
-                        lineNumbersMaxDigits = number.length();
-
-                    for (int j = 0; j < lineNumbersMaxDigits - number.length(); j++)
-                        line += " ";
-
-                    line += number;
-
-                    Render::centerText(text, line, marginTop + cntLine * lineHeight, 5);
-                    text.setLetterSpacing(0.7);
-                    text1.draw(text);
-                    text.setLetterSpacing(1);
-                    marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['9'];
-                    paddingLeft = 0.5 * charWidth[fontSize]['a'];
-
-                    if (String::len(S) + 1 == p1 || String::get(p1, S) == 10)
-                    {
-                        cntLine++;
-                        continue;
-                    }
-
-                    int p2 = String::findNextEndline(p1, S) - 1;
-                    int splitedLines = 0;
-
-                    while (p1 <= p2 && cntLine <= linesVisible)
-                    {
-                        splitedLines++;
-                        int p3 = String::getLastSeen(p1, p2, windowWidth - marginLeft, S);
-                        // if (p3 == posCursor && p3 < String::len(S)) p3++;
-                        cerr << p3 << ' ';
-
-                        if (p3 != p2)
-                        {
-                            char ch1 = String::get(p3, S);
-                            char ch2 = String::get(p3 + 1, S);
-
-                            if (p3 + 1 == posCursor && p3 + 2 <= String::len(S))
-                                ch2 = String::get(p3 + 2, S);
-
-                            while (p3 >= p1 && Replace::isValid(ch2) && (p3 == posCursor || Replace::isValid(String::get(p3, S))))
-                                p3--;
-
-                            if (p3 < p1)
-                            {
-                                p3 = String::getLastSeen(p1, p2, windowWidth - marginLeft, S);
-                            }
-                        }
-
-                        cerr << "current line: " << cntLine << ' ' << p1 << ' ' << p3 << ' ' << posCursor << '\n';
-
-                        cntLine++;
-                        string ln = String::constructString(p1, p3, S);
-                        Render::centerText(text, ln, marginTop + lineHeight * (cntLine - 1));
-
-                        if (p1 <= posCursor && posCursor <= p3)
-                        {
-                            float cw = Render::splitCursorLine(text, text, ln, posCursor - p1 + 1, 0);
-                            cursorLineOnScreen = 1;
-                            cerr << "cw is" << ' ' << cw << ' ' << posCursor - p1 + 1 << '\n';
-                            cursorLine = l2;
-                            cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                            cursorBox.setPosition((float)marginLeft + paddingLeft + cw, (cntLine - 1) * lineHeight + marginTop);
-                            cursorOnScreen = 1;
-                        }
-
-                        text1.draw(text);
-                        p1 = p3 + 1;
-                    }
-
-                    if (cursorLine == l2)
-                    {
-                        cursorLineHighlight.setSize(sf::Vector2f(windowWidth, splitedLines * lineHeight));
-                        cursorLineHighlight.setPosition(0, marginTop + (cntLine - splitedLines) * lineHeight);
-                    }
+                    int P = Replace::findRealPosition(currentAppearance, positions, bit, word, rword);
+                    int L = String::findNumberOfEndlines(1, P, S) + 1;
+                    int F = String::findKthLine(L, S);
+                    Yoffset = (L - 1) * lineHeight;
+                    Xoffset = String::findWidth(F, P - 1, S);
                 }
 
-                img1.setTexture(text1.getTexture());
-                text1.display();
+                renderAgain = 1;
+            }
+
+            if (renderAgain == 1)
+            {
+                Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
             }
             else
             {
-                renderAgain |= firstExec;
-                renderAgain |= fontChanged;
-
-                if (fontChanged || firstExec)
+                if (cursorLine >= l1 && cursorLine <= l2)
                 {
-                    cursorHeight = lineHeight - 2;
-                    cursorWidth = 1;
+                    Render::updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset, cursorLine - l1));
+                    text.setString(renderLines[cursorLine - l1]);
                 }
-
-                fontChanged = 0;
-                firstExec = 0;
-
-                int posCursor = String::findCursorPosition(S);
-                int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
-                int p = String::findKthLine(cursorLine, S);
-                int fp = String::getFirstSeen(p, posCursor, Xoffset, S);
-                int lp = String::getLastSeen(p, posCursor, Xoffset + windowWidth - marginLeft, S);
-                if (lp < posCursor)
-                    fp = -1;
-
-                renderAgain |= lastCursorLine != cursorLine;
-
-                if (findFlag == 1 && updateFindReplace == 1)
-                {
-                    if (currentAppearance < positions.size() && !Replace::isApOnScreen(positions[currentAppearance], word.size()))
-                    {
-                        int P = positions[currentAppearance];
-                        int L = String::findNumberOfEndlines(1, P, S) + 1;
-                        int F = String::findKthLine(L, S);
-                        Yoffset = (L - 1) * lineHeight;
-                        Xoffset = String::findWidth(F, P - 1, S);
-                    }
-
-                    renderAgain = 1;
-                }
-
-                if (replaceFlag == 1 && updateFindReplace == 1)
-                {
-
-                    Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
-
-                    if (currentAppearance != -1 && currentAppearance < positions.size() && !Replace::isApOnScreen(Replace::findRealPosition(currentAppearance, positions, bit, word, rword), word.size()))
-                    {
-                        int P = Replace::findRealPosition(currentAppearance, positions, bit, word, rword);
-                        int L = String::findNumberOfEndlines(1, P, S) + 1;
-                        int F = String::findKthLine(L, S);
-                        Yoffset = (L - 1) * lineHeight;
-                        Xoffset = String::findWidth(F, P - 1, S);
-                    }
-
-                    renderAgain = 1;
-                }
-
-                if (renderAgain == 1)
-                {
-                    Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
-                }
-                else
-                {
-                    if (cursorLine >= l1 && cursorLine <= l2)
-                    {
-                        Render::updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset, cursorLine - l1));
-                        text.setString(renderLines[cursorLine - l1]);
-                    }
-                }
+            }
 
                 string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
                 float cw = Render::splitCursorLine(text, ptext1, cursorTextLine, posCursor - fp + 1, fp);
 
-                if (cursorLine >= l1 && cursorLine <= l2)
-                    cursorLineOnScreen = 1;
-                else
-                    cursorLineOnScreen = 0;
+            if (cursorLine >= l1 && cursorLine <= l2)
+                cursorLineOnScreen = 1;
+            else
+                cursorLineOnScreen = 0;
 
-                if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
-                {
-                    cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
-                    cursorBox.setPosition((float)marginLeft + cw + paddingLeft, (cursorLine - l1) * lineHeight + marginTop);
-
-                    cursorOnScreen = 1;
-                }
-                else
-                    cursorOnScreen = 0;
-
-                cursorLineHighlight.setSize(sf::Vector2f(windowWidth, lineHeight));
-                cursorLineHighlight.setPosition(0, (cursorLine - l1) * lineHeight + marginTop);
-
-                lastCursorLine = cursorLine;
-
-                selectedBoxes.clear();
-
-                if (selectFlag)
-                {
-                    int L = segmSelected.first;
-                    int R = segmSelected.second;
-
-                    for (int i = 0; i < sizeRLines; i++)
-                    {
-                        int l = segmOnScreen[i].first;
-                        int r = segmOnScreen[i].second;
-
-                        int li = max(l, L);
-                        int ri = min(r, R);
-
-                        if (li > ri)
-                            continue;
-
-                        int y = i * lineHeight + marginTop;
-                        int x = marginLeft;
-
-                        int w = String::findWidth(l, li - 1, S);
-                        int W = String::findWidth(li, ri, S);
-
-                        box.setPosition(w + marginLeft + paddingLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
-                        box.setSize(sf::Vector2f(W, lineHeight));
-                        box.setFillColor(currentThemeColors.selectHighlight);
-                        selectedBoxes.push_back(box);
-                    }
-                }
-
-                if (findFlag)
-                {
-                    for (int i = 0; i < sizeRLines; i++)
-                    {
-                        int l = segmOnScreen[i].first;
-                        int r = segmOnScreen[i].second;
-
-                        if (l == -1)
-                            continue;
-
-                        int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
-                        int y = i * lineHeight + marginTop;
-                        //  cerr << "On line " << i + 1 << ": ";
-
-                        while (p < positions.size() && positions[p] <= r)
-                        {
-                            //      cerr << positions[p] << ' ';
-                            int w = String::findWidth(l, positions[p] - 1, S);
-                            int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
-
-                            box.setPosition(marginLeft + w + paddingLeft, y);
-                            box.setSize(sf::Vector2f(W, lineHeight));
-                            if (p != currentAppearance)
-                                box.setFillColor(sf::Color(255, 255, 0, 128));
-                            else
-                                box.setFillColor(sf::Color(255, 187, 0, 128));
-                            selectedBoxes.push_back(box);
-                            p++;
-                        }
-
-                        // cerr << '\n';
-                    }
-
-                    // cerr << "\n\n";
-                }
-
-                if (replaceFlag)
-                {
-                    for (int i = 0; i < sizeRLines; i++)
-                    {
-                        int l = segmOnScreen[i].first;
-                        int r = segmOnScreen[i].second;
-
-                        if (l == -1)
-                            continue;
-
-                        int p = Replace::traceFirstApToRender(l, positions, bit, notRemoved, word, rword);
-                        int y = i * lineHeight + marginTop;
-                        // cerr << "On line " << i + 1 << ": " << p;
-
-                        while (p != -1 && p < positions.size() && Replace::findRealPosition(p, positions, bit, word, rword) <= r)
-                        {
-                            int P = Replace::findRealPosition(p, positions, bit, word, rword);
-                            int w = String::findWidth(l, P - 1, S);
-                            int W = String::findWidth(P, P + word.size() - 1, S);
-
-                            box.setPosition(marginLeft + w + paddingLeft, y);
-                            box.setSize(sf::Vector2f(W, lineHeight));
-                            if (p != currentAppearance)
-                                box.setFillColor(sf::Color(255, 255, 0, 128));
-                            else
-                                box.setFillColor(sf::Color(255, 187, 0, 128));
-                            selectedBoxes.push_back(box);
-                            p = Replace::findNextValidAppearance(p, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                            //   cerr << p << ' ';
-                        }
-                        // cerr << '\n';
-                    }
-                    // cerr << "\n\n";
-                }
-            }
-        }
-
-        if (wordWrap == 0)
-        {
-            if ((findFlag | replaceFlag) && flag == 1)
+            if (cursorLine >= l1 && cursorLine <= l2 && fp != -1)
             {
-                int highlighted = 0;
+                cursorBox.setSize(sf::Vector2f(cursorWidth, cursorHeight));
+                cursorBox.setPosition((float)marginLeft + cw + paddingLeft, (cursorLine - l1) * lineHeight + marginTop);
 
-                for (int i = 0; i < selectedBoxes.size(); i++)
-                {
-                    if (selectedBoxes[i].getFillColor() == sf::Color(255, 187, 0, 128))
-                        highlighted = i;
-                }
+                cursorOnScreen = 1;
+            }
+            else
+                cursorOnScreen = 0;
 
-                for (int i = 0; i < highlighted; i++)
-                {
-                    if (selectedBoxes[i].getPosition().y == selectedBoxes[i + 1].getPosition().y)
-                    {
-                        selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x, selectedBoxes[i].getSize().x), lineHeight));
-                    }
-                }
+            cursorLineHighlight.setSize(sf::Vector2f(windowWidth, lineHeight));
+            cursorLineHighlight.setPosition(0, (cursorLine - l1) * lineHeight + marginTop);
 
-                for (int i = highlighted + 1; i < selectedBoxes.size(); i++)
+            lastCursorLine = cursorLine;
+
+            selectedBoxes.clear();
+
+            if (selectFlag)
+            {
+                int L = segmSelected.first;
+                int R = segmSelected.second;
+
+                for (int i = 0; i < sizeRLines; i++)
                 {
-                    if (selectedBoxes[i].getPosition().y == selectedBoxes[i - 1].getPosition().y)
-                    {
-                        int oldX = selectedBoxes[i].getPosition().x;
-                        selectedBoxes[i].setPosition(max(selectedBoxes[i].getPosition().x, selectedBoxes[i - 1].getPosition().x + selectedBoxes[i - 1].getSize().x), selectedBoxes[i].getPosition().y);
-                        selectedBoxes[i].setSize(sf::Vector2f(selectedBoxes[i].getSize().x - (selectedBoxes[i].getPosition().x - oldX), lineHeight));
-                    }
+                    int l = segmOnScreen[i].first;
+                    int r = segmOnScreen[i].second;
+
+                    int li = max(l, L);
+                    int ri = min(r, R);
+
+                    if (li > ri)
+                        continue;
+
+                    int y = i * lineHeight + marginTop;
+                    int x = marginLeft;
+
+                    int w = String::findWidth(l, li - 1, S);
+                    int W = String::findWidth(li, ri, S);
+
+                    box.setPosition(w + marginLeft + paddingLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
+                    box.setSize(sf::Vector2f(W, lineHeight));
+                    box.setFillColor(currentThemeColors.selectHighlight);
+                    selectedBoxes.push_back(box);
                 }
             }
 
-            if (selectFlag | findFlag | replaceFlag)
-                for (auto box : selectedBoxes)
-                    window.draw(box);
+            if (findFlag)
+            {
+                for (int i = 0; i < sizeRLines; i++)
+                {
+                    int l = segmOnScreen[i].first;
+                    int r = segmOnScreen[i].second;
 
-            window.draw(lineNumbersBackground);
-            if (showLineNumbers)
-                window.draw(img3);
+                    if (l == -1)
+                        continue;
 
-            if (cursorOnScreen)
-                window.draw(cursorBox);
-            if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)
-                window.draw(cursorLineHighlight);
+                    int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
+                    int y = i * lineHeight + marginTop;
+                    //  cerr << "On line " << i + 1 << ": ";
 
-            window.draw(img1);
-            window.draw(ptext1);
-            window.draw(img2);
+                    while (p < positions.size() && positions[p] <= r)
+                    {
+                        //      cerr << positions[p] << ' ';
+                        int w = String::findWidth(l, positions[p] - 1, S);
+                        int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
+
+                        box.setPosition(marginLeft + w + paddingLeft, y);
+                        box.setSize(sf::Vector2f(W, lineHeight));
+                        if (p != currentAppearance)
+                            box.setFillColor(sf::Color(255, 255, 0, 128));
+                        else
+                            box.setFillColor(sf::Color(255, 187, 0, 128));
+                        selectedBoxes.push_back(box);
+                        p++;
+                    }
+
+                    // cerr << '\n';
+                }
+
+                // cerr << "\n\n";
+            }
+
+            if (replaceFlag)
+            {
+                for (int i = 0; i < sizeRLines; i++)
+                {
+                    int l = segmOnScreen[i].first;
+                    int r = segmOnScreen[i].second;
+
+                    if (l == -1)
+                        continue;
+
+                    int p = Replace::traceFirstApToRender(l, positions, bit, notRemoved, word, rword);
+                    int y = i * lineHeight + marginTop;
+                    // cerr << "On line " << i + 1 << ": " << p;
+
+                    while (p != -1 && p < positions.size() && Replace::findRealPosition(p, positions, bit, word, rword) <= r)
+                    {
+                        int P = Replace::findRealPosition(p, positions, bit, word, rword);
+                        int w = String::findWidth(l, P - 1, S);
+                        int W = String::findWidth(P, P + word.size() - 1, S);
+
+                        box.setPosition(marginLeft + w + paddingLeft, y);
+                        box.setSize(sf::Vector2f(W, lineHeight));
+                        if (p != currentAppearance)
+                            box.setFillColor(sf::Color(255, 255, 0, 128));
+                        else
+                            box.setFillColor(sf::Color(255, 187, 0, 128));
+                        selectedBoxes.push_back(box);
+                        p = Replace::findNextValidAppearance(p, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                        //   cerr << p << ' ';
+                    }
+                    // cerr << '\n';
+                }
+                // cerr << "\n\n";
+            }
         }
-        else
+
+        if ((findFlag | replaceFlag) && flag == 1)
         {
-            if (cursorOnScreen)
-                window.draw(cursorBox);
+            int highlighted = 0;
 
-            if (cursorLineOnScreen)
-                window.draw(cursorLineHighlight);
+            for (int i = 0; i < selectedBoxes.size(); i++)
+            {
+                if (selectedBoxes[i].getFillColor() == sf::Color(255, 187, 0, 128))
+                    highlighted = i;
+            }
 
-            window.draw(img1);
+            for (int i = 0; i < highlighted; i++)
+            {
+                if (selectedBoxes[i].getPosition().y == selectedBoxes[i + 1].getPosition().y)
+                {
+                    selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x, selectedBoxes[i].getSize().x), lineHeight));
+                }
+            }
+
+            for (int i = highlighted + 1; i < selectedBoxes.size(); i++)
+            {
+                if (selectedBoxes[i].getPosition().y == selectedBoxes[i - 1].getPosition().y)
+                {
+                    int oldX = selectedBoxes[i].getPosition().x;
+                    selectedBoxes[i].setPosition(max(selectedBoxes[i].getPosition().x, selectedBoxes[i - 1].getPosition().x + selectedBoxes[i - 1].getSize().x), selectedBoxes[i].getPosition().y);
+                    selectedBoxes[i].setSize(sf::Vector2f(selectedBoxes[i].getSize().x - (selectedBoxes[i].getPosition().x - oldX), lineHeight));
+                }
+            }
         }
 
+        if (selectFlag | findFlag | replaceFlag)
+            for (auto box : selectedBoxes)
+                window.draw(box);
+
+        window.draw(lineNumbersBackground);
+        if (showLineNumbers)
+            window.draw(img3);
+
+        if (cursorOnScreen)
+            window.draw(cursorBox);
+        if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)
+            window.draw(cursorLineHighlight);
+
+        window.draw(img1);
+        window.draw(ptext1);
+        window.draw(img2);
+        
         Helpers::updateStatusBarInfo();
         Helpers::updateStatusBarPositions();
     
