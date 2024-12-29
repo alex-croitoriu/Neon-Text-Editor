@@ -756,12 +756,7 @@ int main()
     mainIcon.loadFromFile("assets/images/main_icon.png");
     window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
-    font.loadFromFile("assets/fonts/poppins.ttf");
-    font.setSmooth(false);
-
-    text1.setSmooth(false);
-    text2.setSmooth(false);
-    text3.setSmooth(false);
+    font.loadFromFile("assets/fonts/cour.ttf");
 
     lineHeight = Helpers::getLineHeight();
 
@@ -835,6 +830,10 @@ int main()
     text1.create(maxRows, maxRows);
     text2.create(maxRows, maxRows);
     text3.create(maxRows, maxRows);
+
+    text1.setSmooth(true);
+    text2.setSmooth(true);
+    text3.setSmooth(true);
 
     string path = "", buffer = "";
     int timer = 0;
