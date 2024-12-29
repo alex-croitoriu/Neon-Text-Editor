@@ -272,8 +272,8 @@ namespace Windows
     { ///am invatat de la cei mai buni
         int result = MessageBox(
             NULL,                            
-            L"Do you want to save changes?",  
-            L"Save Changes",                  
+            "Do you want to save changes?",  
+            "Save Changes",                  
             MB_YESNOCANCEL | MB_ICONQUESTION 
         );
 
