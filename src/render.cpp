@@ -222,9 +222,7 @@ void Render::render(int &l1, int &l2, String::Treap *&S, int Yoffset, int Xoffse
     sizeRLines = 0;
 
     for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2 + (l2 < numberOfLines); i++)
-    {
         updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset, i - l1));
-        // cerr << renderLines[sizeRLines - 1] << ' ' << '\n';
-    }
+        
     updateSmartRender(text, l1, l2 + (l2 < numberOfLines), cursorLine, scrollUnitY);
 }

@@ -111,12 +111,12 @@ std::vector<sf::Vector2f> Helpers::getStatusBarPositions()
     ButtonProperties buttonProperties = buttonSizeMapping.at(ButtonSize::SMALL);
     return 
     {
-        sf::Vector2f(0, windowHeight - marginBottom),
-        sf::Vector2f(lineCountTextBox->getSize().x - 1, windowHeight - marginBottom),
-        sf::Vector2f(lineCountTextBox->getSize().x + lineColumnTextBox->getSize().x - 2, windowHeight - marginBottom),
-        sf::Vector2f(std::max(0.0f, windowWidth - 2 * buttonProperties.size.x - zoomLevelTextBox->getSize().x + 2), windowHeight - marginBottom),
-        sf::Vector2f(std::max(0.0f, windowWidth - buttonProperties.size.x - zoomLevelTextBox->getSize().x + 1), windowHeight - marginBottom),
-        sf::Vector2f(std::max(0.0f, windowWidth - buttonProperties.size.x), windowHeight - marginBottom)
+        sf::Vector2f(0, int(windowHeight - marginBottom)),
+        sf::Vector2f(int(lineCountTextBox->getSize().x - 1), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(lineCountTextBox->getSize().x + lineColumnTextBox->getSize().x - 2), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(std::max(0.0f, windowWidth - 2 * buttonProperties.size.x - zoomLevelTextBox->getSize().x + 2)), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(std::max(0.0f, windowWidth - buttonProperties.size.x - zoomLevelTextBox->getSize().x + 1)), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(std::max(0.0f, windowWidth - buttonProperties.size.x)), int(windowHeight - marginBottom))
     };
 }
 

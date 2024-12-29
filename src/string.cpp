@@ -22,7 +22,7 @@ String::Treap::Treap(char ch, bool cursor)
     //  this-> sumCursor = this-> flagCursor = cursor;
     //  this->sumEndline = this->flagEndline = (ch == 10);
     this->sumEndline = (ch == 10);
-    this->sumWidth = getDim(ch) * (1 - cursor * wordWrap);
+    this->sumWidth = getDim(ch) * (1 - cursor);
     cnt = 1;
     priority = rng();
 }
@@ -88,8 +88,6 @@ int String::len(Treap *T)
 
 void String::recalculate(Treap *&T)
 {
-    if (T == 0)
-        std::cerr << "flag!!!", exit(0);
     T->A[1] = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
     T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + getFlagEndline(T);
     T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + getDim(getCh(T));
@@ -141,7 +139,6 @@ void String::print(Treap *T)
     if (T == 0)
         return;
     print(T->L);
-    std::cerr << getCh(T) << ' ';
     print(T->R);
 }
 
@@ -486,8 +483,6 @@ std::string String::constructRenderedLine(int i, Treap *&T, int Xoffset, int I)
     int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
     int t2 = String::getLastSeen(p1, p2, Xoffset + windowWidth - marginLeft, T);
 
-    if (I == 0)
-        std::cerr << t1 << ' ' << t2 << '\n';
     segmOnScreen[I] = {t1, t2};
 
     if (t1 == -1 || t2 == -1)

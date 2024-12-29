@@ -425,9 +425,6 @@ int main()
                                 String::del(S);
                                 S = String::build(fileSize, data);
                                 String::insert(1, S);
-                                
-
-                                cerr << "Read: " << fileSize << ' ' << "ch" << '\n';
 
                                 UnmapViewOfFile(data);
                                 CloseHandle(mappingHandle);
@@ -582,12 +579,6 @@ int main()
                                     flag = 1;
                                     break;
                                 }
-
-                                cerr << "Found: " << positions.size() << '\n';
-                                cerr << "Positions: ";
-                                for (auto i : positions)
-                                    cerr << i << ' ';
-                                cerr << '\n';
 
                                 updateFindReplace = 1;
                                 currentAppearance = 0;
@@ -756,7 +747,6 @@ int main()
                 if (event.type == sf::Event::KeyPressed)
                 {
                     int key = event.key.code;
-                    cerr << "key is " << key << '\n';
 
                     if (key == 36) /// escape
                     {
@@ -857,7 +847,6 @@ int main()
                         {
                             currentAppearance--;
                             currentAppearance = max(0, currentAppearance);
-                            cerr << "After left arrow: " << currentAppearance << '\n';
 
                             renderAgain = 1;
                             flag = 1;
@@ -911,8 +900,6 @@ int main()
                         {
                             currentAppearance++;
                             currentAppearance = min((int)positions.size() - 1, currentAppearance);
-
-                            cerr << "After right arrow: " << currentAppearance << '\n';
 
                             renderAgain = 1;
                             flag = 1;
@@ -1005,7 +992,6 @@ int main()
                 {
                     int ch = event.text.unicode;
 
-                    cerr << "txt is " << ch << "\n";
                     if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1)
                         break;
 
@@ -1122,7 +1108,7 @@ int main()
 
             if (fontChanged || firstExec)
             {
-                cursorHeight = lineHeight - 2;
+                cursorHeight = lineHeight;
                 cursorWidth = 1;
             }
 
@@ -1249,11 +1235,9 @@ int main()
 
                     int p = lower_bound(positions.begin(), positions.end(), l) - positions.begin();
                     int y = i * lineHeight + marginTop;
-                    //  cerr << "On line " << i + 1 << ": ";
 
                     while (p < positions.size() && positions[p] <= r)
                     {
-                        //      cerr << positions[p] << ' ';
                         int w = String::findWidth(l, positions[p] - 1, S);
                         int W = String::findWidth(positions[p], positions[p] + word.size() - 1, S);
 
@@ -1266,11 +1250,7 @@ int main()
                         selectedBoxes.push_back(box);
                         p++;
                     }
-
-                    // cerr << '\n';
                 }
-
-                // cerr << "\n\n";
             }
 
             if (replaceFlag)
@@ -1285,7 +1265,6 @@ int main()
 
                     int p = Replace::traceFirstApToRender(l, positions, bit, notRemoved, word, rword);
                     int y = i * lineHeight + marginTop;
-                    // cerr << "On line " << i + 1 << ": " << p;
 
                     while (p != -1 && p < positions.size() && Replace::findRealPosition(p, positions, bit, word, rword) <= r)
                     {
@@ -1301,11 +1280,8 @@ int main()
                             box.setFillColor(sf::Color(255, 187, 0, 128));
                         selectedBoxes.push_back(box);
                         p = Replace::findNextValidAppearance(p, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                        //   cerr << p << ' ';
                     }
-                    // cerr << '\n';
                 }
-                // cerr << "\n\n";
             }
         }
 
