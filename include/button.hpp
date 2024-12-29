@@ -16,10 +16,10 @@ class Button
     sf::RectangleShape container;
     sf::Text content;
     ButtonSize size;
-    bool alignCenter;
+    bool centerX, centerY;
     
 public:
-    Button(const std::string &label, const sf::Vector2f &position, const ButtonSize &_size = ButtonSize::MEDIUM, const bool &alignCenter = true);
+    Button(const std::string &label, const sf::Vector2f &position, const ButtonSize &_size = ButtonSize::MEDIUM, const bool &centerX = true, const bool &centerY = true);
 
     bool isHovering();
     void setLabel(const std::string &label);

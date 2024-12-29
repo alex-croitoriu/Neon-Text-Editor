@@ -9,7 +9,7 @@
 
 extern sf::Font font;
 extern sf::RenderWindow window;
-extern sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
+extern sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, toolBarBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
 
 extern int windowWidth, windowHeight;
 

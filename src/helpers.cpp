@@ -9,19 +9,19 @@ float Helpers::getLineHeight(int fnt)
     return fnt * 1.5;
 }
 
-void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Text &content, bool vertical, bool horizontal, int paddingTop, int paddingLeft)
+void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Text &content, bool centerX, bool centerY, int paddingTop, int paddingLeft)
 {
-    if (!horizontal && vertical)
+    if (!centerX && centerY)
     {
         content.setOrigin(0, int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
         content.setPosition(int(container.getGlobalBounds().left + paddingLeft), int(container.getPosition().y + container.getSize().y / 2.f));
     }
-    else if (!vertical && horizontal)
+    else if (!centerY && centerX)
     {
         content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), 0);
         content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + paddingTop));
     }
-    else if (horizontal && vertical)
+    else if (centerX && centerY)
     {
         content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
         content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + container.getSize().y / 2.f));
@@ -57,7 +57,8 @@ void Helpers::changeTheme(sf::Text &t1, sf::Text &t2, sf::Text &t3)
     zoomLevelTextBox->updateThemeColors();
 
     lineNumbersBackground.setFillColor(currentThemeColors.lineNumbersBackground);
-    statusBarBackground.setFillColor(currentThemeColors.background);
+    toolBarBackground.setFillColor(currentThemeColors.bar);
+    statusBarBackground.setFillColor(currentThemeColors.bar);
 
     topSeparator.setFillColor(currentThemeColors.separator);
     bottomSeparator.setFillColor(currentThemeColors.separator);

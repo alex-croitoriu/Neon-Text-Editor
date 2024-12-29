@@ -9,7 +9,7 @@ Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabel
     isOpen = false;
 
     // the position parameter is the top left corner of the menu itself, so the toggle button has to go above it
-    toggleButton = new Button(label, sf::Vector2f(position.x, position.y - buttonSizeMapping.at(ButtonSize::MEDIUM).size.y));
+    toggleButton = new Button(label, sf::Vector2f(position.x, position.y - buttonSizeMapping.at(ButtonSize::MEDIUM).size.y), ButtonSize::MEDIUM, true, false);
     buttonCount = buttonLabels.size();
 
     ButtonProperties properties = buttonSizeMapping.at(ButtonSize::LARGE);
@@ -23,7 +23,6 @@ Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabel
 
     container.setSize(sf::Vector2f(properties.size.x, (properties.size.y - 1) * buttonCount + 1)); 
     container.setPosition(position);
-    container.setFillColor(sf::Color(141, 171, 204));
 }
 
 bool Menu::isHovering()

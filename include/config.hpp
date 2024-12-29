@@ -7,7 +7,7 @@
 constexpr int maxFontSize = 100;
 constexpr int maxRows = 10000;
 
-const int marginTop = 21;
+const int marginTop = 24;
 const int marginBottom = 24;
 
 const int initialFontSize = 20;
@@ -42,6 +42,7 @@ struct ThemeColors
     sf::Color background;
     sf::Color text;
     sf::Color separator;
+    sf::Color bar;
     sf::Color lineNumbersText; 
     sf::Color lineNumbersBackground;
     sf::Color cursorLineHighlight;
@@ -51,7 +52,6 @@ struct ThemeColors
     sf::Color buttonOutline;
     sf::Color textBoxBackground;
     sf::Color textBoxOutline;
-    std::vector<sf::Color> cursor;
 };
 
 struct ButtonProperties
@@ -67,37 +67,37 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
     {
         Theme::LIGHT,
         {
-            sf::Color::White,                       // background               
-            sf::Color::Black,                       // text
-            sf::Color(48, 48, 48, 255),             // separator
-            sf::Color(130, 130, 130, 255),          // lineNumbersText
-            sf::Color(200, 200, 200, 255),          // lineNumbersBackground
-            sf::Color(0, 0, 0, 30),                 // cursorLineHighlight
-            sf::Color(0, 0, 0, 40),                 // selectHighlight
-            sf::Color::White,                       // buttonBackground
-            sf::Color(0, 0, 0, 30),                 // buttonHover 
-            sf::Color(48, 48, 48, 255),             // buttonOutline
-            sf::Color::White,                       // textBoxBackground
-            sf::Color(48, 48, 48, 255),             // textBoxOutline
-            { sf::Color::Black, sf::Color::White }  // cursor
+            sf::Color::White,                // background               
+            sf::Color(20, 20, 20, 255),      // text
+            sf::Color(192, 192, 192, 255),   // separator
+            sf::Color(227, 230, 232, 255),   // bar
+            sf::Color(110, 110, 130, 255),   // lineNumbersText
+            sf::Color(210, 211, 212, 255),   // lineNumbersBackground
+            sf::Color(0, 0, 0, 30),          // cursorLineHighlight
+            sf::Color(0, 0, 0, 40),          // selectHighlight
+            sf::Color(227, 230, 232, 255),   // buttonBackground
+            sf::Color(185, 185, 185, 255),   // buttonHover 
+            sf::Color(192, 192, 192, 255),   // buttonOutline
+            sf::Color(227, 230, 232, 255),   // textBoxBackground
+            sf::Color(192, 192, 192, 255),   // textBoxOutline
         }
     },
     {
         Theme::DARK,
         {
-            sf::Color(15, 28, 48, 255),             // background                       
-            sf::Color(184, 187, 191, 255),          // text
-            sf::Color(69, 71, 74, 255),             // separator
-            sf::Color(212, 214, 217, 255),          // lineNumbersText
-            sf::Color(20, 33, 54, 255),             // lineNumbersBackground
-            sf::Color(255, 255, 255, 100),          // cursorLineHighlight
-            sf::Color(80, 80, 80),                  // selectHighlight
-            sf::Color(15, 28, 48, 255),             // buttonBackground
-            sf::Color(15, 28, 48, 255),             // buttonHover   
-            sf::Color(15, 28, 48, 255),             // buttonOutline
-            sf::Color(15, 28, 48, 255),             // textBoxBackground
-            sf::Color(15, 28, 48, 255),                 // textBoxOutline
-            { sf::Color::White, sf::Color::Black }  // cursor
+            sf::Color(15, 28, 48, 255),      // background                       
+            sf::Color(255, 255, 255, 255),   // text
+            sf::Color(15, 28, 48, 255),      // separator
+            sf::Color(20, 33, 54, 255),      // bar
+            sf::Color(212, 214, 217, 255),   // lineNumbersText
+            sf::Color(29, 42, 64, 255),      // lineNumbersBackground
+            sf::Color(255, 255, 255, 100),   // cursorLineHighlight
+            sf::Color(80, 80, 80),           // selectHighlight
+            sf::Color(20, 33, 54, 255),      // buttonBackground
+            sf::Color(53, 115, 204, 255),    // buttonHover   
+            sf::Color(15, 28, 48, 255),      // buttonOutline
+            sf::Color(20, 33, 54, 255),      // textBoxBackground
+            sf::Color(15, 28, 48, 255),      // textBoxOutline
         }
     }
 };
@@ -116,7 +116,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
     {
         ButtonSize::MEDIUM,
         {
-            sf::Vector2f(60, 21),   // size
+            sf::Vector2f(70, 24),   // size
             11,                     // fontSize
             0.8,                    // letterSpacing
             0                       // outlineThickness

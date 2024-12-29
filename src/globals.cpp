@@ -7,7 +7,7 @@
 
 sf::Font font;
 sf::RenderWindow window;
-sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
+sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, toolBarBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
 
 ThemeColors currentThemeColors = themeColorsMapping.at(theme);
 

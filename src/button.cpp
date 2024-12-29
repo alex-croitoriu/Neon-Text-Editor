@@ -3,10 +3,11 @@
 #include "config.hpp"
 #include "helpers.hpp"
 
-Button::Button(const std::string &label, const sf::Vector2f &position, const ButtonSize &_size, const bool &_alignCenter)
+Button::Button(const std::string &label, const sf::Vector2f &position, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
 {
     size = _size;
-    alignCenter = _alignCenter;
+    centerX = _centerX;
+    centerY = _centerY;
 
     ButtonProperties properties = buttonSizeMapping.at(size);
 
@@ -21,10 +22,7 @@ Button::Button(const std::string &label, const sf::Vector2f &position, const But
     content.setFillColor(currentThemeColors.text);
     content.setLetterSpacing(properties.letterSpacing);
 
-    if (alignCenter) 
-        Helpers::centerContentInsideContainer(container, content);
-    else
-        Helpers::centerContentInsideContainer(container, content, true, false, 0, 20);
+    Helpers::centerContentInsideContainer(container, content, centerX, centerY, 4, 20);
 }
 
 bool Button::isHovering()
@@ -41,10 +39,7 @@ void Button::setLabel(const std::string &label)
 void Button::setPosition(const sf::Vector2f &position)
 {
     container.setPosition(position);
-    if (alignCenter) 
-        Helpers::centerContentInsideContainer(container, content);
-    else
-        Helpers::centerContentInsideContainer(container, content, true, false, 0, 20);
+    Helpers::centerContentInsideContainer(container, content, centerX, centerY, 0, 20);
 }
 
 void Button::setHoverState(bool isHovering)

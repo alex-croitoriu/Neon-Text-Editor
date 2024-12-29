@@ -401,6 +401,7 @@ namespace Render
 
         lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
         statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
+        toolBarBackground.setSize(sf::Vector2f(windowWidth, marginTop));
 
         text.setLetterSpacing(1);
         text.setFillColor(currentThemeColors.text);
@@ -804,9 +805,15 @@ int main()
     lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
     lineNumbersBackground.setFillColor(currentThemeColors.lineNumbersBackground);
 
+    toolBarBackground.setPosition(0, 0);
+    toolBarBackground.setSize(sf::Vector2f(windowWidth, marginTop));
+    toolBarBackground.setFillColor(currentThemeColors.bar);
+    
     statusBarBackground.setPosition(0, windowHeight - marginBottom);
     statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
-    statusBarBackground.setFillColor(currentThemeColors.background);
+    statusBarBackground.setFillColor(currentThemeColors.bar);
+
+
 
     int Yoffset = 0, Xoffset = 0;
     int scrollUnitX = charWidth[fontSize][0], scrollUnitY = Helpers::getLineHeight();
@@ -1816,6 +1823,8 @@ int main()
                     lineNumbersBackground.setPosition(0, marginTop);
                     statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
                     statusBarBackground.setPosition(sf::Vector2f(0, windowHeight - marginBottom));
+                    toolBarBackground.setPosition(0, 0);
+                    toolBarBackground.setSize(sf::Vector2f(windowWidth, marginTop));
 
                     break;
                 }
@@ -1830,9 +1839,9 @@ int main()
         cursorTimer %= timeUnit * 2;
 
         if (cursorTimer % (timeUnit * 2) <= timeUnit)
-            cursorBox.setFillColor(currentThemeColors.cursor[0]);
+            cursorBox.setFillColor(currentThemeColors.text);
         else if (cursorTimer % (timeUnit * 2) != 0)
-            cursorBox.setFillColor(currentThemeColors.cursor[1]);
+            cursorBox.setFillColor(currentThemeColors.background);
 
         if (flag || firstExec)
         {
@@ -2206,6 +2215,7 @@ int main()
         Helpers::updateStatusBarPositions();
     
         window.draw(statusBarBackground);
+        window.draw(toolBarBackground);
         lineCountTextBox->draw();
         lineColumnTextBox->draw();
         if (selectedBoxes.size())
