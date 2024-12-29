@@ -26,7 +26,7 @@ void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Te
     }
 }
 
-void Helpers::changeTheme(sf::Text &t1, sf::Text &t2, sf::Text &t3)
+void Helpers::changeTheme(sf::Text &t1, sf::Text &t2)
 {
     if (theme == Theme::LIGHT)
         theme = Theme::DARK;
@@ -36,7 +36,6 @@ void Helpers::changeTheme(sf::Text &t1, sf::Text &t2, sf::Text &t3)
 
     t1.setFillColor(currentThemeColors.text);
     t2.setFillColor(currentThemeColors.text);
-    t3.setFillColor(currentThemeColors.text);
 
     zoomInButton->updateThemeColors();
     zoomOutButton->updateThemeColors();

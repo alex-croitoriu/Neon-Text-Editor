@@ -163,7 +163,7 @@ void Render::updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, i
     text3.display();
 }
 
-float Render::splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, std::string &txt, int posCursorOnScreen, int fp)
+float Render::splitCursorLine(sf::Text &text, sf::Text &h1, std::string &txt, int posCursorOnScreen, int fp)
 {
     if (txt.size() == 0)
     {

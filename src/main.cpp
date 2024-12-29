@@ -27,7 +27,7 @@ using namespace std;
 vector<sf::RectangleShape> selectedBoxes;
 
 sf::Event event;
-sf::Text text, ptext1, ptext2;
+sf::Text text, ptext1;
 
 int cursorHeight = 0, cursorWidth = 0;
 
@@ -53,11 +53,6 @@ int main()
     ptext1.setFillColor(currentThemeColors.text);
     ptext1.setCharacterSize(fontSize);
     ptext1.setStyle(sf::Text::Regular);
-
-    ptext2.setFont(font);
-    ptext2.setFillColor(currentThemeColors.text);
-    ptext2.setCharacterSize(fontSize);
-    ptext2.setStyle(sf::Text::Regular);
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 
@@ -727,7 +722,7 @@ int main()
                             {
                                 optionsMenu->close();
 
-                                Helpers::changeTheme(text, ptext1, ptext2);
+                                Helpers::changeTheme(text, ptext1);
                                 renderAgain = 1;
                             }
                         }
@@ -1228,7 +1223,7 @@ int main()
 
                         if (p1 <= posCursor && posCursor <= p3)
                         {
-                            float cw = Render::splitCursorLine(text, text, ptext2, ln, posCursor - p1 + 1, 0);
+                            float cw = Render::splitCursorLine(text, text, ln, posCursor - p1 + 1, 0);
                             cursorLineOnScreen = 1;
                             cerr << "cw is" << ' ' << cw << ' ' << posCursor - p1 + 1 << '\n';
                             cursorLine = l2;
@@ -1320,7 +1315,7 @@ int main()
                 }
 
                 string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
-                float cw = Render::splitCursorLine(text, ptext1, ptext2, cursorTextLine, posCursor - fp + 1, fp);
+                float cw = Render::splitCursorLine(text, ptext1, cursorTextLine, posCursor - fp + 1, fp);
 
                 if (cursorLine >= l1 && cursorLine <= l2)
                     cursorLineOnScreen = 1;
