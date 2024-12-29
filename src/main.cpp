@@ -18,11 +18,11 @@
 #include "button.hpp"
 #include "menu.hpp"
 #include "string.hpp"
+#include "windows.hpp"
+#include "render.hpp"
+#include "replace.hpp"
 
 using namespace std;
-
-sf::RenderTexture text1, text2, text3;
-sf::Sprite img1, img2, img3;
 
 vector<sf::RectangleShape> selectedBoxes;
 
@@ -30,722 +30,6 @@ sf::Event event;
 sf::Text text, ptext1, ptext2;
 
 int cursorHeight = 0, cursorWidth = 0;
-int lineNumbersMaxDigits = 3;
-
-vector<string> renderLines(maxRows);
-
-namespace Windows
-{
-    string getPathFromUser(string name) /// ia path-ul introdus de catre utilizator pentru a salva fisierul
-    {
-        const int DIM = 200;
-        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
-        sf::Image mainIcon;
-        mainIcon.loadFromFile("assets/images/main_icon.png");
-        window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
-
-        sf::Event event;
-        sf::Text text, pth;
-
-        text.setFont(font);
-        text.setFillColor(sf::Color::Black);
-        text.setString("Enter path: ");
-
-        pth.setFont(font);
-        pth.setFillColor(sf::Color::Green);
-        pth.setPosition(200, 0);
-
-        string path;
-
-        while (window.isOpen())
-        {
-            while (window.pollEvent(event))
-            {
-                if (event.type == sf::Event::KeyPressed)
-                {
-                    int key = event.key.code;
-
-                    if (key == 58 || key == 36)
-                        window.close();
-
-                    break;
-                }
-                if (event.type == sf::Event::TextEntered)
-                {
-                    int ch = event.text.unicode;
-
-                    if (ch == 8)
-                    {
-                        if (path.size())
-                            path.pop_back();
-                    }
-                    else
-                        path += ch;
-
-                    break;
-                }
-            }
-
-            pth.setString(path);
-            window.clear(sf::Color::White);
-            window.draw(text);
-            window.draw(pth);
-            window.display();
-        }
-
-        return path;
-    }
-
-    string getStringFromUser(string name) /// citeste cuvantul pe care vrea user-ul sa-l caute
-    {
-        const int DIM = 200;
-        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
-        sf::Image mainIcon;
-        mainIcon.loadFromFile("assets/images/main_icon.png");
-        window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
-
-        sf::Event event;
-        sf::Text text, pth;
-
-        text.setFont(font);
-        text.setFillColor(sf::Color::Black);
-        text.setString("Enter keyword: ");
-
-        pth.setFont(font);
-        pth.setFillColor(sf::Color::Green);
-        pth.setString("");
-        pth.setPosition(250, 0);
-
-        string path;
-
-        while (window.isOpen())
-        {
-            while (window.pollEvent(event))
-            {
-                if (event.type == sf::Event::KeyPressed)
-                {
-                    int key = event.key.code;
-
-                    if (key == 58 || key == 36)
-                    {
-                        window.close();
-                    }
-
-                    break;
-                }
-                if (event.type == sf::Event::TextEntered)
-                {
-                    int ch = event.text.unicode;
-
-                    if (ch == 8)
-                    {
-                        if (path.size())
-                            path.pop_back();
-                    }
-                    else
-                        path += ch;
-
-                    break;
-                }
-            }
-
-            pth.setString(path);
-            window.clear(sf::Color::White);
-            window.draw(text);
-            window.draw(pth);
-            window.display();
-        }
-
-        return path;
-    }
-
-    void throwMessage(string message)
-    {
-        const int DIM = 200;
-        sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), "");
-
-        sf::Event event;
-        sf::Text text;
-
-        text.setFont(font);
-        text.setFillColor(sf::Color::Black);
-        text.setString(message);
-
-        while (window.isOpen())
-        {
-            while (window.pollEvent(event))
-            {
-                if (event.type == sf::Event::KeyPressed)
-                {
-                    int key = event.key.code;
-
-                    if (key == 58 || key == 36)
-                    {
-                        window.close();
-                    }
-
-                    break;
-                }
-            }
-
-            window.clear(sf::Color::White);
-            window.draw(text);
-            window.display();
-        }
-    }
-
-    string saveAS()
-    {
-        OPENFILENAMEA ofn;
-        char szFile[260];      // Buffer for full file path
-        char szFileTitle[260]; // Buffer for file title (file name only)
-
-        // Initialize the OPENFILENAME structure
-        ZeroMemory(&ofn, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = NULL; // Handle to the owner window
-        ofn.lpstrFile = szFile;
-        ofn.lpstrFile[0] = '\0';                           // Initialize the file buffer with an empty string
-        ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]); // Wide chars
-        ofn.lpstrFileTitle = szFileTitle;
-        ofn.lpstrFileTitle[0] = '\0';                                     // Initialize file title buffer
-        ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]); // Wide chars
-        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";          // Wide character filter
-        ofn.nFilterIndex = 1;                                             // Default filter index
-        ofn.lpstrInitialDir = NULL;                                       // Initial directory
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;              // Overwrite prompt for save dialog
-
-        if (GetOpenFileNameA(&ofn) == TRUE)
-        {
-            // File selected and dialog confirmed
-            std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
-            return ofn.lpstrFile;
-        }
-        else
-        {
-            // Dialog was canceled or an error occurred
-            std::cout << "Open file dialog canceled or failed." << std::endl;
-            return "";
-        }
-    }
-
-    string open()
-    {
-        OPENFILENAMEA ofn;
-        char szFile[260];      // Buffer for full file path
-        char szFileTitle[260]; // Buffer for file title (file name only)
-
-        // Initialize the OPENFILENAME structure
-        ZeroMemory(&ofn, sizeof(ofn));
-        ofn.lStructSize = sizeof(ofn);
-        ofn.hwndOwner = NULL; // Handle to the owner window
-        ofn.lpstrFile = szFile;
-        ofn.lpstrFile[0] = '\0'; // Initialize the file buffer with an empty string
-        ofn.nMaxFile = sizeof(szFile);
-        ofn.lpstrFileTitle = szFileTitle;
-        ofn.lpstrFileTitle[0] = '\0'; // Initialize file title buffer
-        ofn.nMaxFileTitle = sizeof(szFileTitle);
-        ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0"; // ANSI character filter
-        ofn.nFilterIndex = 1;                                    // Default filter index
-        ofn.lpstrInitialDir = NULL;                              // Initial directory
-        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-        // Display the Open dialog box
-        if (GetOpenFileNameA(&ofn) == TRUE)
-        {
-            // File selected and dialog confirmed
-            std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
-            return ofn.lpstrFile;
-        }
-        else
-        {
-            // Dialog was canceled or an error occurred
-            std::cout << "Open file dialog canceled or failed." << std::endl;
-            return "";
-        }
-    }
-    
-    int saveModal() 
-    { ///am invatat de la cei mai buni
-        int result = MessageBox(
-            NULL,                            
-            "Do you want to save changes?",  
-            "Save Changes",                  
-            MB_YESNOCANCEL | MB_ICONQUESTION 
-        );
-
-        return result;
-    }
-}
-
-int sizeRLines = 0;
-string txt1, txt2, txt, all;
-
-namespace Render
-{
-    bool updateViewX(String::Treap *&S, int &Xoffset, int scrollUnitX)
-    {
-        int currLineWidth = String::findCurrentWidth(String::findCursorPosition(S), S);
-        bool modif = 0;
-
-        while (currLineWidth <= Xoffset)
-            Xoffset -= scrollUnitX, modif = 1;
-
-        if (modif)
-            Xoffset -= scrollUnitX;
-        Xoffset = max(0, Xoffset);
-
-        while (currLineWidth >= Xoffset + windowWidth - marginLeft - scrollUnitX)
-            Xoffset += scrollUnitX, modif = 1;
-
-        return modif;
-    }
-
-    bool updateViewY(String::Treap *&S, int &Yoffset, int scrollUnitY)
-    {
-        int globalHeight = String::findCurrentHeight(S);
-        int height = Helpers::getLineHeight();
-        bool modif = 0;
-
-        while (globalHeight - height < Yoffset)
-            Yoffset -= scrollUnitY, modif = 1;
-
-        Yoffset = max(0, Yoffset);
-
-        while (globalHeight > Yoffset + windowHeight - marginBottom - marginTop)
-            Yoffset += scrollUnitY, modif = 1;
-
-        return modif;
-    }
-
-    void updateTextLine(int line, vector<string> &renderLines, string L)
-    {
-        if (line == sizeRLines)
-            renderLines[sizeRLines++] = L;
-        else
-            renderLines[line] = L;
-    }
-
-    int findLineOnScreen(float y)
-    {
-        return (int)((y - marginTop) / lineHeight) + 1;
-    }
-
-    int moveCursorToClick(sf::Vector2i localPosition, String::Treap *&S, int scrollUnitY, int l1, int l2, int Xoffset)
-    {
-        int l = findLineOnScreen(localPosition.y);
-        float w = localPosition.x - marginLeft - paddingLeft;
-
-        if (l + l1 - 1 > l2)
-            return String::len(S) + 1;
-        int p1 = String::findKthLine(l + l1 - 1, S);
-        if (w <= 0)
-            return p1;
-
-        if (String::len(S) + 1 == p1)
-            return String::len(S) + 1;
-        if (String::get(p1, S) == 10)
-            return p1;
-
-        int p2 = String::findNextEndline(p1, S) - 1;
-        int p = String::getFirstSeen(p1, p2, w + Xoffset, S);
-
-        if (p == -1)
-            p = p2;
-        return p + 1;
-    }
-
-    void centerText(sf::Text &text, string s, float startY, float startX = marginLeft + paddingLeft)
-    {
-        bool empty = 0;
-        s += "|";
-        text.setString(s);
-        int centerConst = ((float)lineHeight - text.getGlobalBounds().height) / 2;
-        s.pop_back();
-        text.setString(s);
-        text.setPosition(startX, (int)startY + centerConst);
-    }
-
-    void updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, int scrollUnitY)
-    {
-        txt1.clear(), txt2.clear(), txt.clear();
-        int h1 = 0;
-        int L = min(l2 - l1 + 1, cursorLine - l1);
-
-        text.setCharacterSize(fontSize);
-        text.setLetterSpacing(0.7);
-        text.setFillColor(currentThemeColors.lineNumbersText);
-
-        text1.clear(sf::Color(0, 0, 0, 0));
-        text2.clear(sf::Color(0, 0, 0, 0));
-        text3.clear(sf::Color(0, 0, 0, 0));
-
-        int lastHeight = -lineHeight;
-
-        for (int i = l1; i <= l2; i++)
-        {
-            string line = "";
-            string number = to_string(i);
-            if (number.length() > lineNumbersMaxDigits)
-                lineNumbersMaxDigits = number.length();
-            for (int j = 0; j < lineNumbersMaxDigits - number.length(); j++)
-                line += " ";
-            line += number;
-            centerText(text, line, marginTop + lastHeight + lineHeight, 5);
-            text3.draw(text);
-            lastHeight += lineHeight;
-        }
-
-        marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['9'];
-        paddingLeft = 0.5 * charWidth[fontSize]['a'];
-
-        lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
-        statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
-        toolBarBackground.setSize(sf::Vector2f(windowWidth, marginTop));
-
-        text.setLetterSpacing(1);
-        text.setFillColor(currentThemeColors.text);
-
-        lastHeight = -lineHeight;
-
-        for (int i = 0; i < L; i++)
-        {
-            centerText(text, renderLines[i], marginTop + lastHeight + lineHeight);
-            text1.draw(text);
-            lastHeight += lineHeight;
-        }
-
-        int textHeight = lastHeight;
-
-        if (l1 <= cursorLine && cursorLine <= l2)
-            txt = renderLines[cursorLine - l1];
-        else
-            txt = "";
-
-        if (txt.size())
-            lastHeight += lineHeight;
-
-        for (int i = max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
-        {
-            centerText(text, renderLines[i], marginTop + lastHeight + lineHeight);
-            text2.draw(text);
-            lastHeight += lineHeight;
-        }
-
-        img1.setTexture(text1.getTexture());
-        img2.setTexture(text2.getTexture());
-        img3.setTexture(text3.getTexture());
-
-        centerText(text, txt, marginTop + textHeight + lineHeight);
-
-        text1.display();
-        text2.display();
-        text3.display();
-    }
-
-    float splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, string &txt, int posCursorOnScreen, int fp)
-    {
-        if (txt.size() == 0)
-        {
-            h1.setString("");
-            return 0;
-        }
-
-        if (fp == -1)
-        {
-            h1 = text;
-            return 0;
-        }
-
-        h1.setCharacterSize(fontSize);
-
-        string s1, s2;
-
-        for (int i = 0; i < posCursorOnScreen - 1; i++)
-            s1 += txt[i];
-
-        h1.setString(s1);
-        float w = h1.getGlobalBounds().width;
-        char ch;
-
-        if (posCursorOnScreen < txt.size() && txt[posCursorOnScreen] != 13)
-            ch = txt[posCursorOnScreen];
-        else
-            ch = '|';
-
-        s1 += ch;
-        h1.setString(s1);
-        float W = h1.getGlobalBounds().width;
-        s1.pop_back();
-
-        s2 += ch;
-
-        h1.setString(s2);
-        float cW = h1.getGlobalBounds().width;
-
-        for (int i = posCursorOnScreen; i < txt.size(); i++)
-            s1 += txt[i];
-
-        h1.setString(s1);
-        h1.setPosition(marginLeft + paddingLeft, text.getPosition().y);
-
-        return w + (W - w - cW) / 2;
-    }
-
-    void render(int &l1, int &l2, String::Treap *&S, int Yoffset, int Xoffset, int cursorLine, sf::Text &text, int scrollUnitY)
-    {
-        int numberOfLines = String::findNumberOfEndlines(1, String::len(S), S) + 1;
-
-        l1 = max(1, (Yoffset) / scrollUnitY + 1);
-        l2 = min(numberOfLines, max(1, (Yoffset + windowHeight - marginBottom - marginTop) / scrollUnitY));
-
-        sizeRLines = 0;
-
-        for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2 + (l2 < numberOfLines); i++)
-        {
-            updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset, i - l1));
-            // cerr << renderLines[sizeRLines - 1] << ' ' << '\n';
-        }
-        updateSmartRender(text, l1, l2 + (l2 < numberOfLines), cursorLine, scrollUnitY);
-    }
-}
-
-namespace ReplaceFind
-{
-    void KMP(string &s, string &word, vector<int> &positions, bool &wholeWord)
-    {
-        vector<int> PI(word.size());
-        vector<int> pi(s.size());
-        positions.clear();
-
-        PI[0] = 0;
-
-        for (int i = 1; i < word.size(); i++)
-        {
-            int t = PI[i - 1];
-
-            while (t && word[i] != word[t])
-                t = PI[t - 1];
-
-            t += word[i] == word[t];
-            PI[i] = t;
-        }
-
-        for (int i = 0; i < s.size(); i++)
-        {
-            int t = (i == 0 ? 0 : pi[i - 1]);
-
-            while (t && (t == word.size() || s[i] != word[t]))
-                t = PI[t - 1];
-
-            t += word[t] == s[i];
-            pi[i] = t;
-
-            if (t == word.size())
-            {
-                if (wholeWord == 0 || ((i - word.size() + 1 == 0 || s[i - word.size()] == ' ' || s[i - word.size()] == '\n') && (i == s.size() - 1 || s[i + 1] == ' ' || s[i + 1] == '\n')))
-                    positions.push_back(i - word.size() + 1 + 1);
-            }
-        }
-
-        // cerr << "positions are: "; for (auto i : positions) cerr << i << ' ';
-        // cerr << '\n';
-    }
-
-    bool isApOnScreen(int ap, int sz)
-    {
-        for (int i = 0; i < sizeRLines; i++)
-        {
-            int l = segmOnScreen[i].first;
-            int r = segmOnScreen[i].second;
-
-            if (l == -1)
-                continue;
-
-            cerr << "Line: " << i + 1 << ": " << l << ' ' << r << '\n';
-
-            if (l <= ap && ap <= r && ap + sz - 1 <= r)
-                return 1;
-        }
-
-        cerr << '\n';
-        return 0;
-    }
-
-    bool isValid(char ch)
-    {
-        return ch != 10 && ch != ' ';
-    }
-
-    namespace BIT
-    {
-        void reset(vector<int> &bit)
-        {
-            for (int i = 0; i < bit.size(); i++)
-                bit[i] = 0;
-        }
-
-        void upd(int p, int v, vector<int> &bit)
-        {
-            if (p == 0)
-                bit[p] += v;
-
-            for (; p && p < bit.size(); p += p & -p)
-                bit[p] += v;
-        }
-
-        int get(int p, vector<int> &bit)
-        {
-            int ans = bit[0];
-
-            for (; p; p -= p & -p)
-                ans += bit[p];
-
-            return ans;
-        }
-    }
-
-    void delAp(int idx, vector<int> &prv, vector<int> &nxt, vector<int> &bit, vector<int> &gone, set<int> &notRemoved, int vl = 1)
-    {
-        BIT::upd(idx, vl, bit);
-
-        gone[idx] = 1;
-        notRemoved.erase(idx);
-
-        int P = prv[idx];
-        int N = nxt[idx];
-
-        if (P != -1)
-            nxt[P] = N;
-        if (N != -1)
-            prv[N] = P;
-
-        // prv[idx] = nxt[idx] = -1;
-    }
-
-    int findLastReplace(int idx, vector<int> &bit)
-    {
-        int l = 0, r = idx - 1, ans = -1, mid = 0;
-        int value = BIT::get(idx, bit);
-
-        if (value == 0)
-            return -1;
-
-        while (l <= r)
-        {
-            mid = (l + r) / 2;
-
-            if (BIT::get(mid, bit) >= value)
-                ans = mid, r = mid - 1;
-            else
-                l = mid + 1;
-        }
-
-        return ans;
-    }
-
-    int findNextReplace(int idx, vector<int> &bit)
-    {
-        int l = idx + 1, r = bit.size() - 1, mid = 0, ans = -1;
-        int value = BIT::get(idx, bit) + 1;
-
-        while (l <= r)
-        {
-            mid = (l + r) / 2;
-
-            if (BIT::get(mid, bit) >= value)
-                ans = mid, r = mid - 1;
-            else
-                l = mid + 1;
-        }
-
-        return ans;
-    }
-
-    bool canReplace(int idx, vector<int> &bit, vector<int> &positions, vector<int> &gone, string &rword, string &word)
-    {
-        if (gone[idx])
-            return 0;
-
-        int p1 = findLastReplace(idx, bit);
-        //   cerr << "              working\n" << '\n';
-        int p2 = findNextReplace(idx, bit);
-        //  cerr << idx << ' ' << p1 << ' ' << p2 << '\n';
-
-        if (p1 != -1)
-        {
-            if (positions[p1] + (int)word.size() - 1 >= positions[idx])
-                return 0;
-        }
-
-        if (p2 != -1)
-        {
-            if (positions[idx] + (int)word.size() - 1 >= positions[p2])
-                return 0;
-        }
-
-        return 1;
-    }
-
-    int findNextValidAppearance(int idx, vector<int> &bit, vector<int> &positions, vector<int> &gone, string &rword, string &word, vector<int> &prv, vector<int> &nxt, set<int> &notRemoved)
-    {
-        int x = nxt[idx];
-
-        while (x != -1 && canReplace(x, bit, positions, gone, rword, word) == 0)
-        {
-            int y = nxt[x];
-            delAp(x, prv, nxt, bit, gone, notRemoved, 0);
-            x = y;
-        }
-
-        return x;
-    }
-
-    int findPrevValidAppearance(int idx, vector<int> &bit, vector<int> &positions, vector<int> &gone, string &rword, string &word, vector<int> &prv, vector<int> &nxt, set<int> &notRemoved)
-    {
-        int x = prv[idx];
-
-        while (x != -1 && canReplace(x, bit, positions, gone, rword, word) == 0)
-        {
-            int y = prv[x];
-            delAp(x, prv, nxt, bit, gone, notRemoved, 0);
-            x = y;
-        }
-
-        return x;
-    }
-
-    int findRealPosition(int idx, vector<int> &positions, vector<int> &bit, string &word, string &rword)
-    {
-        int sub = BIT::get(idx, bit);
-        return positions[idx] - sub * word.size() + sub * rword.size();
-    }
-
-    int traceFirstApToRender(int idx, vector<int> &positions, vector<int> &bit, set<int> &notRemoved, string &word, string &rword)
-    {
-        int l = 0, r = positions.size() - 1, mid = 0, ans = -1;
-
-        while (l <= r)
-        {
-            mid = (l + r) / 2;
-
-            auto it = notRemoved.upper_bound(mid);
-
-            if (it == notRemoved.begin())
-                l = mid + 1;
-            else
-            {
-                --it;
-                if (findRealPosition(*it, positions, bit, word, rword) >= idx)
-                    ans = mid, r = mid - 1;
-                else
-                    l = mid + 1;
-            }
-        }
-
-        return ans;
-    }
-}
 
 int main()
 {
@@ -813,15 +97,8 @@ int main()
     statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
     statusBarBackground.setFillColor(currentThemeColors.bar);
 
-
-
     int Yoffset = 0, Xoffset = 0;
     int scrollUnitX = charWidth[fontSize][0], scrollUnitY = Helpers::getLineHeight();
-
-    txt.reserve(100000);
-    txt1.reserve(100000);
-    txt2.reserve(100000);
-    all.reserve(100000);
 
     bool firstExec = 1;
     int l1 = 0, l2 = 0;
@@ -1301,7 +578,7 @@ int main()
                                             i = i - 'A' + 'a';
                                 }
 
-                                ReplaceFind::KMP(s, word, positions, wholeWord);
+                                Replace::KMP(s, word, positions, wholeWord);
 
                                 if (positions.size() == 0)
                                 {
@@ -1346,7 +623,7 @@ int main()
                                             i = i - 'A' + 'a';
                                 }
 
-                                ReplaceFind::KMP(s, word, positions, wholeWord);
+                                Replace::KMP(s, word, positions, wholeWord);
 
                                 if (positions.size() == 0)
                                 {
@@ -1560,7 +837,7 @@ int main()
                     {
                         if (replaceFlag == 1)
                         {
-                            int pap = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                            int pap = Replace::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
 
                             if (pap != -1)
                                 currentAppearance = pap;
@@ -1613,7 +890,7 @@ int main()
                     {
                         if (replaceFlag == 1)
                         {
-                            int nap = ReplaceFind::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                            int nap = Replace::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                             if (nap != -1)
                                 currentAppearance = nap;
                             else
@@ -1694,11 +971,11 @@ int main()
                             break;
                         }
 
-                        int L = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
+                        int L = Replace::findRealPosition(currentAppearance, positions, bit, word, rword);
                         String::replace(L, L + word.size() - 1, rword, S);
-                        ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
-                        int nxtAppearance = ReplaceFind::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
-                        int prvAppearance = ReplaceFind::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                        Replace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                        int nxtAppearance = Replace::findNextValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                        int prvAppearance = Replace::findPrevValidAppearance(currentAppearance, bit, positions, gone, rword, word, prv, nxt, notRemoved);
 
                         nxt[currentAppearance] = prv[currentAppearance] = -1;
                         currentAppearance = max(nxtAppearance, prvAppearance);
@@ -1716,14 +993,14 @@ int main()
 
                         for (auto currentAppearance : snapshot)
                         {
-                            if (ReplaceFind::canReplace(currentAppearance, bit, positions, gone, rword, word) == 0)
+                            if (Replace::canReplace(currentAppearance, bit, positions, gone, rword, word) == 0)
                             {
                                 continue;
                             }
 
-                            int L = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
+                            int L = Replace::findRealPosition(currentAppearance, positions, bit, word, rword);
                             String::replace(L, L + word.size() - 1, rword, S);
-                            ReplaceFind::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                            Replace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                         }
 
                         fileSaved = 0;
@@ -1917,7 +1194,7 @@ int main()
                             if (p3 + 1 == posCursor && p3 + 2 <= String::len(S))
                                 ch2 = String::get(p3 + 2, S);
 
-                            while (p3 >= p1 && ReplaceFind::isValid(ch2) && (p3 == posCursor || ReplaceFind::isValid(String::get(p3, S))))
+                            while (p3 >= p1 && Replace::isValid(ch2) && (p3 == posCursor || Replace::isValid(String::get(p3, S))))
                                 p3--;
 
                             if (p3 < p1)
@@ -1983,7 +1260,7 @@ int main()
 
                 if (findFlag == 1)
                 {
-                    if (currentAppearance < positions.size() && !ReplaceFind::isApOnScreen(positions[currentAppearance], word.size()))
+                    if (currentAppearance < positions.size() && !Replace::isApOnScreen(positions[currentAppearance], word.size()))
                     {
                         int P = positions[currentAppearance];
                         int L = String::findNumberOfEndlines(1, P, S) + 1;
@@ -2000,9 +1277,9 @@ int main()
 
                     Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
 
-                    if (currentAppearance != -1 && currentAppearance < positions.size() && !ReplaceFind::isApOnScreen(ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword), word.size()))
+                    if (currentAppearance != -1 && currentAppearance < positions.size() && !Replace::isApOnScreen(Replace::findRealPosition(currentAppearance, positions, bit, word, rword), word.size()))
                     {
-                        int P = ReplaceFind::findRealPosition(currentAppearance, positions, bit, word, rword);
+                        int P = Replace::findRealPosition(currentAppearance, positions, bit, word, rword);
                         int L = String::findNumberOfEndlines(1, P, S) + 1;
                         int F = String::findKthLine(L, S);
                         Yoffset = (L - 1) * lineHeight;
@@ -2125,13 +1402,13 @@ int main()
                         if (l == -1)
                             continue;
 
-                        int p = ReplaceFind::traceFirstApToRender(l, positions, bit, notRemoved, word, rword);
+                        int p = Replace::traceFirstApToRender(l, positions, bit, notRemoved, word, rword);
                         int y = i * lineHeight + marginTop;
                         // cerr << "On line " << i + 1 << ": " << p;
 
-                        while (p != -1 && p < positions.size() && ReplaceFind::findRealPosition(p, positions, bit, word, rword) <= r)
+                        while (p != -1 && p < positions.size() && Replace::findRealPosition(p, positions, bit, word, rword) <= r)
                         {
-                            int P = ReplaceFind::findRealPosition(p, positions, bit, word, rword);
+                            int P = Replace::findRealPosition(p, positions, bit, word, rword);
                             int w = String::findWidth(l, P - 1, S);
                             int W = String::findWidth(P, P + word.size() - 1, S);
 
@@ -2142,7 +1419,7 @@ int main()
                             else
                                 box.setFillColor(sf::Color(255, 187, 0, 128));
                             selectedBoxes.push_back(box);
-                            p = ReplaceFind::findNextValidAppearance(p, bit, positions, gone, rword, word, prv, nxt, notRemoved);
+                            p = Replace::findNextValidAppearance(p, bit, positions, gone, rword, word, prv, nxt, notRemoved);
                             //   cerr << p << ' ';
                         }
                         // cerr << '\n';
@@ -2216,6 +1493,7 @@ int main()
     
         window.draw(statusBarBackground);
         window.draw(toolBarBackground);
+        
         lineCountTextBox->draw();
         lineColumnTextBox->draw();
         if (selectedBoxes.size())

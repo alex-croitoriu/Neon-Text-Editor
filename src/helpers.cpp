@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "helpers.hpp"
 #include "config.hpp"
 #include "string.hpp"
@@ -28,7 +26,6 @@ void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Te
     }
 }
 
-// TODO: make strings global so no need for prop drilling
 void Helpers::changeTheme(sf::Text &t1, sf::Text &t2, sf::Text &t3)
 {
     if (theme == Theme::LIGHT)
@@ -93,12 +90,6 @@ std::string Helpers::getTime(std::string format)
 
     char data[100];
     int len = strftime(data, sizeof(data), format.c_str(), &datetime);
-
-    if (len == 0)
-    {
-        std::cerr << "Error: invalid format or buffer size too small\n";
-        return "";
-    }
 
     std::string currTime(data, len);
     return currTime;

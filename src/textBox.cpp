@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "globals.hpp"
 #include "textBox.hpp"
 #include "config.hpp"
