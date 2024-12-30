@@ -33,7 +33,7 @@ int cursorHeight = 0, cursorWidth = 0;
 
 int main()
 {
-    window.create(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
+    window.create(sf::VideoMode(windowWidth, windowHeight), "Neon Text Editor");
     window.setFramerateLimit(100);
     sf::View view;
     sf::Image icon;
