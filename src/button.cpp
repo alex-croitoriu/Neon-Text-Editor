@@ -22,7 +22,7 @@ Button::Button(const std::string &label, const sf::Vector2f &position, const boo
     content.setFillColor(currentThemeColors.text);
     content.setLetterSpacing(properties.letterSpacing);
 
-    Helpers::centerContentInsideContainer(container, content, centerX, centerY, 4, 20);
+    Helpers::centerContentInsideContainer(container, content, centerX, centerY, 3, 20);
 }
 
 bool Button::isHovering()
@@ -50,6 +50,11 @@ void Button::setPosition(const sf::Vector2f &position)
 void Button::setHoverState(const bool &isHovering)
 {
     container.setFillColor(isHovering ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
+}
+
+sf::Vector2f Button::getPosition()
+{
+    return container.getPosition();
 }
 
 void Button::updateThemeColors()

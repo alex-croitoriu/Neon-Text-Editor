@@ -4,9 +4,10 @@
 #include "globals.hpp"
 #include "config.hpp"
 
-Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position)
+Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position, const bool &_sideMenu)
 {
     isOpen = false;
+    sideMenu = _sideMenu;
 
     // the position parameter is the top left corner of the menu itself, so the toggle button has to go above it
     toggleButton = new Button(label, sf::Vector2f(position.x, position.y - buttonSizeMapping.at(ButtonSize::MEDIUM).size.y), false, ButtonSize::MEDIUM, true, false);
@@ -17,13 +18,35 @@ Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabel
     buttons = new Button*[buttonCount];
     for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f buttonPosition(position.x + buttonSizeMapping.at(ButtonSize::MEDIUM).size.x, position.y + (properties.size.y - 1) * i);
+        sf::Vector2f buttonPosition(position.x, position.y + (properties.size.y - 1) * i);
         buttons[i] = new Button(buttonLabels[i], buttonPosition, true, ButtonSize::LARGE, false);
     }
 
     container.setSize(sf::Vector2f(properties.size.x, (properties.size.y - 1) * buttonCount + 1)); 
     container.setPosition(position);
 }
+
+Menu::Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position, const bool &_sideMenu)
+{
+    isOpen = false;
+    sideMenu = _sideMenu;
+
+    toggleButton = _toggleButton;
+    buttonCount = buttonLabels.size();
+
+    ButtonProperties properties = buttonSizeMapping.at(ButtonSize::LARGE);
+
+    buttons = new Button*[buttonCount];
+    for (int i = 0; i < buttonCount; i++)
+    {
+        sf::Vector2f buttonPosition(position.x + properties.size.x, position.y + (properties.size.y - 1) * i);
+        buttons[i] = new Button(buttonLabels[i], buttonPosition, true, ButtonSize::LARGE, false);
+    }
+
+    container.setSize(sf::Vector2f(properties.size.x, (properties.size.y - 1) * buttonCount + 1)); 
+    container.setPosition(position + sf::Vector2f(properties.size.x, 0));
+}
+
 
 bool Menu::isHovering()
 {
@@ -90,7 +113,10 @@ void Menu::setPosition(const sf::Vector2f &position)
 void Menu::draw()
 {
     if (!isOpen)
-        toggleButton->draw();
+    {
+        if (!sideMenu)
+            toggleButton->draw();
+    }
     else
     {
         toggleButton->draw();

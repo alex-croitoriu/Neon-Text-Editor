@@ -26,12 +26,9 @@ void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Te
     }
 }
 
-void Helpers::changeTheme(sf::Text &t1, sf::Text &t2)
+void Helpers::changeTheme(Theme _theme, sf::Text &t1, sf::Text &t2)
 {
-    if (theme == Theme::LIGHT)
-        theme = Theme::DARK;
-    else
-        theme = Theme::LIGHT;
+    theme = _theme; 
     currentThemeColors = themeColorsMapping.at(theme);
 
     t1.setFillColor(currentThemeColors.text);
@@ -40,10 +37,10 @@ void Helpers::changeTheme(sf::Text &t1, sf::Text &t2)
     zoomInButton->updateThemeColors();
     zoomOutButton->updateThemeColors();
 
-    zoomInButton->setOutline(theme == Theme::LIGHT);
-    zoomOutButton->setOutline(theme == Theme::LIGHT);
+    zoomInButton->setOutline(theme != Theme::DARK);
+    zoomOutButton->setOutline(theme != Theme::DARK);
  
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
     {
         menus[i]->getToggleButton()->updateThemeColors();
         for (int j = 0; j < menus[i]->getButtonCount(); j++)

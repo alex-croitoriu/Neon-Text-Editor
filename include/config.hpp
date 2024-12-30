@@ -16,8 +16,8 @@ const int fontUnit = 2;
 const int timeUnit = 50;
 const int bucketSize = 175000;
 
-const float textBoxFontSize = 11;
-const float textBoxLetterSpacing = 1;
+const float textBoxFontSize = 12;
+const float textBoxLetterSpacing = 0.9;
 const float textBoxHeight = 24;
 const float textBoxPaddingX = 10;
 const float textBoxPaddingY = 5;
@@ -29,13 +29,17 @@ const std::vector<std::string> menuButtonLabels[] =
 {
     { "Open", "Save", "Save as", "Exit" },
     { "Copy", "Paste", "Cut", "Find", "Replace", "Select All" },
-    { "Hide lines", "Go to line", "Time & Date", "Switch theme" }
+    { "Hide lines", "Go to line", "Time & Date", "Change theme" },
+    { "Light", "Dark", "Solarized", "Abyss", "Red" }
 };
 
 enum Theme
 {
     LIGHT,
-    DARK
+    DARK,
+    SOLARIZED,
+    ABYSS,
+    RED
 };
 
 struct ThemeColors 
@@ -62,13 +66,22 @@ struct ButtonProperties
     float letterSpacing;
 };
 
+const std::map<std::string, Theme> themeNamesMapping = 
+{
+    { "Light",     Theme::LIGHT     },
+    { "Dark",      Theme::DARK      },
+    { "Solarized", Theme::SOLARIZED },
+    { "Abyss",     Theme::ABYSS     },
+    { "Red",       Theme::RED       },
+};
+
 const std::map<Theme, ThemeColors> themeColorsMapping = 
 {
     {
         Theme::LIGHT,
         {
             sf::Color::White,                // background               
-            sf::Color(20, 20, 20, 255),      // text
+            sf::Color(12, 12, 12, 255),      // text
             sf::Color(192, 192, 192, 255),   // separator
             sf::Color(227, 230, 232, 255),   // bar
             sf::Color(110, 110, 130, 255),   // line numbers text
@@ -99,6 +112,60 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(20, 33, 54, 255),      // textbox background
             sf::Color(20, 33, 54, 255),      // textbox outline
         }
+    },
+    {
+        Theme::SOLARIZED,
+        {
+            sf::Color(253, 246, 227, 255),   // background
+            sf::Color(7, 54, 66, 255),       // text
+            sf::Color(147, 161, 161, 255),   // separator
+            sf::Color(238, 232, 213, 255),   // bar
+            sf::Color(88, 110, 117, 255),    // line numbers text
+            sf::Color(238, 232, 213, 255),   // line numbers background
+            sf::Color(0, 43, 54, 30),        // cursor line highlight
+            sf::Color(0, 43, 54, 40),        // select highlight
+            sf::Color(238, 232, 213, 255),   // button background
+            sf::Color(181, 137, 0, 255),     // button hover
+            sf::Color(131, 148, 150, 255),   // button outline
+            sf::Color(238, 232, 213, 255),   // textbox background
+            sf::Color(147, 161, 161, 255)    // textbox outline
+        }
+    },
+    {
+        Theme::ABYSS,
+        {
+            sf::Color(33, 36, 43, 255),      // background  
+            sf::Color(171, 178, 191, 255),   // text  
+            sf::Color(81, 90, 102, 255),     // separator  
+            sf::Color(40, 44, 52, 255),      // bar  
+            sf::Color(131, 148, 150, 255),   // line numbers text  
+            sf::Color(40, 44, 52, 255),      // line numbers background  
+            sf::Color(50, 56, 66, 30),       // cursor line highlight  
+            sf::Color(50, 56, 66, 40),       // select highlight  
+            sf::Color(40, 44, 52, 255),      // button background  
+            sf::Color(81, 90, 102, 255),     // button hover  
+            sf::Color(81, 90, 102, 255),     // button outline  
+            sf::Color(40, 44, 52, 255),      // textbox background  
+            sf::Color(81, 90, 102, 255)      // textbox outline  
+        }
+    },
+    {
+        Theme::RED,
+        {
+            sf::Color(50, 0, 0, 255),        // background  
+            sf::Color(255, 200, 200, 255),   // text  
+            sf::Color(200, 100, 100, 255),   // separator  
+            sf::Color(100, 0, 0, 255),       // bar  
+            sf::Color(255, 150, 150, 255),   // line numbers text  
+            sf::Color(100, 0, 0, 255),       // line numbers background  
+            sf::Color(70, 0, 0, 30),         // cursor line highlight  
+            sf::Color(70, 0, 0, 40),         // select highlight  
+            sf::Color(100, 0, 0, 255),       // button background  
+            sf::Color(150, 50, 50, 255),     // button hover  
+            sf::Color(200, 100, 100, 255),   // button outline  
+            sf::Color(100, 0, 0, 255),       // textbox background  
+            sf::Color(200, 100, 100, 255)    // textbox outline  
+        }
     }
 };
 
@@ -108,7 +175,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
         ButtonSize::SMALL,
         {
             sf::Vector2f(36, 24),   // size
-            10,                     // fontSize
+            11,                     // fontSize
             1,                      // letterSpacing
         }
     },
@@ -116,16 +183,16 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
         ButtonSize::MEDIUM,
         {
             sf::Vector2f(70, 24),   // size
-            11,                     // fontSize
-            1,                      // letterSpacing
+            14,                     // fontSize
+            0.8,                      // letterSpacing
         }
     },
     {
         ButtonSize::LARGE,
         {
             sf::Vector2f(140, 30),  // size
-            12,                     // fontSize
-            1,                      // letterSpacing
+            14,                     // fontSize
+            0.7,                    // letterSpacing
         }
     },
 };

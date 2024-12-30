@@ -26,6 +26,7 @@ public:
     void setOutline(const bool &outline);
     void setPosition(const sf::Vector2f &position);
     void setHoverState(const bool &isHovering);
+    sf::Vector2f getPosition();
     void updateThemeColors();
     void draw();
 };

@@ -41,7 +41,7 @@ int main()
     icon.loadFromFile("assets/images/icon.png");
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
-    font.loadFromFile("assets/fonts/cour.ttf");
+    font.loadFromFile("assets/fonts/kanit.ttf");
 
     lineHeight = Helpers::getLineHeight();
 
@@ -57,12 +57,14 @@ int main()
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 
-    menus = new Menu *[3];
+    menus = new Menu *[4];
     for (int i = 0; i < 3; i++)
         menus[i] = new Menu(menuLabels[i], menuButtonLabels[i], toolBarPositions[i]);
 
-    Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2];
-    Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons();
+    menus[3] = new Menu(menus[2]->getButtons()[3], menuButtonLabels[3], menus[2]->getButtons()[3]->getPosition(), true);
+
+    Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2], *themeMenu = menus[3];
+    Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons(), **themeMenuButtons = themeMenu->getButtons();
 
     fileNameTextBox = new TextBox("", toolBarPositions[3], false);
 
@@ -333,19 +335,29 @@ int main()
                         {
                             toggleButton->setHoverState(true);
                             menus[i]->open();
-                            menus[i]->setPosition(toolBarPositions[i]);
+                            if (i == 1)
+                                menus[i]->setPosition(toolBarPositions[i]);
                         }
                         else
                             toggleButton->setHoverState(false);
                     }
+                    if (optionsMenu->getIsOpen() && themeMenu->getToggleButton()->isHovering())
+                    {
+                        themeMenu->open();
+                    }
 
                     // close menus if user isn't hovering over them anymore
-                    for (int i = 0; i < 3; i++)
-                        if (menus[i]->getIsOpen() && !menus[i]->isHovering() && !menus[i]->getToggleButton()->isHovering() && menus[i]->getPosition() == toolBarPositions[i])
-                            menus[i]->close();
+                    if (fileMenu->getIsOpen() && !fileMenu->isHovering() && !fileMenu->getToggleButton()->isHovering())
+                        fileMenu->close();
+                    if (editMenu->getIsOpen() && !editMenu->isHovering() && !editMenu->getToggleButton()->isHovering() && editMenu->getPosition() == toolBarPositions[1])
+                        editMenu->close();
+                    if (optionsMenu->getIsOpen() && !optionsMenu->isHovering() && !optionsMenu->getToggleButton()->isHovering() && !themeMenu->isHovering())
+                        optionsMenu->close();
+                    if (themeMenu->getIsOpen() && !themeMenu->isHovering() && !themeMenu->getToggleButton()->isHovering())
+                        themeMenu->close();
 
                     // set hover state for buttons inside menus
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < 4; i++)
                     {
                         Button **buttons = menus[i]->getButtons();
                         for (int j = 0; j < menus[i]->getButtonCount(); j++)
@@ -752,12 +764,16 @@ int main()
                                 renderAgain = 1;
                                 fileSaved = 0;
                             }
-                            else if (optionsMenuButtons[3]->isHovering())
-                            {
-                                optionsMenu->close();
 
-                                Helpers::changeTheme(text, ptext1);
-                                renderAgain = 1;
+                            for (int i = 0; i < themeMenu->getButtonCount(); i++)
+                            {
+                                if (themeMenuButtons[i]->isHovering())
+                                {
+                                    Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i]), text, ptext1);
+                                    renderAgain = 1;
+                                    themeMenu->close();
+                                    optionsMenu->close();
+                                }
                             }
                         }
                         // change cursor position inside text visible in the viewport
@@ -1418,7 +1434,7 @@ int main()
         window.draw(topSeparator);
         window.draw(bottomSeparator);
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
             menus[i]->draw();
         
         fileNameTextBox->draw();
