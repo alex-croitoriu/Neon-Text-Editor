@@ -13,7 +13,7 @@ const int marginBottom = 24;
 
 const int initialFontSize = 20;
 const int fontUnit = 2;
-const int timeUnit = 2000;
+const int timeUnit = 50;
 const int bucketSize = 1e5;
 
 const float textBoxFontSize = 11;

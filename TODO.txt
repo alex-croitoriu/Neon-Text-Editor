@@ -20,9 +20,9 @@
 - [X] move zoom in/out buttons to the bottom
 - [X] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
 - [X] dark/light mode 
+- [X] current file name top right
 
 - [ ] scrollbar
-- [ ] current file name top right
 - [ ] modal for unsaved changes 
 - [ ] modal for find
 - [ ] modal for replace

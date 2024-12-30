@@ -34,6 +34,7 @@ int cursorHeight = 0, cursorWidth = 0;
 int main()
 {
     window.create(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
+    window.setFramerateLimit(100);
     sf::View view;
     sf::Image mainIcon;
 
@@ -110,7 +111,6 @@ int main()
     text3.setSmooth(true);
 
     string buffer = "";
-    int timer = 0;
     int cursorTimer = 0;
     bool cursorOnScreen = 0;
     bool cursorLineOnScreen = 1;
@@ -1131,9 +1131,6 @@ int main()
             }
 
         window.clear(currentThemeColors.background);
-
-        timer++;
-        timer %= timeUnit;
 
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
