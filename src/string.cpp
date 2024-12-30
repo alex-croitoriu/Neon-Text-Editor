@@ -14,20 +14,17 @@ int String::getDim(char ch)
 
 String::Treap::Treap(char ch, bool cursor)
 {
-    // if (ch == 13) ch = 10;
     this->ch = ch;
     L = R = 0;
     flagCursor = sumCursor = cursor;
 
-    //  this-> sumCursor = this-> flagCursor = cursor;
-    //  this->sumEndline = this->flagEndline = (ch == 10);
     this->sumEndline = (ch == 10);
     this->sumWidth = getDim(ch) * (1 - cursor);
     cnt = 1;
     priority = rng();
 }
 
-std::vector<String::Treap*> String::freePointers;
+std::vector<String::Treap *> String::freePointers;
 
 bool String::getFlagCursor(Treap *&T)
 {
@@ -472,7 +469,7 @@ void String::updateWidth(Treap *&T)
 std::string String::constructRenderedLine(int i, Treap *&T, int Xoffset, int I)
 {
     std::string txt = "";
-    int p1 = String::findKthLine(i, T); 
+    int p1 = String::findKthLine(i, T);
     segmOnScreen[I] = {-1, -1};
     if (String::len(T) + 1 == p1 || String::get(p1, T) == 10)
         return txt;
@@ -530,7 +527,7 @@ void String::heapify(Treap *&T)
     }
 }
 
-String::Treap* String::build(int n, Treap *P)
+String::Treap *String::build(int n, Treap *P)
 {
     if (n == 0)
         return NULL;
@@ -544,9 +541,9 @@ String::Treap* String::build(int n, Treap *P)
     return T;
 }
 
-String::Treap* String::build(int n, const char *data)
+String::Treap *String::build(int n, const char *data)
 {
-    Treap *ptr = new Treap[1<<((int)log2(n)+1)];
+    Treap *ptr = new Treap[1 << ((int)log2(n) + 1)];
 
     for (int i = 0; i < n; i++)
         ptr[i] = Treap(data[i]);
@@ -597,64 +594,60 @@ void String::saveText(FILE *fptr, Treap *&T)
     saveText(fptr, T->R);
 }
 
-void String::copyTextToClipboard(const char* text) {
-    // Open the clipboard
-    if (!OpenClipboard(NULL)) {
+void String::copyTextToClipboard(const char *text)
+{
+    if (!OpenClipboard(NULL))
+    {
         std::cerr << "Failed to open clipboard!" << std::endl;
         return;
     }
 
-    // Empty the clipboard
     EmptyClipboard();
 
-    // Calculate the size of the memory to allocate for the text
-    size_t len = strlen(text) + 1;  // +1 for the null terminator
+    size_t len = strlen(text) + 1;
     HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
 
-    if (!hMem) {
+    if (!hMem)
+    {
         std::cerr << "Failed to allocate memory!" << std::endl;
         CloseClipboard();
         return;
     }
 
-    // Lock the allocated memory and copy the text to it
     memcpy(GlobalLock(hMem), text, len);
     GlobalUnlock(hMem);
 
-    // Set the clipboard data to the allocated memory (CF_TEXT is the format for text data)
     SetClipboardData(CF_TEXT, hMem);
 
-    // Close the clipboard
     CloseClipboard();
 
     std::cout << "Text copied to clipboard: " << text << std::endl;
 }
 
-// Function to retrieve text from the clipboard
-std::string String::getTextFromClipboard() {
-    // Open the clipboard
-    if (!OpenClipboard(NULL)) {
+std::string String::getTextFromClipboard()
+{
+    if (!OpenClipboard(NULL))
+    {
         std::cerr << "Failed to open clipboard!" << std::endl;
         return "";
     }
 
-    // Get the clipboard data in the CF_TEXT format
     HANDLE hData = GetClipboardData(CF_TEXT);
-    if (hData == NULL) {
+    if (hData == NULL)
+    {
         std::cerr << "No text in clipboard or failed to retrieve data!" << std::endl;
         CloseClipboard();
         return "";
     }
 
-    // Lock the clipboard data to get a pointer to the text
-    char* pszText = static_cast<char*>(GlobalLock(hData));
-    if (pszText == NULL) {
+    char *pszText = static_cast<char *>(GlobalLock(hData));
+    if (pszText == NULL)
+    {
         std::cerr << "Failed to lock clipboard data!" << std::endl;
         CloseClipboard();
         return "";
     }
 
-    // Output the clipboard text
     int len = strlen(pszText);
     std::string clipboardText;
 
@@ -665,7 +658,6 @@ std::string String::getTextFromClipboard() {
 
     std::cout << "Clipboard contains: " << pszText << std::endl;
 
-    // Unlock the clipboard data and close the clipboard
     GlobalUnlock(hData);
     CloseClipboard();
     return clipboardText;

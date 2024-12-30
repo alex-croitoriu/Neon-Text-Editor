@@ -223,7 +223,6 @@ int main()
 
             buffer = String::constructString(s2);
             String::copyTextToClipboard(buffer.c_str());
-            // delete s2;
             String::del(s2);
 
             String::merge(S, s1, s3);
@@ -436,22 +435,8 @@ int main()
                                 for (int i = 0; i < fileSize; i++)
                                     newFileLines += data[i] == '\n';
 
-                               // strcpy(dataPtr, data);
-
                                 String::del(S);
                                 S = new String::Treap(cursorChar , 1);
-                              //  S = String::build(fileSize, data);
-                               // String::insert(1, S);
-
-                               // UnmapViewOfFile(data);
-                               // CloseHandle(mappingHandle);
-                                //CloseHandle(fileHandle);
-                                
-                                auto stop = std::chrono::high_resolution_clock::now();
-
-                                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-                                std::cout << "Time elapsed: " << duration.count() << '\n';
-                               // std::cerr << *(data + 1) << '\n';
                                 
                                 renderAgain = 1;
                                 fileSaved = 1;
@@ -1124,7 +1109,6 @@ int main()
 
                 if (event.type == sf::Event::Resized)
                 {
-                    // update the view to the new size of the window
                     sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
                     window.setView(sf::View(visibleArea));
                     renderAgain = 1;

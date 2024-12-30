@@ -77,8 +77,6 @@ void Replace::delAp(int idx, std::vector<int> &prv, std::vector<int> &nxt, std::
         nxt[P] = N;
     if (N != -1)
         prv[N] = P;
-
-    // prv[idx] = nxt[idx] = -1;
 }
 
 int Replace::findLastReplace(int idx, std::vector<int> &bit)

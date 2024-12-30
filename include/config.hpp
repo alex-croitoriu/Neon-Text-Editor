@@ -14,7 +14,7 @@ const int marginBottom = 24;
 const int initialFontSize = 20;
 const int fontUnit = 2;
 const int timeUnit = 50;
-const int bucketSize = 1e5;
+const int bucketSize = 175000;
 
 const float textBoxFontSize = 11;
 const float textBoxLetterSpacing = 1;
@@ -71,15 +71,15 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(20, 20, 20, 255),      // text
             sf::Color(192, 192, 192, 255),   // separator
             sf::Color(227, 230, 232, 255),   // bar
-            sf::Color(110, 110, 130, 255),   // lineNumbersText
-            sf::Color(210, 211, 212, 255),   // lineNumbersBackground
-            sf::Color(0, 0, 0, 30),          // cursorLineHighlight
-            sf::Color(0, 0, 0, 40),          // selectHighlight
-            sf::Color(227, 230, 232, 255),   // buttonBackground
-            sf::Color(185, 185, 185, 255),   // buttonHover 
-            sf::Color(192, 192, 192, 255),   // buttonOutline
-            sf::Color(227, 230, 232, 255),   // textBoxBackground
-            sf::Color(192, 192, 192, 255),   // textBoxOutline
+            sf::Color(110, 110, 130, 255),   // line numbers text
+            sf::Color(210, 211, 212, 255),   // line numbers background
+            sf::Color(0, 0, 0, 30),          // cursor line highlight
+            sf::Color(0, 0, 0, 40),          // select highlight
+            sf::Color(227, 230, 232, 255),   // button background
+            sf::Color(185, 185, 185, 255),   // button hover 
+            sf::Color(192, 192, 192, 255),   // button outline
+            sf::Color(227, 230, 232, 255),   // textbox background
+            sf::Color(192, 192, 192, 255),   // textbox outline
         }
     },
     {
@@ -89,15 +89,15 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(255, 255, 255, 255),   // text
             sf::Color(20, 33, 54, 255),      // separator
             sf::Color(20, 33, 54, 255),      // bar
-            sf::Color(212, 214, 217, 255),   // lineNumbersText
-            sf::Color(29, 42, 64, 255),      // lineNumbersBackground
-            sf::Color(255, 255, 255, 100),   // cursorLineHighlight
-            sf::Color(80, 80, 80),           // selectHighlight
-            sf::Color(20, 33, 54, 255),      // buttonBackground
-            sf::Color(53, 115, 204, 255),    // buttonHover   
-            sf::Color(15, 28, 48, 255),      // buttonOutline
-            sf::Color(20, 33, 54, 255),      // textBoxBackground
-            sf::Color(20, 33, 54, 255),      // textBoxOutline
+            sf::Color(212, 214, 217, 255),   // line numbers text
+            sf::Color(29, 42, 64, 255),      // line numbers background
+            sf::Color(255, 255, 255, 100),   // cursor line highlight
+            sf::Color(80, 80, 80),           // select highlight
+            sf::Color(20, 33, 54, 255),      // button background
+            sf::Color(53, 115, 204, 255),    // button hover   
+            sf::Color(15, 28, 48, 255),      // button outline
+            sf::Color(20, 33, 54, 255),      // textbox background
+            sf::Color(20, 33, 54, 255),      // textbox outline
         }
     }
 };
