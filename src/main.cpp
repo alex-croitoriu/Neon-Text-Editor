@@ -140,6 +140,8 @@ int main()
     HANDLE fileHandle = NULL , mappingHandle = NULL;
     DWORD fileSize = 0;
 
+    auto start = std::chrono::high_resolution_clock::now();
+
     while (window.isOpen())
     {
         bool flag = 0;
@@ -416,7 +418,7 @@ int main()
                                 if (path.size() == 0)
                                     break;
 
-                                auto start = std::chrono::high_resolution_clock::now();
+                                start = std::chrono::high_resolution_clock::now();
 
                                 fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
@@ -438,7 +440,8 @@ int main()
 
                                 String::del(S);
                                 S = new String::Treap(cursorChar , 1);
-                                
+
+                                readFileFlag = 1;
                                 renderAgain = 1;
                                 fileSaved = 1;
                                 flag = 1;
@@ -1141,6 +1144,11 @@ int main()
         if (readFileFlag == 1 && currPosNewFile == fileSize)
         {
             readFileFlag = 0;
+
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            std::cout << "Time elapsed: " << duration.count() << '\n';
+
             data = NULL;
             UnmapViewOfFile(originalData);
             CloseHandle(mappingHandle);
