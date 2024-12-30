@@ -29,7 +29,6 @@ String::Treap::Treap(char ch, bool cursor)
 
 std::vector<String::Treap*> String::freePointers;
 
-
 bool String::getFlagCursor(Treap *&T)
 {
     if (T == 0)
@@ -51,35 +50,35 @@ int String::getCh(Treap *&T)
     return T->ch;
 }
 
-bool String::sumCursor(Treap *T)
+bool String::sumCursor(Treap *&T)
 {
     if (T == 0)
         return 0;
     return T->a2;
 }
 
-int String::sumEndline(Treap *T)
+int String::sumEndline(Treap *&T)
 {
     if (T == 0)
         return 0;
     return T->sumEndline;
 }
 
-int String::cnt(Treap *T)
+int String::cnt(Treap *&T)
 {
     if (T == 0)
         return 0;
     return T->cnt;
 }
 
-int String::sumWidth(Treap *T)
+int String::sumWidth(Treap *&T)
 {
     if (T == 0)
         return 0;
     return T->sumWidth;
 }
 
-int String::len(Treap *T)
+int String::len(Treap *&T)
 {
     if (T == 0)
         return 0;
@@ -134,7 +133,7 @@ void String::split(Treap *T, Treap *&L, Treap *&R, int key, int add)
     recalculate(T);
 }
 
-void String::print(Treap *T)
+void String::print(Treap *&T)
 {
     if (T == 0)
         return;
@@ -216,7 +215,7 @@ void String::insert(int pos, Treap *&T, char ch)
     }
 }
 
-int String::findCursorPosition(Treap *T, int add)
+int String::findCursorPosition(Treap *&T, int add)
 {
     int curr = add + cnt(T->L) + 1;
 
@@ -228,7 +227,7 @@ int String::findCursorPosition(Treap *T, int add)
         return findCursorPosition(T->R, curr);
 }
 
-int String::findWidth(Treap *T, int key, int add)
+int String::findWidth(Treap *&T, int key, int add)
 {
     if (T == 0)
         return 0;
@@ -241,7 +240,7 @@ int String::findWidth(Treap *T, int key, int add)
         return findWidth(T->L, key, add);
 }
 
-void String::construct(Treap *T, std::string &s)
+void String::construct(Treap *&T, std::string &s)
 {
     if (T == 0)
         return;
@@ -250,7 +249,7 @@ void String::construct(Treap *T, std::string &s)
     construct(T->R, s);
 }
 
-std::string String::constructString(Treap *T)
+std::string String::constructString(Treap *&T)
 {
     std::string S;
     construct(T, S);
@@ -568,19 +567,6 @@ std::string String::constructRawString(Treap *&T)
     insert(len(T) + 1, T);
 
     return raw;
-}
-
-void String::setW(int pos, int w, Treap *&T)
-{
-    Treap *t1, *t2, *t3;
-
-    split(T, t2, t3, pos);
-    split(t2, t1, t2, pos - 1);
-
-    t2->sumWidth = w;
-
-    merge(T, t1, t2);
-    merge(T, T, t3);
 }
 
 void String::replace(int l, int r, std::string &word, Treap *&T)
