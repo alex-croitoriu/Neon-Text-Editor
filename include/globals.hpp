@@ -28,5 +28,6 @@ extern float lineHeight;
 extern float marginLeft, paddingLeft;
 extern std::pair<int, int> segmSelected, segmOnScreen[];
 extern std::vector<std::string> renderLines;
-
 extern int sizeRLines;
+
+extern std::string path;

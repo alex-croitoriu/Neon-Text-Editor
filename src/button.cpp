@@ -3,7 +3,7 @@
 #include "config.hpp"
 #include "helpers.hpp"
 
-Button::Button(const std::string &label, const sf::Vector2f &position, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
+Button::Button(const std::string &label, const sf::Vector2f &position, const bool &outline, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
 {
     size = _size;
     centerX = _centerX;
@@ -15,7 +15,7 @@ Button::Button(const std::string &label, const sf::Vector2f &position, const But
     container.setPosition(position);
     container.setFillColor(currentThemeColors.buttonBackground);
     container.setOutlineColor(currentThemeColors.buttonOutline);
-    container.setOutlineThickness(properties.outlineThickness);
+    container.setOutlineThickness(outline ? -1 : 0);
 
     content = sf::Text(label, font, properties.fontSize);
     // content.setStyle(sf::Text::Bold);
@@ -36,13 +36,18 @@ void Button::setLabel(const std::string &label)
     content.setString(label);
 }
 
+void Button::setOutline(const bool &outline)
+{
+    container.setOutlineThickness(outline ? -1 : 0);
+}
+
 void Button::setPosition(const sf::Vector2f &position)
 {
     container.setPosition(position);
     Helpers::centerContentInsideContainer(container, content, centerX, centerY, 0, 20);
 }
 
-void Button::setHoverState(bool isHovering)
+void Button::setHoverState(const bool &isHovering)
 {
     container.setFillColor(isHovering ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
 }

@@ -63,12 +63,14 @@ int main()
     Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2];
     Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons();
 
+    fileNameTextBox = new TextBox("", toolBarPositions[3], false);
+
     lineCountTextBox = new TextBox("", statusBarPositions[0]);
     lineColumnTextBox = new TextBox("", statusBarPositions[1]);
     selectedCharacterCountTextBox = new TextBox("", statusBarPositions[2]);
-    zoomOutButton = new Button(zoomButtonLabels[0], statusBarPositions[3], ButtonSize::SMALL);
+    zoomOutButton = new Button(zoomButtonLabels[0], statusBarPositions[3], true, ButtonSize::SMALL);
     zoomLevelTextBox = new TextBox("", statusBarPositions[4]);
-    zoomInButton = new Button(zoomButtonLabels[1], statusBarPositions[5], ButtonSize::SMALL);
+    zoomInButton = new Button(zoomButtonLabels[1], statusBarPositions[5], true, ButtonSize::SMALL);
 
     cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
 
@@ -107,7 +109,7 @@ int main()
     text2.setSmooth(true);
     text3.setSmooth(true);
 
-    string path = "", buffer = "";
+    string buffer = "";
     int timer = 0;
     int cursorTimer = 0;
     bool cursorOnScreen = 0;
@@ -129,7 +131,6 @@ int main()
     string word, rword;
     string param;
     set<int> notRemoved;
-    bool fileSaved = 1;
 
     while (window.isOpen())
     {
@@ -374,8 +375,8 @@ int main()
                         if (zoomOutButton->isHovering())
                         {
                             fontSize -= fontUnit;
-                            fontSize = max(fontUnit, fontSize);
-                            zoomLevel = 100 * fontSize / 20;
+                            fontSize = max(minFontSize, fontSize);
+                            zoomLevel = 100 * fontSize / initialFontSize;
                             zoomLevelTextBox->setContent(to_string(zoomLevel) + "%");
                             lineHeight = Helpers::getLineHeight();
 
@@ -387,7 +388,7 @@ int main()
                         {
                             fontSize += fontUnit;
                             fontSize = min(fontSize, maxFontSize);
-                            zoomLevel = 100 * fontSize / 20;
+                            zoomLevel = 100 * fontSize / initialFontSize;
                             zoomLevelTextBox->setContent(to_string(zoomLevel) + "%");
 
                             lineHeight = Helpers::getLineHeight();
@@ -1032,6 +1033,7 @@ int main()
 
                 if (event.type == sf::Event::TextEntered) /// ce scrie user-ul
                 {
+                    fileSaved = 0;
                     int ch = event.text.unicode;
 
                     if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1)
@@ -1375,6 +1377,9 @@ int main()
         
         Helpers::updateStatusBarInfo();
         Helpers::updateStatusBarPositions();
+
+        Helpers::updateToolBarInfo();
+        Helpers::updateToolBarPositions();
     
         window.draw(statusBarBackground);
         window.draw(toolBarBackground);
@@ -1393,6 +1398,8 @@ int main()
 
         for (int i = 0; i < 3; i++)
             menus[i]->draw();
+        
+        fileNameTextBox->draw();
 
         window.display();
     }

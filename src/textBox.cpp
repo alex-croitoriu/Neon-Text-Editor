@@ -3,12 +3,12 @@
 #include "config.hpp"
 #include "helpers.hpp"
 
-TextBox::TextBox(const std::string &_content, const sf::Vector2f &position)
+TextBox::TextBox(const std::string &_content, const sf::Vector2f &position, bool outline)
 {
     container.setPosition(position);
     container.setFillColor(currentThemeColors.textBoxBackground);
     container.setOutlineColor(currentThemeColors.textBoxOutline);
-    container.setOutlineThickness(-1);
+    container.setOutlineThickness(outline ? -1 : 0);
 
     content = sf::Text(_content, font, textBoxFontSize);
     // content.setStyle(sf::Text::Bold);

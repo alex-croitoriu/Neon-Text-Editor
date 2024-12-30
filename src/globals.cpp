@@ -27,11 +27,12 @@ float lineHeight = Helpers::getLineHeight();
 float marginLeft, paddingLeft;
 std::pair<int, int> segmSelected, segmOnScreen[maxRows];
 std::vector<std::string> renderLines(maxRows);
-
 int sizeRLines = 0;
+
+std::string path = "";
 
 String::Treap *S = new String::Treap(cursorChar, 1);
 
-TextBox *lineColumnTextBox, *zoomLevelTextBox, *selectedCharacterCountTextBox, *lineCountTextBox;
+TextBox *lineColumnTextBox, *zoomLevelTextBox, *selectedCharacterCountTextBox, *lineCountTextBox, *fileNameTextBox;
 Button *zoomOutButton, *zoomInButton;
 Menu **menus;

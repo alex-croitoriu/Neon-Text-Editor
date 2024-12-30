@@ -11,9 +11,12 @@ namespace Helpers
     // TODO: make strings global so no need for prop drilling
     void changeTheme(sf::Text &t1, sf::Text &t2);
     bool isAnyButtonPressed();
-    std::string getTime(std::string format);
+    std::string getTime(const std::string &format);
     std::vector<sf::Vector2f> getToolBarPositions();
+    void updateToolBarPositions();
+    void updateToolBarInfo();
     std::vector<sf::Vector2f> getStatusBarPositions();
-    void updateStatusBarInfo();
     void updateStatusBarPositions();
+    void updateStatusBarInfo();
+    std::string getFileName();
 }

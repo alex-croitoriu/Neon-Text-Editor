@@ -5,6 +5,7 @@
 #define cursorChar ' '
 
 constexpr int maxFontSize = 100;
+constexpr int minFontSize = 10;
 constexpr int maxRows = 10000;
 
 const int marginTop = 24;
@@ -59,7 +60,6 @@ struct ButtonProperties
     sf::Vector2f size;
     float fontSize;
     float letterSpacing;
-    float outlineThickness;
 };
 
 const std::map<Theme, ThemeColors> themeColorsMapping = 
@@ -87,7 +87,7 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
         {
             sf::Color(15, 28, 48, 255),      // background                       
             sf::Color(255, 255, 255, 255),   // text
-            sf::Color(15, 28, 48, 255),      // separator
+            sf::Color(20, 33, 54, 255),      // separator
             sf::Color(20, 33, 54, 255),      // bar
             sf::Color(212, 214, 217, 255),   // lineNumbersText
             sf::Color(29, 42, 64, 255),      // lineNumbersBackground
@@ -97,7 +97,7 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(53, 115, 204, 255),    // buttonHover   
             sf::Color(15, 28, 48, 255),      // buttonOutline
             sf::Color(20, 33, 54, 255),      // textBoxBackground
-            sf::Color(15, 28, 48, 255),      // textBoxOutline
+            sf::Color(20, 33, 54, 255),      // textBoxOutline
         }
     }
 };
@@ -110,7 +110,6 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
             sf::Vector2f(36, 24),   // size
             10,                     // fontSize
             1,                      // letterSpacing
-            -1                      // outlineThickness
         }
     },
     {
@@ -118,8 +117,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
         {
             sf::Vector2f(70, 24),   // size
             11,                     // fontSize
-            1,                    // letterSpacing
-            0                       // outlineThickness
+            1,                      // letterSpacing
         }
     },
     {
@@ -127,8 +125,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
         {
             sf::Vector2f(140, 30),  // size
             12,                     // fontSize
-            1,                    // letterSpacing
-            -1                      // outlineThickness
+            1,                      // letterSpacing
         }
     },
 };
