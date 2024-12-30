@@ -13,6 +13,8 @@ sf::Sprite img1, img2, img3;
 
 ThemeColors currentThemeColors = themeColorsMapping.at(theme);
 
+bool fileSaved = 1;
+
 int windowWidth = 800, windowHeight = 600;
 
 bool showLineNumbers = true;

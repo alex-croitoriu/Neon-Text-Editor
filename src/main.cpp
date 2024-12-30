@@ -282,9 +282,7 @@ int main()
                     int closeOption = Windows::saveModal();
 
                     if (closeOption == IDCANCEL)
-                    {
                         break;
-                    }
                     else if (closeOption == IDYES)
                     {
                         if (path.size() == 0)
@@ -480,6 +478,43 @@ int main()
                                 String::saveText(fptr, S);
                                 fileSaved = 1;
                                 fclose(fptr);
+                            }
+                            else if (fileMenuButtons[3]->isHovering())
+                            {
+                                fileMenu->close();
+                                if (fileSaved == 1)
+                                {
+                                    window.close();
+                                    break;
+                                }
+
+                                int closeOption = Windows::saveModal();
+
+                                if (closeOption == IDCANCEL)
+                                    break;
+                                else if (closeOption == IDYES)
+                                {
+                                    if (path.size() == 0)
+                                        path = Windows::saveAS();
+
+                                    FILE* fptr = fopen(path.c_str(), "w");
+
+                                    if (fptr == NULL)
+                                    {
+                                        Windows::throwMessage("Wrong Path!");
+                                        break;
+                                    }
+
+                                    String::saveText(fptr, S);
+                                    fileSaved = 1;
+                                    fclose(fptr);
+                                    break;
+                                }
+                                else if (closeOption == IDNO)
+                                {
+                                    window.close();
+                                    break;
+                                }
                             }
                         }
                         else if (editMenu->getIsOpen())

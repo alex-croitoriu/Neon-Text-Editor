@@ -13,6 +13,8 @@ extern sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, 
 extern sf::RenderTexture text1, text2, text3;
 extern sf::Sprite img1, img2, img3;
 
+extern bool fileSaved;
+
 extern int windowWidth, windowHeight;
 
 extern bool showLineNumbers;
