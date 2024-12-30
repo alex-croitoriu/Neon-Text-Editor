@@ -1155,15 +1155,6 @@ int main()
 
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
-        
-        if(data != NULL && *data != '\0')
-        for (int it = 0; data != NULL && *data != '\0' && it < bucketSize; it++, data++)
-        {
-            renderAgain = 1;
-            flag = 1;
-            String::insert(String::len(S) + 1, S, *data);
-            //cerr << String::findCursorPosition(S) << '\n';
-        }
 
         if (currPosNewFile == fileSize)
         {
@@ -1176,9 +1167,11 @@ int main()
         {
             int lastIdx = std::min((int) fileSize, currPosNewFile + bucketSize);
             int sz = lastIdx - currPosNewFile;
-            String::build(sz, data);
+            String::merge(S, S, String::build(sz, data));
             data += sz;
             currPosNewFile += sz;
+            flag = 1;
+            renderAgain = 1;
         }
 
         if (cursorTimer % (timeUnit * 2) <= timeUnit)
