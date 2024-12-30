@@ -17,7 +17,7 @@ String::Treap::Treap(char ch, bool cursor)
     // if (ch == 13) ch = 10;
     this->ch = ch;
     L = R = 0;
-    A[0] = A[1] = cursor;
+    a1 = a2 = cursor;
 
     //  this-> sumCursor = this-> flagCursor = cursor;
     //  this->sumEndline = this->flagEndline = (ch == 10);
@@ -34,7 +34,7 @@ bool String::getFlagCursor(Treap *&T)
 {
     if (T == 0)
         return 0;
-    return T->A[0];
+    return T->a1;
 }
 
 bool String::getFlagEndline(Treap *&T)
@@ -55,7 +55,7 @@ bool String::sumCursor(Treap *T)
 {
     if (T == 0)
         return 0;
-    return T->A[1];
+    return T->a2;
 }
 
 int String::sumEndline(Treap *T)
@@ -88,7 +88,7 @@ int String::len(Treap *T)
 
 void String::recalculate(Treap *&T)
 {
-    T->A[1] = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
+    T->a2 = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
     T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + getFlagEndline(T);
     T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + getDim(getCh(T));
     T->cnt = cnt(T->L) + cnt(T->R) + 1;
@@ -547,12 +547,10 @@ String::Treap* String::build(int n, Treap *P)
 
 String::Treap* String::build(int n, const char *data)
 {
-    Treap *ptr = new Treap[n];
+    Treap *ptr = new Treap[1<<((int)log2(n)+1)];
 
     for (int i = 0; i < n; i++)
-    {
         ptr[i] = Treap(data[i]);
-    }
 
     return build(n, ptr);
 }

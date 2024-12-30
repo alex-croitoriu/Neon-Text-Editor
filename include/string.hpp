@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bitset>
 #include <string>
 #include <vector>
 
@@ -19,7 +18,7 @@ namespace String
         int cnt;
         int priority;
         char ch;
-        std::bitset<2> A;
+        bool a1, a2;
 
         Treap(char ch = 0, bool cursor = 0);
     };
