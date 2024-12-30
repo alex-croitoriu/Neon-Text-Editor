@@ -22,7 +22,6 @@ int lineNumbersMaxDigits = 3;
 int fontSize = initialFontSize;
 int zoomLevel = 100;
 float lineHeight = Helpers::getLineHeight();
-bool wordWrap = 0;
 float marginLeft, paddingLeft;
 std::pair<int, int> segmSelected, segmOnScreen[maxRows];
 std::vector<std::string> renderLines(maxRows);

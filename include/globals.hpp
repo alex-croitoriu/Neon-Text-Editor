@@ -23,7 +23,6 @@ extern int lineNumbersMaxDigits;
 extern int fontSize;
 extern int zoomLevel;
 extern float lineHeight;
-extern bool wordWrap;
 extern float marginLeft, paddingLeft;
 extern std::pair<int, int> segmSelected, segmOnScreen[];
 extern std::vector<std::string> renderLines;

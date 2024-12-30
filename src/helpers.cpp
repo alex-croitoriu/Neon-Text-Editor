@@ -26,7 +26,7 @@ void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Te
     }
 }
 
-void Helpers::changeTheme(sf::Text &t1, sf::Text &t2, sf::Text &t3)
+void Helpers::changeTheme(sf::Text &t1, sf::Text &t2)
 {
     if (theme == Theme::LIGHT)
         theme = Theme::DARK;
@@ -36,7 +36,6 @@ void Helpers::changeTheme(sf::Text &t1, sf::Text &t2, sf::Text &t3)
 
     t1.setFillColor(currentThemeColors.text);
     t2.setFillColor(currentThemeColors.text);
-    t3.setFillColor(currentThemeColors.text);
 
     zoomInButton->updateThemeColors();
     zoomOutButton->updateThemeColors();
@@ -112,27 +111,27 @@ std::vector<sf::Vector2f> Helpers::getStatusBarPositions()
     ButtonProperties buttonProperties = buttonSizeMapping.at(ButtonSize::SMALL);
     return 
     {
-        sf::Vector2f(0, windowHeight - marginBottom),
-        sf::Vector2f(lineCountTextBox->getSize().x - 1, windowHeight - marginBottom),
-        sf::Vector2f(lineCountTextBox->getSize().x + lineColumnTextBox->getSize().x - 2, windowHeight - marginBottom),
-        sf::Vector2f(std::max(0.0f, windowWidth - 2 * buttonProperties.size.x - zoomLevelTextBox->getSize().x + 2), windowHeight - marginBottom),
-        sf::Vector2f(std::max(0.0f, windowWidth - buttonProperties.size.x - zoomLevelTextBox->getSize().x + 1), windowHeight - marginBottom),
-        sf::Vector2f(std::max(0.0f, windowWidth - buttonProperties.size.x), windowHeight - marginBottom)
+        sf::Vector2f(0, int(windowHeight - marginBottom)),
+        sf::Vector2f(int(lineCountTextBox->getSize().x - 1), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(lineCountTextBox->getSize().x + lineColumnTextBox->getSize().x - 2), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(std::max(0.0f, windowWidth - 2 * buttonProperties.size.x - zoomLevelTextBox->getSize().x + 2)), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(std::max(0.0f, windowWidth - buttonProperties.size.x - zoomLevelTextBox->getSize().x + 1)), int(windowHeight - marginBottom)),
+        sf::Vector2f(int(std::max(0.0f, windowWidth - buttonProperties.size.x)), int(windowHeight - marginBottom))
     };
 }
 
 void Helpers::updateStatusBarInfo()
 {
-    int posCursor = String::findCursorPosition(S);
-    int cursorLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
+    int cursorPosition = String::findCursorPosition(S);
+    int cursorLine = String::findNumberOfEndlines(1, cursorPosition, S) + 1;
 
-    int currentLine = String::findNumberOfEndlines(1, posCursor, S) + 1;
-    int currentCol = String::findCursorPosition(S) - String::findKthLine(cursorLine , S);
+    int currentLine = String::findNumberOfEndlines(1, cursorPosition, S) + 1;
+    int currentColumn = String::findCursorPosition(S) - String::findKthLine(cursorLine , S);
     int selectedCharacterCount = segmSelected.second - segmSelected.first + 1 - String::findNumberOfEndlines(segmSelected.first, segmSelected.second, S);
     int lineCount = String::findNumberOfEndlines(1, String::len(S), S) + 1;
 
     lineCountTextBox->setContent(std::to_string(lineCount) + (lineCount == 1 ? " line" : " lines"));
-    lineColumnTextBox->setContent("Ln " + std::to_string(currentLine) + ", Col " + std::to_string(currentCol));
+    lineColumnTextBox->setContent("Ln " + std::to_string(currentLine) + ", Col " + std::to_string(currentColumn));
     selectedCharacterCountTextBox->setContent(std::to_string(selectedCharacterCount) + " selected");
     zoomLevelTextBox->setContent(std::to_string(zoomLevel) + "%");
 }

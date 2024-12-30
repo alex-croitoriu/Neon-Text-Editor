@@ -17,24 +17,23 @@ String::Treap::Treap(char ch, bool cursor)
     // if (ch == 13) ch = 10;
     this->ch = ch;
     L = R = 0;
-    A[0] = A[1] = cursor;
+    a1 = a2 = cursor;
 
     //  this-> sumCursor = this-> flagCursor = cursor;
     //  this->sumEndline = this->flagEndline = (ch == 10);
     this->sumEndline = (ch == 10);
-    this->sumWidth = getDim(ch) * (1 - cursor * wordWrap);
+    this->sumWidth = getDim(ch) * (1 - cursor);
     cnt = 1;
     priority = rng();
 }
 
 std::vector<String::Treap*> String::freePointers;
 
-
 bool String::getFlagCursor(Treap *&T)
 {
     if (T == 0)
         return 0;
-    return T->A[0];
+    return T->a1;
 }
 
 bool String::getFlagEndline(Treap *&T)
@@ -51,35 +50,35 @@ int String::getCh(Treap *&T)
     return T->ch;
 }
 
-bool String::sumCursor(Treap *T)
+bool String::sumCursor(Treap *&T)
 {
     if (T == 0)
         return 0;
-    return T->A[1];
+    return T->a2;
 }
 
-int String::sumEndline(Treap *T)
+int String::sumEndline(Treap *&T)
 {
     if (T == 0)
         return 0;
     return T->sumEndline;
 }
 
-int String::cnt(Treap *T)
+int String::cnt(Treap *&T)
 {
     if (T == 0)
         return 0;
     return T->cnt;
 }
 
-int String::sumWidth(Treap *T)
+int String::sumWidth(Treap *&T)
 {
     if (T == 0)
         return 0;
     return T->sumWidth;
 }
 
-int String::len(Treap *T)
+int String::len(Treap *&T)
 {
     if (T == 0)
         return 0;
@@ -88,9 +87,7 @@ int String::len(Treap *T)
 
 void String::recalculate(Treap *&T)
 {
-    if (T == 0)
-        std::cerr << "flag!!!", exit(0);
-    T->A[1] = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
+    T->a2 = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
     T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + getFlagEndline(T);
     T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + getDim(getCh(T));
     T->cnt = cnt(T->L) + cnt(T->R) + 1;
@@ -136,12 +133,11 @@ void String::split(Treap *T, Treap *&L, Treap *&R, int key, int add)
     recalculate(T);
 }
 
-void String::print(Treap *T)
+void String::print(Treap *&T)
 {
     if (T == 0)
         return;
     print(T->L);
-    std::cerr << getCh(T) << ' ';
     print(T->R);
 }
 
@@ -219,7 +215,7 @@ void String::insert(int pos, Treap *&T, char ch)
     }
 }
 
-int String::findCursorPosition(Treap *T, int add)
+int String::findCursorPosition(Treap *&T, int add)
 {
     int curr = add + cnt(T->L) + 1;
 
@@ -231,7 +227,7 @@ int String::findCursorPosition(Treap *T, int add)
         return findCursorPosition(T->R, curr);
 }
 
-int String::findWidth(Treap *T, int key, int add)
+int String::findWidth(Treap *&T, int key, int add)
 {
     if (T == 0)
         return 0;
@@ -244,7 +240,7 @@ int String::findWidth(Treap *T, int key, int add)
         return findWidth(T->L, key, add);
 }
 
-void String::construct(Treap *T, std::string &s)
+void String::construct(Treap *&T, std::string &s)
 {
     if (T == 0)
         return;
@@ -253,7 +249,7 @@ void String::construct(Treap *T, std::string &s)
     construct(T->R, s);
 }
 
-std::string String::constructString(Treap *T)
+std::string String::constructString(Treap *&T)
 {
     std::string S;
     construct(T, S);
@@ -486,8 +482,6 @@ std::string String::constructRenderedLine(int i, Treap *&T, int Xoffset, int I)
     int t1 = String::getFirstSeen(p1, p2, Xoffset, T);
     int t2 = String::getLastSeen(p1, p2, Xoffset + windowWidth - marginLeft, T);
 
-    if (I == 0)
-        std::cerr << t1 << ' ' << t2 << '\n';
     segmOnScreen[I] = {t1, t2};
 
     if (t1 == -1 || t2 == -1)
@@ -552,12 +546,10 @@ String::Treap* String::build(int n, Treap *P)
 
 String::Treap* String::build(int n, const char *data)
 {
-    Treap *ptr = new Treap[n];
+    Treap *ptr = new Treap[1<<((int)log2(n)+1)];
 
     for (int i = 0; i < n; i++)
-    {
         ptr[i] = Treap(data[i]);
-    }
 
     return build(n, ptr);
 }
@@ -575,19 +567,6 @@ std::string String::constructRawString(Treap *&T)
     insert(len(T) + 1, T);
 
     return raw;
-}
-
-void String::setW(int pos, int w, Treap *&T)
-{
-    Treap *t1, *t2, *t3;
-
-    split(T, t2, t3, pos);
-    split(t2, t1, t2, pos - 1);
-
-    t2->sumWidth = w;
-
-    merge(T, t1, t2);
-    merge(T, T, t3);
 }
 
 void String::replace(int l, int r, std::string &word, Treap *&T)

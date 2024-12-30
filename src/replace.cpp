@@ -39,9 +39,6 @@ void Replace::KMP(std::string &s, std::string &word, std::vector<int> &positions
                 positions.push_back(i - word.size() + 1 + 1);
         }
     }
-
-    // std::cerr << "positions are: "; for (auto i : positions) std::cerr << i << ' ';
-    // std::cerr << '\n';
 }
 
 bool Replace::isApOnScreen(int ap, int sz)
@@ -54,13 +51,10 @@ bool Replace::isApOnScreen(int ap, int sz)
         if (l == -1)
             continue;
 
-        std::cerr << "Line: " << i + 1 << ": " << l << ' ' << r << '\n';
-
         if (l <= ap && ap <= r && ap + sz - 1 <= r)
             return 1;
     }
 
-    std::cerr << '\n';
     return 0;
 }
 
@@ -132,9 +126,7 @@ bool Replace::canReplace(int idx, std::vector<int> &bit, std::vector<int> &posit
         return 0;
 
     int p1 = findLastReplace(idx, bit);
-    //   std::cerr << "              working\n" << '\n';
     int p2 = findNextReplace(idx, bit);
-    //  std::cerr << idx << ' ' << p1 << ' ' << p2 << '\n';
 
     if (p1 != -1)
     {

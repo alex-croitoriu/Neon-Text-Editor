@@ -14,5 +14,5 @@ namespace Render
     void centerText(sf::Text &text, std::string s, float startY, float startX = marginLeft + paddingLeft);
     void render(int &l1, int &l2, String::Treap *&S, int Yoffset, int Xoffset, int cursorLine, sf::Text &text, int scrollUnitY);
     void updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, int scrollUnitY);
-    float splitCursorLine(sf::Text &text, sf::Text &h1, sf::Text &h2, std::string &txt, int posCursorOnScreen, int fp);
+    float splitCursorLine(sf::Text &text, sf::Text &h1, std::string &txt, int posCursorOnScreen, int fp);
 }
