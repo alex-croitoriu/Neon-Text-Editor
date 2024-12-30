@@ -134,6 +134,7 @@ int main()
     char* originalData = NULL;
     int newFileLines = 0;
     int currPosNewFile = 0;
+    bool readFileFlag = 0;
 
     HANDLE fileHandle = NULL , mappingHandle = NULL;
     DWORD fileSize = 0;
@@ -451,7 +452,8 @@ int main()
                                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
                                 std::cout << "Time elapsed: " << duration.count() << '\n';
                                // std::cerr << *(data + 1) << '\n';
-                                
+                                readFileFlag = 1;
+
                                 renderAgain = 1;
                                 fileSaved = 1;
                                 flag = 1;
@@ -1156,14 +1158,15 @@ int main()
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
 
-        if (currPosNewFile == fileSize)
+        if (readFileFlag == 1 && currPosNewFile == fileSize)
         {
+            readFileFlag = 0;
             data = NULL;
             UnmapViewOfFile(originalData);
             CloseHandle(mappingHandle);
             CloseHandle(fileHandle);
         }
-        else
+        else if(readFileFlag == 1)
         {
             int lastIdx = std::min((int) fileSize, currPosNewFile + bucketSize);
             int sz = lastIdx - currPosNewFile;
