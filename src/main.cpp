@@ -38,7 +38,7 @@ int main()
     sf::View view;
     sf::Image mainIcon;
 
-    mainIcon.loadFromFile("assets/images/main_icon.png");
+    mainIcon.loadFromFile("assets/images/icon.png");
     window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
 
     font.loadFromFile("assets/fonts/cour.ttf");
