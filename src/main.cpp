@@ -133,9 +133,10 @@ int main()
     char* data = NULL;
     char* originalData = NULL;
     int newFileLines = 0;
+    int currPosNewFile = 0;
 
     HANDLE fileHandle = NULL , mappingHandle = NULL;
-    DWORD fileSize;
+    DWORD fileSize = 0;
 
     while (window.isOpen())
     {
@@ -429,6 +430,7 @@ int main()
                                 fileSize = GetFileSize(fileHandle, nullptr);
 
                                 newFileLines = 1;
+                                currPosNewFile = 0;
 
                                 for (int i = 0; i < fileSize; i++)
                                     newFileLines += data[i] == '\n';
@@ -1153,21 +1155,23 @@ int main()
 
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
-        
-        for (int it = 0; data != NULL && *data != '\0' && it < bucketSize; it++, data++)
-        {
-            renderAgain = 1;
-            flag = 1;
-            String::insert(String::len(S) + 1, S, *data);
-            //cerr << String::findCursorPosition(S) << '\n';
-        }
 
-        if (data != NULL && *data == '\0')
+        if (currPosNewFile == fileSize)
         {
             data = NULL;
             UnmapViewOfFile(originalData);
             CloseHandle(mappingHandle);
             CloseHandle(fileHandle);
+        }
+        else
+        {
+            int lastIdx = std::min((int) fileSize, currPosNewFile + bucketSize);
+            int sz = lastIdx - currPosNewFile;
+            String::merge(S, S, String::build(sz, data));
+            data += sz;
+            currPosNewFile += sz;
+            flag = 1;
+            renderAgain = 1;
         }
 
         if (cursorTimer % (timeUnit * 2) <= timeUnit)
