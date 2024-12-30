@@ -133,7 +133,6 @@ int main()
     set<int> notRemoved;
     char* data = NULL;
     char* originalData = NULL;
-    int newFileLines = 0;
     int currPosNewFile = 0;
     bool readFileFlag = 0;
 
@@ -273,7 +272,8 @@ int main()
             if (String::len(S) > 1)
             {
                 segmSelected = {1, String::len(S) - 1};
-                buffer = String::constructRawString(S);
+                String::del(String::findCursorPosition(S), S);
+                String::insert(String::len(S) + 1 , S);
                 flag = 1;
                 selectFlag = 1;
             }
@@ -432,11 +432,7 @@ int main()
                                 originalData = data = (char *)(MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
                                 fileSize = GetFileSize(fileHandle, nullptr);
 
-                                newFileLines = 1;
                                 currPosNewFile = 0;
-
-                                for (int i = 0; i < fileSize; i++)
-                                    newFileLines += data[i] == '\n';
 
                                 String::del(S);
                                 S = new String::Treap(cursorChar , 1);
@@ -704,12 +700,11 @@ int main()
 
                                 if (String::len(S) > 1)
                                 {
-                                    segmSelected = {1, String::len(S) - 1};
-                                    buffer = String::constructRawString(S);
-                                    String::copyTextToClipboard(buffer.c_str());
+                                    segmSelected = { 1, String::len(S) - 1 };
+                                    String::del(String::findCursorPosition(S), S);
+                                    String::insert(String::len(S) + 1, S);
                                     flag = 1;
                                     selectFlag = 1;
-                                    renderAgain = 1;
                                 }
 
                                 break;
