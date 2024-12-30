@@ -410,6 +410,8 @@ int main()
                                 if (path.size() == 0)
                                     break;
 
+                                auto start = std::chrono::high_resolution_clock::now();
+
                                 HANDLE fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
                                 if (fileHandle == INVALID_HANDLE_VALUE)
@@ -429,6 +431,11 @@ int main()
                                 UnmapViewOfFile(data);
                                 CloseHandle(mappingHandle);
                                 CloseHandle(fileHandle);
+                                
+                                auto stop = std::chrono::high_resolution_clock::now();
+
+                                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+                                cout << "Time elapsed: " << duration.count() << '\n';
 
                                 renderAgain = 1;
                                 fileSaved = 1;
