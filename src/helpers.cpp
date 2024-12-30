@@ -39,6 +39,9 @@ void Helpers::changeTheme(sf::Text &t1, sf::Text &t2)
 
     zoomInButton->updateThemeColors();
     zoomOutButton->updateThemeColors();
+
+    zoomInButton->setOutline(theme == Theme::LIGHT);
+    zoomOutButton->setOutline(theme == Theme::LIGHT);
  
     for (int i = 0; i < 3; i++)
     {
@@ -46,6 +49,8 @@ void Helpers::changeTheme(sf::Text &t1, sf::Text &t2)
         for (int j = 0; j < menus[i]->getButtonCount(); j++)
             menus[i]->getButtons()[j]->updateThemeColors();
     }
+
+    fileNameTextBox->updateThemeColors();
 
     lineCountTextBox->updateThemeColors();
     lineColumnTextBox->updateThemeColors();
@@ -82,7 +87,7 @@ bool Helpers::isAnyButtonPressed()
     return false;
 }
 
-std::string Helpers::getTime(std::string format)
+std::string Helpers::getTime(const std::string &format)
 {
     time_t timestamp = time(NULL);
     struct tm datetime = *localtime(&timestamp);
@@ -99,11 +104,22 @@ std::vector<sf::Vector2f> Helpers::getToolBarPositions()
     ButtonProperties properties = buttonSizeMapping.at(ButtonSize::MEDIUM);
     return 
     {
-        // first 3 positions represent the top left corner of the menus themselves, not the top left corner of the toggle menu button
-        sf::Vector2f(0, properties.size.y),
-        sf::Vector2f(properties.size.x, properties.size.y),
-        sf::Vector2f(2 * properties.size.x, properties.size.y),
+        sf::Vector2f(0, properties.size.y),                          // file menu
+        sf::Vector2f(properties.size.x, properties.size.y),          // edit menu
+        sf::Vector2f(2 * properties.size.x, properties.size.y),      // options menu
+        sf::Vector2f(windowWidth - fileNameTextBox->getSize().x, 0)  // file name text box
     };
+}
+
+void Helpers::updateToolBarPositions()
+{
+    std::vector<sf::Vector2f> toolBarPositions = getToolBarPositions();
+    fileNameTextBox->setPosition(toolBarPositions[3]);
+}
+
+void Helpers::updateToolBarInfo()
+{
+    fileNameTextBox->setContent((fileSaved ? "" : "*") + getFileName());
 }
 
 std::vector<sf::Vector2f> Helpers::getStatusBarPositions()
@@ -118,6 +134,18 @@ std::vector<sf::Vector2f> Helpers::getStatusBarPositions()
         sf::Vector2f(int(std::max(0.0f, windowWidth - buttonProperties.size.x - zoomLevelTextBox->getSize().x + 1)), int(windowHeight - marginBottom)),
         sf::Vector2f(int(std::max(0.0f, windowWidth - buttonProperties.size.x)), int(windowHeight - marginBottom))
     };
+}
+
+void Helpers::updateStatusBarPositions()
+{
+    std::vector<sf::Vector2f> statusBarPositions = getStatusBarPositions();
+
+    lineCountTextBox->setPosition(statusBarPositions[0]);
+    lineColumnTextBox->setPosition(statusBarPositions[1]);
+    selectedCharacterCountTextBox->setPosition(statusBarPositions[2]);
+    zoomOutButton->setPosition(statusBarPositions[3]);
+    zoomLevelTextBox->setPosition(statusBarPositions[4]);
+    zoomInButton->setPosition(statusBarPositions[5]);
 }
 
 void Helpers::updateStatusBarInfo()
@@ -136,14 +164,14 @@ void Helpers::updateStatusBarInfo()
     zoomLevelTextBox->setContent(std::to_string(zoomLevel) + "%");
 }
 
-void Helpers::updateStatusBarPositions()
+std::string Helpers::getFileName()
 {
-    std::vector<sf::Vector2f> statusBarPositions = getStatusBarPositions();
+    if (path.size() == 0)
+        return "New file";
 
-    lineCountTextBox->setPosition(statusBarPositions[0]);
-    lineColumnTextBox->setPosition(statusBarPositions[1]);
-    selectedCharacterCountTextBox->setPosition(statusBarPositions[2]);
-    zoomOutButton->setPosition(statusBarPositions[3]);
-    zoomLevelTextBox->setPosition(statusBarPositions[4]);
-    zoomInButton->setPosition(statusBarPositions[5]);
+    size_t pos = path.find_last_of("/\\");
+    if (pos != std::string::npos)
+        return path.substr(pos + 1);
+
+    return path;
 }
