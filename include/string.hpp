@@ -18,7 +18,7 @@ namespace String
         int cnt;
         int priority;
         char ch;
-        bool a1, a2;
+        bool flagCursor, sumCursor;
 
         Treap(char ch = 0, bool cursor = 0);
     };
@@ -28,15 +28,15 @@ namespace String
     bool getFlagCursor(Treap *&T);
     bool getFlagEndline(Treap *&T);
     int getCh(Treap *&T);
-    bool sumCursor(Treap *&T);
-    int sumEndline(Treap *&T);
-    int cnt(Treap *&T);
-    int sumWidth(Treap *&T);
-    int len(Treap *&T);
+    bool sumCursor(Treap *T);
+    int sumEndline(Treap *T);
+    int cnt(Treap *T);
+    int sumWidth(Treap *T);
+    int len(Treap *T);
     void recalculate(Treap *&T);
     void merge(Treap *&T, Treap *L, Treap *R);
     void split(Treap *T, Treap *&L, Treap *&R, int key, int add = 0);
-    void print(Treap *&T);
+    void print(Treap *T);
     char get(int pos, Treap *&T);
 
     void del(int pos, Treap *&T);
@@ -46,12 +46,12 @@ namespace String
     void insert(int pos, Treap *&T, Treap *S = new Treap(cursorChar, 1));
     void insert(int pos, Treap *&T, char ch);
 
-    int findCursorPosition(Treap *&T, int add = 0);
-    int findWidth(Treap *&T, int key, int add = 0);
+    int findCursorPosition(Treap *T, int add = 0);
+    int findWidth(Treap *T, int key, int add = 0);
 
-    void construct(Treap *&T, std::string &s);
+    void construct(Treap *T, std::string &s);
 
-    std::string constructString(Treap *&T);
+    std::string constructString(Treap *T);
     std::string constructString(int l, int r, Treap *&T);
 
     int findNumberOfEndlines(int l, int r, Treap *&T);
