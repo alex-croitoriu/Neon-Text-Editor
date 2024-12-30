@@ -12,9 +12,9 @@ std::string Windows::getPathFromUser(std::string name) /// ia path-ul introdus d
 {
     const int DIM = 200;
     sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
-    sf::Image mainIcon;
-    mainIcon.loadFromFile("assets/images/main_icon.png");
-    window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
+    sf::Image icon;
+    icon.loadFromFile("assets/images/main_icon.png");
+    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     sf::Event event;
     sf::Text text, pth;
@@ -72,9 +72,9 @@ std::string Windows::getStringFromUser(std::string name) /// citeste cuvantul pe
 {
     const int DIM = 200;
     sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
-    sf::Image mainIcon;
-    mainIcon.loadFromFile("assets/images/main_icon.png");
-    window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
+    sf::Image icon;
+    icon.loadFromFile("assets/images/main_icon.png");
+    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     sf::Event event;
     sf::Text text, pth;

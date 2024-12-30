@@ -36,10 +36,10 @@ int main()
     window.create(sf::VideoMode(windowWidth, windowHeight), "Text Editor");
     window.setFramerateLimit(100);
     sf::View view;
-    sf::Image mainIcon;
+    sf::Image icon;
 
-    mainIcon.loadFromFile("assets/images/icon.png");
-    window.setIcon(mainIcon.getSize().x, mainIcon.getSize().y, mainIcon.getPixelsPtr());
+    icon.loadFromFile("assets/images/icon.png");
+    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     font.loadFromFile("assets/fonts/cour.ttf");
 
