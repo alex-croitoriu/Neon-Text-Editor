@@ -17,7 +17,7 @@ String::Treap::Treap(char ch, bool cursor)
     // if (ch == 13) ch = 10;
     this->ch = ch;
     L = R = 0;
-    a1 = a2 = cursor;
+    flagCursor = sumCursor = cursor;
 
     //  this-> sumCursor = this-> flagCursor = cursor;
     //  this->sumEndline = this->flagEndline = (ch == 10);
@@ -33,7 +33,7 @@ bool String::getFlagCursor(Treap *&T)
 {
     if (T == 0)
         return 0;
-    return T->a1;
+    return T->flagCursor;
 }
 
 bool String::getFlagEndline(Treap *&T)
@@ -50,35 +50,35 @@ int String::getCh(Treap *&T)
     return T->ch;
 }
 
-bool String::sumCursor(Treap *&T)
+bool String::sumCursor(Treap *T)
 {
     if (T == 0)
         return 0;
-    return T->a2;
+    return T->sumCursor;
 }
 
-int String::sumEndline(Treap *&T)
+int String::sumEndline(Treap *T)
 {
     if (T == 0)
         return 0;
     return T->sumEndline;
 }
 
-int String::cnt(Treap *&T)
+int String::cnt(Treap *T)
 {
     if (T == 0)
         return 0;
     return T->cnt;
 }
 
-int String::sumWidth(Treap *&T)
+int String::sumWidth(Treap *T)
 {
     if (T == 0)
         return 0;
     return T->sumWidth;
 }
 
-int String::len(Treap *&T)
+int String::len(Treap *T)
 {
     if (T == 0)
         return 0;
@@ -87,7 +87,7 @@ int String::len(Treap *&T)
 
 void String::recalculate(Treap *&T)
 {
-    T->a2 = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
+    T->sumCursor = (sumCursor(T->L) + sumCursor(T->R) + getFlagCursor(T));
     T->sumEndline = sumEndline(T->L) + sumEndline(T->R) + getFlagEndline(T);
     T->sumWidth = sumWidth(T->L) + sumWidth(T->R) + getDim(getCh(T));
     T->cnt = cnt(T->L) + cnt(T->R) + 1;
@@ -133,7 +133,7 @@ void String::split(Treap *T, Treap *&L, Treap *&R, int key, int add)
     recalculate(T);
 }
 
-void String::print(Treap *&T)
+void String::print(Treap *T)
 {
     if (T == 0)
         return;
@@ -215,7 +215,7 @@ void String::insert(int pos, Treap *&T, char ch)
     }
 }
 
-int String::findCursorPosition(Treap *&T, int add)
+int String::findCursorPosition(Treap *T, int add)
 {
     int curr = add + cnt(T->L) + 1;
 
@@ -227,7 +227,7 @@ int String::findCursorPosition(Treap *&T, int add)
         return findCursorPosition(T->R, curr);
 }
 
-int String::findWidth(Treap *&T, int key, int add)
+int String::findWidth(Treap *T, int key, int add)
 {
     if (T == 0)
         return 0;
@@ -240,7 +240,7 @@ int String::findWidth(Treap *&T, int key, int add)
         return findWidth(T->L, key, add);
 }
 
-void String::construct(Treap *&T, std::string &s)
+void String::construct(Treap *T, std::string &s)
 {
     if (T == 0)
         return;
@@ -249,7 +249,7 @@ void String::construct(Treap *&T, std::string &s)
     construct(T->R, s);
 }
 
-std::string String::constructString(Treap *&T)
+std::string String::constructString(Treap *T)
 {
     std::string S;
     construct(T, S);

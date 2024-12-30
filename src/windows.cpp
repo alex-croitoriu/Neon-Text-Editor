@@ -241,8 +241,8 @@ int Windows::saveModal()
 { ///am invatat de la cei mai buni
     int result = MessageBox(
         NULL,                            
-        "Do you want to save changes?",  
-        "Save Changes",                  
+        L"Do you want to save changes?",  
+        L"Save Changes",                  
         MB_YESNOCANCEL | MB_ICONQUESTION 
     );
 
