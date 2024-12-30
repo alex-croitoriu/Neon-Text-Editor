@@ -131,6 +131,13 @@ int main()
     string word, rword;
     string param;
     set<int> notRemoved;
+    char* data = NULL;
+    char* originalData = NULL;
+    int newFileLines = 0;
+    int currPosNewFile = 0;
+
+    HANDLE fileHandle = NULL , mappingHandle = NULL;
+    DWORD fileSize = 0;
 
     while (window.isOpen())
     {
@@ -411,7 +418,7 @@ int main()
 
                                 auto start = std::chrono::high_resolution_clock::now();
 
-                                HANDLE fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+                                fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
                                 if (fileHandle == INVALID_HANDLE_VALUE)
                                 {
@@ -419,23 +426,33 @@ int main()
                                     break;
                                 }
 
-                                HANDLE mappingHandle = CreateFileMapping(fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
-                                char *data = (char *)(MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
-                                DWORD fileSize = GetFileSize(fileHandle, nullptr);
+                                mappingHandle = CreateFileMapping(fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
+                                originalData = data = (char *)(MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
+                                fileSize = GetFileSize(fileHandle, nullptr);
+
+                                newFileLines = 1;
+                                currPosNewFile = 0;
+
+                                for (int i = 0; i < fileSize; i++)
+                                    newFileLines += data[i] == '\n';
+
+                               // strcpy(dataPtr, data);
 
                                 String::del(S);
-                                S = String::build(fileSize, data);
-                                String::insert(1, S);
+                                S = new String::Treap(cursorChar , 1);
+                              //  S = String::build(fileSize, data);
+                               // String::insert(1, S);
 
-                                UnmapViewOfFile(data);
-                                CloseHandle(mappingHandle);
-                                CloseHandle(fileHandle);
+                               // UnmapViewOfFile(data);
+                               // CloseHandle(mappingHandle);
+                                //CloseHandle(fileHandle);
                                 
                                 auto stop = std::chrono::high_resolution_clock::now();
 
                                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-                                cout << "Time elapsed: " << duration.count() << '\n';
-
+                                std::cout << "Time elapsed: " << duration.count() << '\n';
+                               // std::cerr << *(data + 1) << '\n';
+                                
                                 renderAgain = 1;
                                 fileSaved = 1;
                                 flag = 1;
@@ -903,6 +920,7 @@ int main()
                         else
                         {
                             int posCursor = String::findCursorPosition(S);
+                            cerr << posCursor << '\n';
 
                             if (posCursor > 1)
                             {
@@ -956,7 +974,7 @@ int main()
                         else
                         {
                             int posCursor = String::findCursorPosition(S);
-
+                            cerr << posCursor << '\n';
                             if (posCursor < String::len(S))
                             {
                                 String::del(posCursor, S);
@@ -1134,6 +1152,24 @@ int main()
 
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
+
+        if (currPosNewFile == fileSize)
+        {
+            data = NULL;
+            UnmapViewOfFile(originalData);
+            CloseHandle(mappingHandle);
+            CloseHandle(fileHandle);
+        }
+        else
+        {
+            int lastIdx = std::min((int) fileSize, currPosNewFile + bucketSize);
+            int sz = lastIdx - currPosNewFile;
+            String::merge(S, S, String::build(sz, data));
+            data += sz;
+            currPosNewFile += sz;
+            flag = 1;
+            renderAgain = 1;
+        }
 
         if (cursorTimer % (timeUnit * 2) <= timeUnit)
             cursorBox.setFillColor(currentThemeColors.text);
