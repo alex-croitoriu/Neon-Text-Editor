@@ -33,12 +33,12 @@ int cursorHeight = 0, cursorWidth = 0;
 
 int main()
 {
-    window.create(sf::VideoMode(windowWidth, windowHeight), "Neon Text Editor");
+    window.create(sf::VideoMode(windowWidth, windowHeight), "Neon - Text Editor");
     window.setFramerateLimit(100);
     sf::View view;
     sf::Image icon;
 
-    icon.loadFromFile("assets/images/icon.png");
+    icon.loadFromFile("assets/images/icon2.png");
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     font.loadFromFile("assets/fonts/kanit.ttf");

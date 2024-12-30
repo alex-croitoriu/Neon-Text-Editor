@@ -30,7 +30,7 @@ const std::vector<std::string> menuButtonLabels[] =
     { "Open", "Save", "Save as", "Exit" },
     { "Copy", "Paste", "Cut", "Find", "Replace", "Select All" },
     { "Hide lines", "Go to line", "Time & Date", "Change theme" },
-    { "Light", "Dark", "Solarized", "Midnight", "Abyss", "Red", "Povesti din folclorul maghiar" }
+    { "Light", "Dark", "Solarized", "Midnight", "Abyss", "Neon", "Red", "Povesti din folclorul maghiar" }
 };
 
 enum Theme
@@ -40,6 +40,7 @@ enum Theme
     SOLARIZED,
     MIDNIGHT,
     ABYSS,
+    NEON,
     RED,
     POVESTI_DIN_FOLCLORUL_MAGHIAR,
 };
@@ -75,6 +76,7 @@ const std::map<std::string, Theme> themeNamesMapping =
     { "Solarized", Theme::SOLARIZED },
     { "Midnight",  Theme::MIDNIGHT  },
     { "Abyss",     Theme::ABYSS     },
+    { "Neon",      Theme::NEON      },
     { "Red",       Theme::RED       },
     { "Povesti din folclorul maghiar", Theme::POVESTI_DIN_FOLCLORUL_MAGHIAR }
 };
@@ -172,6 +174,24 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
         }
     },
     {
+        Theme::NEON,
+        {
+            sf::Color(40, 170, 15, 255),     // background
+            sf::Color(12, 12, 12, 255),      // text
+            sf::Color(55, 255, 20, 255),     // separator
+            sf::Color(55, 255, 20, 255),     // bar
+            sf::Color(77, 77, 77, 255),   // line numbers text
+            sf::Color(45, 186, 20, 255),     // line numbers background
+            sf::Color(0, 0, 0, 30),          // cursor line highlight
+            sf::Color(255, 255, 255, 40),    // select highlight
+            sf::Color(55, 255, 20, 255),     // button background
+            sf::Color(185, 185, 185, 255),   // button hover
+            sf::Color(40, 170, 15, 255),     // button outline
+            sf::Color(55, 255, 20, 255),     // textbox background
+            sf::Color(55, 255, 20, 255),     // textbox outline
+        }
+    },
+    {
         Theme::RED,
         {
             sf::Color(50, 0, 0, 255),        // background  
@@ -192,19 +212,19 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
     {
         Theme::POVESTI_DIN_FOLCLORUL_MAGHIAR,
         {
-            sf::Color(255, 221, 89, 255),   // background
-            sf::Color(204, 0, 0, 255),      // text
-            sf::Color(255, 170, 0, 255),    // separator
-            sf::Color(255, 221, 89, 255),   // bar
-            sf::Color(204, 0, 0, 255),      // line numbers text
-            sf::Color(255, 221, 89, 255),   // line numbers background
-            sf::Color(255, 170, 0, 30),     // cursor line highlight 
-            sf::Color(255, 170, 0, 40),     // select highlight
-            sf::Color(255, 221, 89, 255),   // button background
-            sf::Color(255, 200, 50, 255),   // button hover
-            sf::Color(204, 0, 0, 255),      // button outline
-            sf::Color(255, 221, 89, 255),   // textbox background
-            sf::Color(255, 170, 0, 255)     // textbox outline
+            sf::Color(255, 221, 89, 255),    // background
+            sf::Color(204, 0, 0, 255),       // text
+            sf::Color(255, 170, 0, 255),     // separator
+            sf::Color(255, 221, 89, 255),    // bar
+            sf::Color(204, 0, 0, 255),       // line numbers text
+            sf::Color(255, 221, 89, 255),    // line numbers background
+            sf::Color(255, 170, 0, 30),      // cursor line highlight 
+            sf::Color(255, 170, 0, 40),      // select highlight
+            sf::Color(255, 221, 89, 255),    // button background
+            sf::Color(255, 200, 50, 255),    // button hover
+            sf::Color(204, 0, 0, 255),       // button outline
+            sf::Color(255, 221, 89, 255),    // textbox background
+            sf::Color(255, 170, 0, 255)      // textbox outline
         }
     }
 };
