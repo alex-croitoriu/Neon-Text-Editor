@@ -16,7 +16,7 @@ const int timeUnit = 2000;
 const int bucketSize = 1e5;
 
 const float textBoxFontSize = 11;
-const float textBoxLetterSpacing = 0.8;
+const float textBoxLetterSpacing = 1;
 const float textBoxHeight = 24;
 const float textBoxPaddingX = 10;
 const float textBoxPaddingY = 5;
@@ -26,7 +26,7 @@ const std::string toggleLinesButtonLabels[] = { "Show lines", "Hide lines" };
 const std::string menuLabels[] = { "File", "Edit", "Options" };
 const std::vector<std::string> menuButtonLabels[] =
 {
-    { "Open", "Save", "Save as" },
+    { "Open", "Save", "Save as", "Exit" },
     { "Copy", "Paste", "Cut", "Find", "Replace", "Select All" },
     { "Hide lines", "Go to line", "Time & Date", "Switch theme" }
 };
@@ -118,7 +118,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
         {
             sf::Vector2f(70, 24),   // size
             11,                     // fontSize
-            0.8,                    // letterSpacing
+            1,                    // letterSpacing
             0                       // outlineThickness
         }
     },
@@ -127,7 +127,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
         {
             sf::Vector2f(140, 30),  // size
             12,                     // fontSize
-            0.9,                    // letterSpacing
+            1,                    // letterSpacing
             -1                      // outlineThickness
         }
     },
