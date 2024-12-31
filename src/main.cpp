@@ -327,7 +327,6 @@ int main()
 
                 if (event.type == sf::Event::MouseMoved)
                 {
-                    // set hover state for zoom buttons
                     zoomOutButton->setHoverState(zoomOutButton->isHovering());
                     zoomInButton->setHoverState(zoomInButton->isHovering());
 
@@ -347,9 +346,7 @@ int main()
                             toggleButton->setHoverState(false);
                     }
                     if (optionsMenu->getIsOpen() && themeMenu->getToggleButton()->isHovering())
-                    {
                         themeMenu->open();
-                    }
 
                     // close menus if user isn't hovering over them anymore
                     if (fileMenu->getIsOpen() && !fileMenu->isHovering() && !fileMenu->getToggleButton()->isHovering())
@@ -925,7 +922,6 @@ int main()
                         else
                         {
                             int posCursor = String::findCursorPosition(S);
-                            cerr << posCursor << '\n';
 
                             if (posCursor > 1)
                             {
@@ -979,7 +975,6 @@ int main()
                         else
                         {
                             int posCursor = String::findCursorPosition(S);
-                            cerr << posCursor << '\n';
                             if (posCursor < String::len(S))
                             {
                                 String::del(posCursor, S);

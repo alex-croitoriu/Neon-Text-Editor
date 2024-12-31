@@ -169,33 +169,30 @@ void Windows::throwMessage(std::string message)
 std::string Windows::saveAS()
 {
     OPENFILENAMEA ofn;
-    char szFile[260];      // Buffer for full file path
-    char szFileTitle[260]; // Buffer for file title (file name only)
+    char szFile[260];      
+    char szFileTitle[260];
 
-    // Initialize the OPENFILENAME structure
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = NULL; // Handle to the owner window
+    ofn.hwndOwner = NULL; 
     ofn.lpstrFile = szFile;
-    ofn.lpstrFile[0] = '\0';                           // Initialize the file buffer with an empty std::string
-    ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]); // Wide chars
+    ofn.lpstrFile[0] = '\0';                           
+    ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]);
     ofn.lpstrFileTitle = szFileTitle;
-    ofn.lpstrFileTitle[0] = '\0';                                     // Initialize file title buffer
-    ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]); // Wide chars
-    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";          // Wide character filter
-    ofn.nFilterIndex = 1;                                             // Default filter index
-    ofn.lpstrInitialDir = NULL;                                       // Initial directory
-    ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;              // Overwrite prompt for save dialog
+    ofn.lpstrFileTitle[0] = '\0';                                     
+    ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]); 
+    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";          
+    ofn.nFilterIndex = 1;                                             
+    ofn.lpstrInitialDir = NULL;                                       
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;              
 
     if (GetOpenFileNameA(&ofn) == TRUE)
     {
-        // File selected and dialog confirmed
         std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
         return ofn.lpstrFile;
     }
     else
     {
-        // Dialog was canceled or an error occurred
         std::cout << "Open file dialog canceled or failed." << std::endl;
         return "";
     }
@@ -204,41 +201,38 @@ std::string Windows::saveAS()
 std::string Windows::open()
 {
     OPENFILENAMEA ofn;
-    char szFile[260];      // Buffer for full file path
-    char szFileTitle[260]; // Buffer for file title (file name only)
+    char szFile[260];      
+    char szFileTitle[260]; 
 
-    // Initialize the OPENFILENAME structure
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = NULL; // Handle to the owner window
+    ofn.hwndOwner = NULL; 
     ofn.lpstrFile = szFile;
-    ofn.lpstrFile[0] = '\0'; // Initialize the file buffer with an empty std::string
+    ofn.lpstrFile[0] = '\0';
     ofn.nMaxFile = sizeof(szFile);
     ofn.lpstrFileTitle = szFileTitle;
-    ofn.lpstrFileTitle[0] = '\0'; // Initialize file title buffer
+    ofn.lpstrFileTitle[0] = '\0';
     ofn.nMaxFileTitle = sizeof(szFileTitle);
-    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0"; // ANSI character filter
-    ofn.nFilterIndex = 1;                                    // Default filter index
-    ofn.lpstrInitialDir = NULL;                              // Initial directory
+    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0"; 
+    ofn.nFilterIndex = 1;                                    
+    ofn.lpstrInitialDir = NULL;                              
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-    // Display the Open dialog box
     if (GetOpenFileNameA(&ofn) == TRUE)
     {
-        // File selected and dialog confirmed
         std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
         return ofn.lpstrFile;
     }
     else
     {
-        // Dialog was canceled or an error occurred
         std::cout << "Open file dialog canceled or failed." << std::endl;
         return "";
     }
 }
 
 int Windows::saveModal() 
-{ ///am invatat de la cei mai buni
+{ 
+    
     int result = MessageBox(
         NULL,                            
         "Do you want to save changes?",  
