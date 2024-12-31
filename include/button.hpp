@@ -8,7 +8,8 @@ enum ButtonSize
 {
     SMALL,
     MEDIUM,
-    LARGE
+    LARGE,
+    EXTRA_LARGE
 };
 
 class Button
