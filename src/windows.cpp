@@ -19,11 +19,11 @@ std::string Windows::getPathFromUser(std::string name) /// ia path-ul introdus d
     sf::Event event;
     sf::Text text, pth;
 
-    text.setFont(font);
+    text.setFont(globalFont);
     text.setFillColor(sf::Color::Black);
     text.setString("Enter path: ");
 
-    pth.setFont(font);
+    pth.setFont(globalFont);
     pth.setFillColor(sf::Color::Green);
     pth.setPosition(200, 0);
 
@@ -79,11 +79,11 @@ std::string Windows::getStringFromUser(std::string name) /// citeste cuvantul pe
     sf::Event event;
     sf::Text text, pth;
 
-    text.setFont(font);
+    text.setFont(globalFont);
     text.setFillColor(sf::Color::Black);
     text.setString("Enter keyword: ");
 
-    pth.setFont(font);
+    pth.setFont(globalFont);
     pth.setFillColor(sf::Color::Green);
     pth.setString("");
     pth.setPosition(250, 0);
@@ -139,7 +139,7 @@ void Windows::throwMessage(std::string message)
     sf::Event event;
     sf::Text text;
 
-    text.setFont(font);
+    text.setFont(globalFont);
     text.setFillColor(sf::Color::Black);
     text.setString(message);
 

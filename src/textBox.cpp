@@ -10,7 +10,7 @@ TextBox::TextBox(const std::string &_content, const sf::Vector2f &position, bool
     container.setOutlineColor(currentThemeColors.textBoxOutline);
     container.setOutlineThickness(outline ? -1 : 0);
 
-    content = sf::Text(_content, font, textBoxFontSize);
+    content = sf::Text(_content, globalFont, textBoxFontSize);
     content.setFillColor(currentThemeColors.text);
     content.setLetterSpacing(textBoxLetterSpacing);
 

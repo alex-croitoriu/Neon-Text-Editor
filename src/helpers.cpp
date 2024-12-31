@@ -37,10 +37,10 @@ void Helpers::changeTheme(Theme _theme, sf::Text &t1, sf::Text &t2)
     zoomInButton->updateThemeColors();
     zoomOutButton->updateThemeColors();
 
-    zoomInButton->setOutline(theme != Theme::MIDNIGHT && theme != Theme::ABYSS && theme != Theme::DARK && theme != Theme::NEON && theme != Theme::SOLARIZED_DARK && theme != Theme::OBSIDIAN);
-    zoomOutButton->setOutline(theme != Theme::MIDNIGHT && theme != Theme::ABYSS && theme != Theme::DARK && theme != Theme::NEON && theme != Theme::SOLARIZED_DARK && theme != Theme::OBSIDIAN);
+    zoomInButton ->setOutline(theme != Theme::DARK && theme != Theme::NEON_DARK && theme != Theme::SOLARIZED_DARK && theme != Theme::MIDNIGHT && theme != Theme::OBSIDIAN);
+    zoomOutButton->setOutline(theme != Theme::DARK && theme != Theme::NEON_DARK && theme != Theme::SOLARIZED_DARK && theme != Theme::MIDNIGHT && theme != Theme::OBSIDIAN);
  
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
     {
         menus[i]->getToggleButton()->updateThemeColors();
         for (int j = 0; j < menus[i]->getButtonCount(); j++)
@@ -60,6 +60,8 @@ void Helpers::changeTheme(Theme _theme, sf::Text &t1, sf::Text &t2)
 
     topSeparator.setFillColor(currentThemeColors.separator);
     bottomSeparator.setFillColor(currentThemeColors.separator);
+
+    cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
 }
 
 bool Helpers::isAnyButtonPressed()
@@ -67,7 +69,7 @@ bool Helpers::isAnyButtonPressed()
     if (zoomOutButton->isHovering() || zoomInButton->isHovering())
         return true;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
     {
         if (menus[i]->getToggleButton()->isHovering())
             return true;

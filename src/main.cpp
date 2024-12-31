@@ -46,18 +46,20 @@ int main()
     sf::Sprite povesti;
     povesti.setTexture(texture, true);
 
-    font.loadFromFile("assets/fonts/kanit.ttf");
+    globalFont.loadFromFile("assets/fonts/open_sans.ttf");
+    textFont.loadFromFile("assets/fonts/raleway.ttf");
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 
-    menus = new Menu *[4];
+    menus = new Menu *[5];
     for (int i = 0; i < 3; i++)
         menus[i] = new Menu(menuLabels[i], menuButtonLabels[i], toolBarPositions[i]);
 
     menus[3] = new Menu(menus[2]->getButtons()[3], menuButtonLabels[3], menus[2]->getButtons()[3]->getPosition(), true);
+    menus[4] = new Menu(menus[2]->getButtons()[4], menuButtonLabels[4], menus[2]->getButtons()[4]->getPosition(), true);
 
-    Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2], *themeMenu = menus[3];
-    Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons(), **themeMenuButtons = themeMenu->getButtons();
+    Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2], *themeMenu = menus[3], *fontMenu = menus[4];
+    Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons(), **themeMenuButtons = themeMenu->getButtons(), **fontMenuButtons = fontMenu->getButtons();
 
     fileNameTextBox = new TextBox("", toolBarPositions[3], false);
 
@@ -70,12 +72,12 @@ int main()
 
     lineHeight = Helpers::getLineHeight();
 
-    text.setFont(font);
+    text.setFont(textFont);
     text.setFillColor(currentThemeColors.text);
     text.setCharacterSize(fontSize);
     text.setStyle(sf::Text::Regular);
 
-    ptext1.setFont(font);
+    ptext1.setFont(textFont);
     ptext1.setFillColor(currentThemeColors.text);
     ptext1.setCharacterSize(fontSize);
     ptext1.setStyle(sf::Text::Regular);
@@ -341,21 +343,25 @@ int main()
                         else
                             toggleButton->setHoverState(false);
                     }
-                    if (optionsMenu->getIsOpen() && themeMenu->getToggleButton()->isHovering())
+                    if (optionsMenu->getIsOpen() && themeMenu->getToggleButton()->isHovering() && !fontMenu->getIsOpen())
                         themeMenu->open();
+                    if (optionsMenu->getIsOpen() && fontMenu->getToggleButton()->isHovering() && !themeMenu->getIsOpen())
+                        fontMenu->open();
 
                     // close menus if user isn't hovering over them anymore
                     if (fileMenu->getIsOpen() && !fileMenu->isHovering() && !fileMenu->getToggleButton()->isHovering())
                         fileMenu->close();
                     if (editMenu->getIsOpen() && !editMenu->isHovering() && !editMenu->getToggleButton()->isHovering() && editMenu->getPosition() == toolBarPositions[1])
                         editMenu->close();
-                    if (optionsMenu->getIsOpen() && !optionsMenu->isHovering() && !optionsMenu->getToggleButton()->isHovering() && !themeMenu->isHovering())
+                    if (optionsMenu->getIsOpen() && !optionsMenu->isHovering() && !optionsMenu->getToggleButton()->isHovering() && !themeMenu->isHovering() && !fontMenu->isHovering())
                         optionsMenu->close();
                     if (themeMenu->getIsOpen() && !themeMenu->isHovering() && !themeMenu->getToggleButton()->isHovering())
                         themeMenu->close();
+                    if (fontMenu->getIsOpen() && !fontMenu->isHovering() && !fontMenu->getToggleButton()->isHovering())
+                        fontMenu->close();
 
                     // set hover state for buttons inside menus
-                    for (int i = 0; i < 4; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         Button **buttons = menus[i]->getButtons();
                         for (int j = 0; j < menus[i]->getButtonCount(); j++)
@@ -763,16 +769,29 @@ int main()
                                 fileSaved = 0;
                             }
                             
-                            for (int i = 0; i < themeMenu->getButtonCount(); i++)
-                            {
-                                if (themeMenuButtons[i]->isHovering())
+                            if (themeMenu->getIsOpen())
+                                for (int i = 0; i < themeMenu->getButtonCount(); i++)
                                 {
-                                    Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i]), text, ptext1);
-                                    renderAgain = 1;
-                                    themeMenu->close();
-                                    optionsMenu->close();
+                                    if (themeMenuButtons[i]->isHovering())
+                                    {
+                                        Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i]), text, ptext1);
+                                        renderAgain = 1;
+                                        themeMenu->close();
+                                        optionsMenu->close();
+                                    }
                                 }
-                            }
+                            
+                            else if (fontMenu->getIsOpen())
+                                for (int i = 0; i < fontMenu->getButtonCount(); i++)
+                                {
+                                    if (fontMenuButtons[i]->isHovering())
+                                    {
+                                        // Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i]), text, ptext1);
+                                        renderAgain = 1;
+                                        fontMenu->close();
+                                        optionsMenu->close();
+                                    }
+                                }
                         }
                         // change cursor position inside text visible in the viewport
                         else
@@ -1418,7 +1437,7 @@ int main()
         window.draw(topSeparator);
         window.draw(bottomSeparator);
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
             menus[i]->draw();
         
         fileNameTextBox->draw();
