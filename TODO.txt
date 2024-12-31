@@ -21,6 +21,7 @@
 - [X] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
 - [X] dark/light mode 
 - [X] current file name top right
+- [X] fix theme buttons click goes behind bug
 - [X] name and logo
 
 - [ ] scrollbar
@@ -31,6 +32,5 @@
 - [ ] modal for error
 - [ ] modal for go to line
 
-- [ ] fix theme buttons click goes behind bug
 - [ ] add additional fonts
  

@@ -1,9 +1,9 @@
 #include <iostream>
 #include <chrono>
 #include <random>
+#include <windows.h>
 
 #include "string.hpp"
-#include <windows.h>
 
 std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
 

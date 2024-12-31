@@ -4,14 +4,14 @@
 
 #include "textBox.hpp"
 #include "button.hpp"
-#include "menu.hpp"
 #include "config.hpp"
+#include "menu.hpp"
 
 extern sf::Font font;
 extern sf::RenderWindow window;
 extern sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, toolBarBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
-extern sf::RenderTexture text1, text2, text3;
-extern sf::Sprite img1, img2, img3;
+extern sf::RenderTexture aboveCurrentLineText, belowCurrentLineText, lineNumbersText;
+extern sf::Sprite aboveCurrentLineSprite, belowCurrentLineSprite, lineNumbersSprite;
 
 extern bool fileSaved;
 

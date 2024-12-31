@@ -169,22 +169,22 @@ void Windows::throwMessage(std::string message)
 std::string Windows::saveAS()
 {
     OPENFILENAMEA ofn;
-    char szFile[260];      
+    char szFile[260];
     char szFileTitle[260];
 
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = NULL; 
+    ofn.hwndOwner = NULL;
     ofn.lpstrFile = szFile;
-    ofn.lpstrFile[0] = '\0';                           
+    ofn.lpstrFile[0] = '\0';
     ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]);
     ofn.lpstrFileTitle = szFileTitle;
-    ofn.lpstrFileTitle[0] = '\0';                                     
-    ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]); 
-    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";          
-    ofn.nFilterIndex = 1;                                             
-    ofn.lpstrInitialDir = NULL;                                       
-    ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;              
+    ofn.lpstrFileTitle[0] = '\0';
+    ofn.nMaxFileTitle = sizeof(szFileTitle) / sizeof(szFileTitle[0]);
+    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";
+    ofn.nFilterIndex = 1;
+    ofn.lpstrInitialDir = NULL;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 
     if (GetOpenFileNameA(&ofn) == TRUE)
     {
@@ -201,21 +201,21 @@ std::string Windows::saveAS()
 std::string Windows::open()
 {
     OPENFILENAMEA ofn;
-    char szFile[260];      
-    char szFileTitle[260]; 
+    char szFile[260];
+    char szFileTitle[260];
 
     ZeroMemory(&ofn, sizeof(ofn));
     ofn.lStructSize = sizeof(ofn);
-    ofn.hwndOwner = NULL; 
+    ofn.hwndOwner = NULL;
     ofn.lpstrFile = szFile;
     ofn.lpstrFile[0] = '\0';
     ofn.nMaxFile = sizeof(szFile);
     ofn.lpstrFileTitle = szFileTitle;
     ofn.lpstrFileTitle[0] = '\0';
     ofn.nMaxFileTitle = sizeof(szFileTitle);
-    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0"; 
-    ofn.nFilterIndex = 1;                                    
-    ofn.lpstrInitialDir = NULL;                              
+    ofn.lpstrFilter = "All Files\0*.*\0Text Files\0*.TXT\0";
+    ofn.nFilterIndex = 1;
+    ofn.lpstrInitialDir = NULL;
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
     if (GetOpenFileNameA(&ofn) == TRUE)
@@ -230,14 +230,14 @@ std::string Windows::open()
     }
 }
 
-int Windows::saveModal() 
-{ 
-    
-    int result = MessageBox(
-        NULL,                            
-        "Do you want to save changes?",  
-        "Save Changes",                  
-        MB_YESNOCANCEL | MB_ICONQUESTION 
+int Windows::saveModal()
+{
+    int result = MessageBox
+    (
+        NULL,
+        "Do you want to save changes?",
+        "Save Changes",
+        MB_YESNOCANCEL | MB_ICONQUESTION
     );
 
     return result;

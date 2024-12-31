@@ -1,15 +1,15 @@
 #include "globals.hpp"
+#include "helpers.hpp"
+#include "string.hpp"
 #include "button.hpp"
 #include "menu.hpp"
-#include "helpers.hpp"
 #include "config.hpp"
-#include "string.hpp"
 
 sf::Font font;
 sf::RenderWindow window;
 sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, toolBarBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
-sf::RenderTexture text1, text2, text3;
-sf::Sprite img1, img2, img3;
+sf::RenderTexture aboveCurrentLineText, belowCurrentLineText, lineNumbersText;
+sf::Sprite aboveCurrentLineSprite, belowCurrentLineSprite, lineNumbersSprite;
 
 ThemeColors currentThemeColors = themeColorsMapping.at(theme);
 

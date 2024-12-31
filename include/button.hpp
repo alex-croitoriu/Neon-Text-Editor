@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-
 #include <string>
 
 enum ButtonSize
@@ -18,7 +17,7 @@ class Button
     sf::Text content;
     ButtonSize size;
     bool centerX, centerY;
-    
+
 public:
     Button(const std::string &label, const sf::Vector2f &position, const bool &outline = false, const ButtonSize &_size = ButtonSize::MEDIUM, const bool &centerX = true, const bool &centerY = true);
 

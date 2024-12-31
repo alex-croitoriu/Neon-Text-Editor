@@ -1,8 +1,6 @@
-#include <iostream>
-
 #include "replace.hpp"
-#include "bit.hpp"
 #include "globals.hpp"
+#include "bit.hpp"
 
 void Replace::KMP(std::string &s, std::string &word, std::vector<int> &positions, bool &wholeWord)
 {

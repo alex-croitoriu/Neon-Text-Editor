@@ -1,5 +1,5 @@
-#include "render.hpp"
 #include "helpers.hpp"
+#include "render.hpp"
 
 std::string txt;
 
@@ -93,12 +93,12 @@ void Render::updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, i
     int L = std::min(l2 - l1 + 1, cursorLine - l1);
 
     text.setCharacterSize(fontSize);
-    text.setLetterSpacing(0.7);
+    text.setLetterSpacing(0.8);
     text.setFillColor(currentThemeColors.lineNumbersText);
 
-    text1.clear(sf::Color(0, 0, 0, 0));
-    text2.clear(sf::Color(0, 0, 0, 0));
-    text3.clear(sf::Color(0, 0, 0, 0));
+    aboveCurrentLineText.clear(sf::Color(0, 0, 0, 0));
+    belowCurrentLineText.clear(sf::Color(0, 0, 0, 0));
+    lineNumbersText.clear(sf::Color(0, 0, 0, 0));
 
     int lastHeight = -lineHeight;
 
@@ -112,7 +112,7 @@ void Render::updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, i
             line += " ";
         line += number;
         centerText(text, line, marginTop + lastHeight + lineHeight, 5);
-        text3.draw(text);
+        lineNumbersText.draw(text);
         lastHeight += lineHeight;
     }
 
@@ -131,7 +131,7 @@ void Render::updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, i
     for (int i = 0; i < L; i++)
     {
         centerText(text, renderLines[i], marginTop + lastHeight + lineHeight);
-        text1.draw(text);
+        aboveCurrentLineText.draw(text);
         lastHeight += lineHeight;
     }
 
@@ -148,19 +148,19 @@ void Render::updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, i
     for (int i = std::max(0, cursorLine - l1 + 1); i < sizeRLines; i++)
     {
         centerText(text, renderLines[i], marginTop + lastHeight + lineHeight);
-        text2.draw(text);
+        belowCurrentLineText.draw(text);
         lastHeight += lineHeight;
     }
 
-    img1.setTexture(text1.getTexture());
-    img2.setTexture(text2.getTexture());
-    img3.setTexture(text3.getTexture());
+    aboveCurrentLineSprite.setTexture(aboveCurrentLineText.getTexture());
+    belowCurrentLineSprite.setTexture(belowCurrentLineText.getTexture());
+    lineNumbersSprite.setTexture(lineNumbersText.getTexture());
 
     centerText(text, txt, marginTop + textHeight + lineHeight);
 
-    text1.display();
-    text2.display();
-    text3.display();
+    aboveCurrentLineText.display();
+    belowCurrentLineText.display();
+    lineNumbersText.display();
 }
 
 float Render::splitCursorLine(sf::Text &text, sf::Text &h1, std::string &txt, int posCursorOnScreen, int fp)
@@ -223,6 +223,6 @@ void Render::render(int &l1, int &l2, String::Treap *&S, int Yoffset, int Xoffse
 
     for (int i = l1; l1 > 0 && l2 > 0 && l1 <= l2 && i <= l2 + (l2 < numberOfLines); i++)
         updateTextLine(sizeRLines, renderLines, String::constructRenderedLine(i, S, Xoffset, i - l1));
-        
+
     updateSmartRender(text, l1, l2 + (l2 < numberOfLines), cursorLine, scrollUnitY);
 }

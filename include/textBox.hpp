@@ -1,14 +1,13 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-
 #include <string>
 
 class TextBox
 {
     sf::RectangleShape container;
     sf::Text content;
-    
+
 public:
     TextBox(const std::string &label, const sf::Vector2f &position, bool outline = true);
 

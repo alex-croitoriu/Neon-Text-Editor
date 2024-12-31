@@ -1,7 +1,7 @@
+#include "helpers.hpp"
 #include "globals.hpp"
 #include "textBox.hpp"
 #include "config.hpp"
-#include "helpers.hpp"
 
 TextBox::TextBox(const std::string &_content, const sf::Vector2f &position, bool outline)
 {

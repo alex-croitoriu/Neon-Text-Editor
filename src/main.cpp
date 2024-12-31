@@ -1,5 +1,4 @@
 ﻿#include <SFML/Graphics.hpp>
-
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -13,14 +12,14 @@
 #include <bitset>
 
 #include "helpers.hpp"
+#include "replace.hpp"
+#include "windows.hpp"
 #include "globals.hpp"
+#include "render.hpp"
+#include "string.hpp"
 #include "config.hpp"
 #include "button.hpp"
 #include "menu.hpp"
-#include "string.hpp"
-#include "windows.hpp"
-#include "render.hpp"
-#include "replace.hpp"
 
 using namespace std;
 
@@ -34,31 +33,20 @@ int cursorHeight = 0, cursorWidth = 0;
 int main()
 {
     window.create(sf::VideoMode(windowWidth, windowHeight), "Neon - Text Editor");
-    window.setFramerateLimit(100);
+    window.setFramerateLimit(90);
+
     sf::View view;
     sf::Image icon;
+
+    icon.loadFromFile("assets/images/icon.png");
+    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     sf::Texture texture;
     texture.loadFromFile("assets/images/povesti.png");
     sf::Sprite povesti;
     povesti.setTexture(texture, true);
 
-    icon.loadFromFile("assets/images/icon.png");
-    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-
     font.loadFromFile("assets/fonts/kanit.ttf");
-
-    lineHeight = Helpers::getLineHeight();
-
-    text.setFont(font);
-    text.setFillColor(currentThemeColors.text);
-    text.setCharacterSize(fontSize);
-    text.setStyle(sf::Text::Regular);
-
-    ptext1.setFont(font);
-    ptext1.setFillColor(currentThemeColors.text);
-    ptext1.setCharacterSize(fontSize);
-    ptext1.setStyle(sf::Text::Regular);
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 
@@ -79,6 +67,18 @@ int main()
     zoomOutButton = new Button(zoomButtonLabels[0], statusBarPositions[3], true, ButtonSize::SMALL);
     zoomLevelTextBox = new TextBox("", statusBarPositions[4]);
     zoomInButton = new Button(zoomButtonLabels[1], statusBarPositions[5], true, ButtonSize::SMALL);
+
+    lineHeight = Helpers::getLineHeight();
+
+    text.setFont(font);
+    text.setFillColor(currentThemeColors.text);
+    text.setCharacterSize(fontSize);
+    text.setStyle(sf::Text::Regular);
+
+    ptext1.setFont(font);
+    ptext1.setFillColor(currentThemeColors.text);
+    ptext1.setCharacterSize(fontSize);
+    ptext1.setStyle(sf::Text::Regular);
 
     cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
 
@@ -109,13 +109,9 @@ int main()
     int l1 = 0, l2 = 0;
     int lastCursorLine = 0;
 
-    text1.create(maxRows, maxRows);
-    text2.create(maxRows, maxRows);
-    text3.create(maxRows, maxRows);
-
-    text1.setSmooth(true);
-    text2.setSmooth(true);
-    text3.setSmooth(true);
+    aboveCurrentLineText.create(maxRows, maxRows);
+    belowCurrentLineText.create(maxRows, maxRows);
+    lineNumbersText.create(maxRows, maxRows);
 
     string buffer = "";
     int cursorTimer = 0;
@@ -766,7 +762,7 @@ int main()
                                 renderAgain = 1;
                                 fileSaved = 0;
                             }
-
+                            
                             for (int i = 0; i < themeMenu->getButtonCount(); i++)
                             {
                                 if (themeMenuButtons[i]->isHovering())
@@ -1029,9 +1025,7 @@ int main()
                         for (auto currentAppearance : snapshot)
                         {
                             if (Replace::canReplace(currentAppearance, bit, positions, gone, rword, word) == 0)
-                            {
                                 continue;
-                            }
 
                             int L = Replace::findRealPosition(currentAppearance, positions, bit, word, rword);
                             String::replace(L, L + word.size() - 1, rword, S);
@@ -1160,7 +1154,7 @@ int main()
 
             auto stop = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-            std::cout << "Time elapsed: " << duration.count() << '\n';
+            std::cout << "Time elapsed: " << duration.count() << " ms\n";
 
             data = NULL;
             UnmapViewOfFile(originalData);
@@ -1241,9 +1235,7 @@ int main()
             }
 
             if (renderAgain == 1)
-            {
                 Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
-            }
             else
             {
                 if (cursorLine >= l1 && cursorLine <= l2)
@@ -1374,28 +1366,20 @@ int main()
             int highlighted = 0;
 
             for (int i = 0; i < selectedBoxes.size(); i++)
-            {
                 if (selectedBoxes[i].getFillColor() == sf::Color(255, 187, 0, 128))
                     highlighted = i;
-            }
 
             for (int i = 0; i < highlighted; i++)
-            {
                 if (selectedBoxes[i].getPosition().y == selectedBoxes[i + 1].getPosition().y)
-                {
                     selectedBoxes[i].setSize(sf::Vector2f(min(selectedBoxes[i + 1].getPosition().x - selectedBoxes[i].getPosition().x, selectedBoxes[i].getSize().x), lineHeight));
-                }
-            }
 
             for (int i = highlighted + 1; i < selectedBoxes.size(); i++)
-            {
                 if (selectedBoxes[i].getPosition().y == selectedBoxes[i - 1].getPosition().y)
                 {
                     int oldX = selectedBoxes[i].getPosition().x;
                     selectedBoxes[i].setPosition(max(selectedBoxes[i].getPosition().x, selectedBoxes[i - 1].getPosition().x + selectedBoxes[i - 1].getSize().x), selectedBoxes[i].getPosition().y);
                     selectedBoxes[i].setSize(sf::Vector2f(selectedBoxes[i].getSize().x - (selectedBoxes[i].getPosition().x - oldX), lineHeight));
                 }
-            }
         }
 
         if (selectFlag | findFlag | replaceFlag)
@@ -1404,16 +1388,16 @@ int main()
 
         window.draw(lineNumbersBackground);
         if (showLineNumbers)
-            window.draw(img3);
+            window.draw(lineNumbersSprite);
 
         if (cursorOnScreen)
             window.draw(cursorBox);
         if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)
             window.draw(cursorLineHighlight);
 
-        window.draw(img1);
+        window.draw(aboveCurrentLineSprite);
         window.draw(ptext1);
-        window.draw(img2);
+        window.draw(belowCurrentLineSprite);
         
         Helpers::updateStatusBarInfo();
         Helpers::updateStatusBarPositions();
@@ -1428,11 +1412,9 @@ int main()
         lineColumnTextBox->draw();
         if (selectedBoxes.size())
             selectedCharacterCountTextBox->draw();
-        zoomLevelTextBox->draw();
-
         zoomOutButton->draw();
+        zoomLevelTextBox->draw();
         zoomInButton->draw();
-
         window.draw(topSeparator);
         window.draw(bottomSeparator);
 

@@ -4,7 +4,7 @@
 
 #include "globals.hpp"
 
-namespace Helpers 
+namespace Helpers
 {
     float getLineHeight(int fnt = fontSize);
     void centerContentInsideContainer(sf::RectangleShape &container, sf::Text &content, bool vertical = true, bool horizontal = true, int paddingTop = 0, int paddingLeft = 0);

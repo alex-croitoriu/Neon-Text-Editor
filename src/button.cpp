@@ -1,7 +1,7 @@
 #include "globals.hpp"
-#include "button.hpp"
-#include "config.hpp"
 #include "helpers.hpp"
+#include "config.hpp"
+#include "button.hpp"
 
 Button::Button(const std::string &label, const sf::Vector2f &position, const bool &outline, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
 {

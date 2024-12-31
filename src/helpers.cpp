@@ -67,7 +67,7 @@ bool Helpers::isAnyButtonPressed()
     if (zoomOutButton->isHovering() || zoomInButton->isHovering())
         return true;
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
     {
         if (menus[i]->getToggleButton()->isHovering())
             return true;
