@@ -31,5 +31,6 @@
 - [ ] modal for error
 - [ ] modal for go to line
 
+- [ ] fix theme buttons click goes behind bug
 - [ ] add additional fonts
  
