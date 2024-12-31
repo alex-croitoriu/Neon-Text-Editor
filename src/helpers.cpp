@@ -37,8 +37,8 @@ void Helpers::changeTheme(Theme _theme, sf::Text &t1, sf::Text &t2)
     zoomInButton->updateThemeColors();
     zoomOutButton->updateThemeColors();
 
-    zoomInButton->setOutline(theme != Theme::MIDNIGHT && theme != Theme::ABYSS && theme != Theme::DARK && theme != Theme::NEON);
-    zoomOutButton->setOutline(theme != Theme::MIDNIGHT && theme != Theme::ABYSS && theme != Theme::DARK && theme != Theme::NEON);
+    zoomInButton->setOutline(theme != Theme::MIDNIGHT && theme != Theme::ABYSS && theme != Theme::DARK && theme != Theme::NEON && theme != Theme::SOLARIZED_DARK && theme != Theme::OBSIDIAN);
+    zoomOutButton->setOutline(theme != Theme::MIDNIGHT && theme != Theme::ABYSS && theme != Theme::DARK && theme != Theme::NEON && theme != Theme::SOLARIZED_DARK && theme != Theme::OBSIDIAN);
  
     for (int i = 0; i < 4; i++)
     {

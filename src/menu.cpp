@@ -39,12 +39,12 @@ Menu::Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, 
     buttons = new Button*[buttonCount];
     for (int i = 0; i < buttonCount; i++)
     {
-        sf::Vector2f buttonPosition(position.x + properties.size.x, position.y + (properties.size.y - 1) * i);
+        sf::Vector2f buttonPosition(position.x + properties.size.x - 1, position.y + (properties.size.y - 1) * i);
         buttons[i] = new Button(buttonLabels[i], buttonPosition, true, ButtonSize::LARGE, false);
     }
 
     container.setSize(sf::Vector2f(properties.size.x, (properties.size.y - 1) * buttonCount + 1)); 
-    container.setPosition(position + sf::Vector2f(properties.size.x, 0));
+    container.setPosition(position + sf::Vector2f(properties.size.x - 1, 0));
 }
 
 

@@ -18,7 +18,6 @@ Button::Button(const std::string &label, const sf::Vector2f &position, const boo
     container.setOutlineThickness(outline ? -1 : 0);
 
     content = sf::Text(label, font, properties.fontSize);
-    // content.setStyle(sf::Text::Bold);
     content.setFillColor(currentThemeColors.text);
     content.setLetterSpacing(properties.letterSpacing);
 

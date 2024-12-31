@@ -21,6 +21,7 @@
 - [X] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
 - [X] dark/light mode 
 - [X] current file name top right
+- [X] name and logo
 
 - [ ] scrollbar
 - [ ] modal for unsaved changes 
@@ -29,7 +30,6 @@
 - [ ] modal for time and date
 - [ ] modal for error
 - [ ] modal for go to line
-- [ ] name and logo
 
 - [ ] add additional fonts
  

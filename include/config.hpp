@@ -30,16 +30,18 @@ const std::vector<std::string> menuButtonLabels[] =
     { "Open", "Save", "Save as", "Exit" },
     { "Copy", "Paste", "Cut", "Find", "Replace", "Select All" },
     { "Hide lines", "Go to line", "Time & Date", "Change theme" },
-    { "Light", "Dark", "Solarized", "Midnight", "Abyss", "Neon", "Red", "Povesti din folclorul maghiar" }
+    { "Light", "Dark", "Solarized Light", "Solarized Dark", "Midnight", "Abyss", "Obsidian", "Neon", "Red", "Povesti din folclorul maghiar" }
 };
 
 enum Theme
 {
     LIGHT,
     DARK,
-    SOLARIZED,
+    SOLARIZED_LIGHT,
+    SOLARIZED_DARK,
     MIDNIGHT,
     ABYSS,
+    OBSIDIAN,
     NEON,
     RED,
     POVESTI_DIN_FOLCLORUL_MAGHIAR,
@@ -71,13 +73,15 @@ struct ButtonProperties
 
 const std::map<std::string, Theme> themeNamesMapping = 
 {
-    { "Light",     Theme::LIGHT     },
-    { "Dark",      Theme::DARK      },
-    { "Solarized", Theme::SOLARIZED },
-    { "Midnight",  Theme::MIDNIGHT  },
-    { "Abyss",     Theme::ABYSS     },
-    { "Neon",      Theme::NEON      },
-    { "Red",       Theme::RED       },
+    { "Light",                         Theme::LIGHT                         },
+    { "Dark",                          Theme::DARK                          },
+    { "Solarized Light",               Theme::SOLARIZED_LIGHT               },
+    { "Solarized Dark",                Theme::SOLARIZED_DARK                },
+    { "Midnight",                      Theme::MIDNIGHT                      },
+    { "Abyss",                         Theme::ABYSS                         },
+    { "Obsidian",                      Theme::OBSIDIAN                      },
+    { "Neon",                          Theme::NEON                          },
+    { "Red",                           Theme::RED                           },
     { "Povesti din folclorul maghiar", Theme::POVESTI_DIN_FOLCLORUL_MAGHIAR }
 };
 
@@ -119,22 +123,40 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(40, 44, 52, 255)       // textbox outline  
         }
     },
-    {
-        Theme::SOLARIZED,
+    { 
+        Theme::SOLARIZED_LIGHT,
         {
-            sf::Color(253, 246, 227, 255),   // background
-            sf::Color(7, 54, 66, 255),       // text
-            sf::Color(147, 161, 161, 255),   // separator
-            sf::Color(238, 232, 213, 255),   // bar
-            sf::Color(88, 110, 117, 255),    // line numbers text
-            sf::Color(238, 232, 213, 255),   // line numbers background
-            sf::Color(0, 43, 54, 30),        // cursor line highlight
-            sf::Color(0, 43, 54, 40),        // select highlight
-            sf::Color(238, 232, 213, 255),   // button background
-            sf::Color(181, 137, 0, 255),     // button hover
-            sf::Color(131, 148, 150, 255),   // button outline
-            sf::Color(238, 232, 213, 255),   // textbox background
-            sf::Color(147, 161, 161, 255)    // textbox outline
+            sf::Color(253, 246, 227, 255),   // background (light beige)
+            sf::Color(7, 54, 66, 255),       // text (dark blue-gray)
+            sf::Color(147, 161, 161, 255),   // separator (gray)
+            sf::Color(238, 232, 213, 255),   // bar (light beige)
+            sf::Color(88, 110, 117, 255),    // line numbers text (grayish blue)
+            sf::Color(238, 232, 213, 255),   // line numbers background (light beige)
+            sf::Color(0, 43, 54, 30),        // cursor line highlight (subtle)
+            sf::Color(0, 43, 54, 40),        // select highlight (subtle)
+            sf::Color(238, 232, 213, 255),   // button background (light beige)
+            sf::Color(181, 137, 0, 255),     // button hover (yellow-orange)
+            sf::Color(131, 148, 150, 255),   // button outline (gray-blue)
+            sf::Color(238, 232, 213, 255),   // textbox background (light beige)
+            sf::Color(147, 161, 161, 255)    // textbox outline (gray)
+        }
+    },
+    { 
+        Theme::SOLARIZED_DARK,
+        {
+            sf::Color(0, 43, 54, 255),        // background
+            sf::Color(131, 148, 150, 255),    // text
+            sf::Color(88, 110, 117, 255),     // separator
+            sf::Color(7, 54, 66, 255),        // bar
+            sf::Color(147, 161, 161, 255),    // line numbers text
+            sf::Color(7, 54, 66, 255),        // line numbers background
+            sf::Color(0, 43, 54, 30),         // cursor line highlight
+            sf::Color(255, 255, 255, 40),     // select highlight
+            sf::Color(7, 54, 66, 255),        // button background
+            sf::Color(0, 43, 54, 255),        // button hover
+            sf::Color(88, 110, 117, 255),     // button outline
+            sf::Color(7, 54, 66, 255),        // textbox background
+            sf::Color(7, 54, 66, 255)         // textbox outline
         }
     },
     {
@@ -158,34 +180,52 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
     {
         Theme::ABYSS,
         {
-            sf::Color(38, 50, 56, 255),      // background 
-            sf::Color(183, 183, 255, 255),   // text
-            sf::Color(75, 85, 94, 255),      // separator
-            sf::Color(48, 61, 69, 255),      // bar
-            sf::Color(130, 170, 255, 255),   // line
-            sf::Color(48, 61, 69, 255),      // line numbers background
-            sf::Color(255, 255, 255, 30),    // cursor line highlight  
-            sf::Color(255, 255, 255, 40),    // select highlight  
-            sf::Color(48, 61, 69, 255),      // button background
-            sf::Color(100, 120, 140, 255),   // button hover
-            sf::Color(75, 85, 94, 255),      // button outline  
-            sf::Color(48, 61, 69, 255),      // textbox background
-            sf::Color(75, 85, 94, 255)       // textbox outline
+            sf::Color(12, 12, 17, 255),      // background
+            sf::Color(180, 180, 180, 255),   // text
+            sf::Color(50, 50, 70, 255),      // separator
+            sf::Color(40, 40, 60, 255),      // bar
+            sf::Color(100, 100, 120, 255),   // line numbers text
+            sf::Color(20, 20, 30, 255),      // line numbers background
+            sf::Color(0, 0, 0, 40),          // cursor line highlight
+            sf::Color(255, 255, 255, 40),    // select highlight
+            sf::Color(40, 40, 60, 255),      // button background
+            sf::Color(60, 60, 80, 255),      // button hover
+            sf::Color(20, 20, 30, 255),      // button outline
+            sf::Color(40, 40, 60, 255),      // textbox background
+            sf::Color(40, 40, 60, 255),      // textbox outline
+        }
+    },
+    { 
+        Theme::OBSIDIAN,
+        {
+            sf::Color(35, 30, 45, 255),      // background
+            sf::Color(204, 204, 204, 255),   // text
+            sf::Color(35, 30, 45, 255),      // separator
+            sf::Color(50, 45, 65, 255),      // bar
+            sf::Color(150, 140, 180, 255),   // line numbers text
+            sf::Color(60, 50, 75, 255),      // line numbers background
+            sf::Color(56, 50, 80, 30),       // cursor line highlight
+            sf::Color(255, 255, 255, 40),    // select highlight
+            sf::Color(50, 45, 65, 255),      // button background
+            sf::Color(138, 43, 226, 255),    // button hover
+            sf::Color(35, 30, 45, 255),      // button outline
+            sf::Color(50, 45, 65, 255),      // textbox background
+            sf::Color(50, 45, 65, 255)       // textbox outline
         }
     },
     {
         Theme::NEON,
         {
             sf::Color(40, 170, 15, 255),     // background
-            sf::Color(12, 12, 12, 255),      // text
+            sf::Color(45, 45, 45, 255),      // text
             sf::Color(55, 255, 20, 255),     // separator
             sf::Color(55, 255, 20, 255),     // bar
-            sf::Color(77, 77, 77, 255),   // line numbers text
+            sf::Color(45, 45, 45, 255),      // line numbers text
             sf::Color(45, 186, 20, 255),     // line numbers background
             sf::Color(0, 0, 0, 30),          // cursor line highlight
-            sf::Color(255, 255, 255, 40),    // select highlight
+            sf::Color(0, 0, 0, 40),          // select highlight
             sf::Color(55, 255, 20, 255),     // button background
-            sf::Color(185, 185, 185, 255),   // button hover
+            sf::Color(22, 140, 1, 255),      // button hover
             sf::Color(40, 170, 15, 255),     // button outline
             sf::Color(55, 255, 20, 255),     // textbox background
             sf::Color(55, 255, 20, 255),     // textbox outline
@@ -212,19 +252,19 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
     {
         Theme::POVESTI_DIN_FOLCLORUL_MAGHIAR,
         {
-            sf::Color(255, 221, 89, 255),    // background
-            sf::Color(204, 0, 0, 255),       // text
-            sf::Color(255, 170, 0, 255),     // separator
-            sf::Color(255, 221, 89, 255),    // bar
-            sf::Color(204, 0, 0, 255),       // line numbers text
-            sf::Color(255, 221, 89, 255),    // line numbers background
-            sf::Color(255, 170, 0, 30),      // cursor line highlight 
-            sf::Color(255, 170, 0, 40),      // select highlight
-            sf::Color(255, 221, 89, 255),    // button background
+            sf::Color(255, 211, 63, 255),    // background
+            sf::Color(181, 4, 4, 255),       // text
+            sf::Color(204, 14, 14),          // separator
+            sf::Color(255, 211, 63, 255),    // bar
+            sf::Color(181, 4, 4, 255),       // line numbers text
+            sf::Color(255, 211, 63, 255),    // line numbers background
+            sf::Color(0, 0, 0, 30),          // cursor line highlight 
+            sf::Color(0, 0, 0, 40),          // select highlight
+            sf::Color(255, 211, 63, 255),    // button background
             sf::Color(255, 200, 50, 255),    // button hover
-            sf::Color(204, 0, 0, 255),       // button outline
-            sf::Color(255, 221, 89, 255),    // textbox background
-            sf::Color(255, 170, 0, 255)      // textbox outline
+            sf::Color(204, 14, 14),          // button outline
+            sf::Color(255, 211, 63, 255),    // textbox background
+            sf::Color(204, 14, 14)           // textbox outline
         }
     }
 };

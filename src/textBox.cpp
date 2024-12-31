@@ -11,7 +11,6 @@ TextBox::TextBox(const std::string &_content, const sf::Vector2f &position, bool
     container.setOutlineThickness(outline ? -1 : 0);
 
     content = sf::Text(_content, font, textBoxFontSize);
-    // content.setStyle(sf::Text::Bold);
     content.setFillColor(currentThemeColors.text);
     content.setLetterSpacing(textBoxLetterSpacing);
 

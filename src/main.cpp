@@ -38,7 +38,12 @@ int main()
     sf::View view;
     sf::Image icon;
 
-    icon.loadFromFile("assets/images/icon2.png");
+    sf::Texture texture;
+    texture.loadFromFile("assets/images/povesti.png");
+    sf::Sprite povesti;
+    povesti.setTexture(texture, true);
+
+    icon.loadFromFile("assets/images/icon.png");
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     font.loadFromFile("assets/fonts/kanit.ttf");
@@ -1148,6 +1153,8 @@ int main()
             }
 
         window.clear(currentThemeColors.background);
+        if (theme == Theme::POVESTI_DIN_FOLCLORUL_MAGHIAR)
+            window.draw(povesti);
 
         cursorTimer++;
         cursorTimer %= timeUnit * 2;
