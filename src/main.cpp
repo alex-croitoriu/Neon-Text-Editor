@@ -642,6 +642,12 @@ int main()
                             {
                                 fileMenu->close();
 
+                                // new file logic
+                            }
+                            else if (fileMenuButtons[1]->isHovering())
+                            {
+                                fileMenu->close();
+
                                 path = Windows::open();
 
                                 if (path.size() == 0)
@@ -671,7 +677,7 @@ int main()
                                 fileSaved = 1;
                                 flag = 1;
                             }
-                            else if (fileMenuButtons[1]->isHovering())
+                            else if (fileMenuButtons[2]->isHovering())
                             {
                                 fileMenu->close();
 
@@ -690,7 +696,7 @@ int main()
                                 fileSaved = 1;
                                 fclose(fptr);
                             }
-                            else if (fileMenuButtons[2]->isHovering())
+                            else if (fileMenuButtons[3]->isHovering())
                             {
                                 fileMenu->close();
 
@@ -711,7 +717,7 @@ int main()
                                 fileSaved = 1;
                                 fclose(fptr);
                             }
-                            else if (fileMenuButtons[3]->isHovering())
+                            else if (fileMenuButtons[4]->isHovering())
                             {
                                 fileMenu->close();
                                 if (fileSaved == 1)
