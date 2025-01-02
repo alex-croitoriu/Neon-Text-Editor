@@ -47,7 +47,47 @@ int main()
     povesti.setTexture(texture, true);
 
     globalFont.loadFromFile("assets/fonts/kanit.ttf");
-    textFont.loadFromFile("assets/fonts/roboto_mono.ttf");
+    textFont.loadFromFile("assets/fonts/kanit.ttf");
+
+    // for (auto x : fontNamesMapping)
+    // {
+    //     cout << x.first << ' ' << x.second << '\n';
+    //     textFont.loadFromFile("assets/fonts/" + x.second + ".ttf");
+    //     text.setFont(textFont);
+
+    //     string fileName = "fonts/" + x.second + ".txt";
+    //     FILE* fptrr = fopen(fileName.c_str(), "w");
+    //     fprintf(fptrr, "%c", '{');
+
+    //     for (int fnt = 0; fnt <= 100; fnt++)
+    //     {
+    //         text.setCharacterSize(fnt);
+
+    //         fprintf(fptrr, "%c", '{');
+
+    //         for (int i = 0; i <= 255; i++)
+    //         {
+    //             string st;
+
+    //             for (int it = 1; it <= 30; it++)
+    //                 st += i;
+                
+    //             text.setString(st);
+
+    //             int w = ceil(text.getGlobalBounds().width / 30.0);
+
+    //             if (fnt == 0) w = 0;
+    //             fprintf(fptrr, "%d", w);
+    //             if (i < 255) fprintf(fptrr, "%c", ',');
+    //         }
+
+    //         fprintf(fptrr, "%c", '}');
+    //         if (fnt < 100) fprintf(fptrr, "%c", ',');
+    //     }
+
+    //     fprintf(fptrr, "%c", '}');
+    //     fclose(fptrr);
+    // }
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 
@@ -105,7 +145,7 @@ int main()
     statusBarBackground.setFillColor(currentThemeColors.bar);
 
     int Yoffset = 0, Xoffset = 0;
-    int scrollUnitX = charWidth[fontSize][0], scrollUnitY = Helpers::getLineHeight();
+    int scrollUnitX = charWidth[fontIndex][fontSize][0], scrollUnitY = Helpers::getLineHeight();
 
     bool firstExec = 1;
     int l1 = 0, l2 = 0;
@@ -145,11 +185,12 @@ int main()
     DWORD fileSize = 0;
 
     auto start = std::chrono::high_resolution_clock::now();
+    
 
     while (window.isOpen())
     {
         bool flag = 0;
-        bool fontChanged = 0;
+        bool fontSizeChanged = 0;
         bool renderAgain = 0;
         bool updateFindReplace = 0;
 
@@ -584,7 +625,7 @@ int main()
                             lineHeight = Helpers::getLineHeight();
 
                             String::updateWidth(S);
-                            fontChanged = 1;
+                            fontSizeChanged = 1;
                             cursorTimer = 0;
                         }
                         else if (zoomInButton->isHovering())
@@ -597,7 +638,7 @@ int main()
                             lineHeight = Helpers::getLineHeight();
 
                             String::updateWidth(S);
-                            fontChanged = 1;
+                            fontSizeChanged = 1;
                             cursorTimer = 0;
                         }
 
@@ -985,7 +1026,12 @@ int main()
                                 {
                                     if (fontMenuButtons[i]->isHovering())
                                     {
-                                        // Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i]), text, ptext1);
+                                        Helpers::changeFont(fontNamesMapping.at(menuButtonLabels[4][i].first));
+                                        fontIndex = i;
+                                        String::updateWidth(S);
+                                        scrollUnitX = charWidth[fontIndex][fontSize][0];
+                                        scrollUnitY = Helpers::getLineHeight();
+                                        cout << fontIndex << '\n';
                                         renderAgain = 1;
                                         fontMenu->close();
                                         optionsMenu->close();
@@ -1403,18 +1449,18 @@ int main()
 
         if (flag || firstExec)
         {
-            scrollUnitX = charWidth[fontSize][0], scrollUnitY = Helpers::getLineHeight();
+            scrollUnitX = charWidth[fontIndex][fontSize][0], scrollUnitY = Helpers::getLineHeight();
 
             renderAgain |= firstExec;
-            renderAgain |= fontChanged;
+            renderAgain |= fontSizeChanged;
 
-            if (fontChanged || firstExec)
+            if (fontSizeChanged || firstExec)
             {
                 cursorHeight = lineHeight;
                 cursorWidth = 1;
             }
 
-            fontChanged = 0;
+            fontSizeChanged = 0;
             firstExec = 0;
 
             int posCursor = String::findCursorPosition(S);
@@ -1516,7 +1562,7 @@ int main()
                     int w = String::findWidth(l, li - 1, S);
                     int W = String::findWidth(li, ri, S);
 
-                    box.setPosition(w + marginLeft + paddingLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontSize][' '] : 0), y);
+                    box.setPosition(w + marginLeft + paddingLeft + (cursorLine - l1 == i && li == posCursor + 1 ? -charWidth[fontIndex][fontSize][' '] : 0), y);
                     box.setSize(sf::Vector2f(W, lineHeight));
                     box.setFillColor(currentThemeColors.selectHighlight);
                     selectedBoxes.push_back(box);

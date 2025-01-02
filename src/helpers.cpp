@@ -75,6 +75,11 @@ void Helpers::changeTheme(Theme _theme, sf::Text &t1, sf::Text &t2)
     cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
 }
 
+void Helpers::changeFont(const std::string& font)
+{
+    textFont.loadFromFile("assets/fonts/" + font + ".ttf ");
+}
+
 bool Helpers::isAnyButtonPressed()
 {
     if (zoomOutButton->isHovering() || zoomInButton->isHovering())

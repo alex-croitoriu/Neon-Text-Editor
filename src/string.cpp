@@ -9,7 +9,7 @@ std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
 
 int String::getDim(char ch)
 {
-    return charWidth[fontSize][ch];
+    return charWidth[fontIndex][fontSize][ch];
 }
 
 String::Treap::Treap(char ch, bool cursor)

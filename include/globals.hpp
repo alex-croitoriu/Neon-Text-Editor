@@ -14,7 +14,7 @@ extern sf::RenderTexture aboveCurrentLineText, belowCurrentLineText, lineNumbers
 extern sf::Sprite aboveCurrentLineSprite, belowCurrentLineSprite, lineNumbersSprite;
 
 extern bool fileSaved;
-
+extern int fontIndex;
 extern int windowWidth, windowHeight;
 
 extern bool showLineNumbers;

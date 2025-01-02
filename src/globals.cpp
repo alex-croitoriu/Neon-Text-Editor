@@ -2,8 +2,8 @@
 #include "helpers.hpp"
 #include "string.hpp"
 #include "button.hpp"
-#include "menu.hpp"
 #include "config.hpp"
+#include "menu.hpp"
 
 sf::Font globalFont, textFont;
 sf::RenderWindow window;
@@ -14,6 +14,7 @@ sf::Sprite aboveCurrentLineSprite, belowCurrentLineSprite, lineNumbersSprite;
 ThemeColors currentThemeColors = themeColorsMapping.at(theme);
 
 bool fileSaved = 1;
+int fontIndex = 0;
 
 int windowWidth = 800, windowHeight = 600;
 

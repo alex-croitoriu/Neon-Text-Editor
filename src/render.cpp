@@ -117,8 +117,8 @@ void Render::updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, i
         lastHeight += lineHeight;
     }
 
-    marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[fontSize]['9'];
-    paddingLeft = 0.5 * charWidth[fontSize]['a'];
+    marginLeft = showLineNumbers * (lineNumbersMaxDigits + 1) * charWidth[0][fontSize]['9'];
+    paddingLeft = 0.5 * charWidth[0][fontSize]['a'];
 
     lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
     statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));

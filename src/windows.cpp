@@ -4,69 +4,10 @@
 #include <string>
 #include <windows.h>
 #include <commdlg.h>
+#include <filesystem>
 
 #include "windows.hpp"
 #include "globals.hpp"
-
-std::string Windows::getPathFromUser(std::string name) /// ia path-ul introdus de catre utilizator pentru a salva fisierul
-{
-    const int DIM = 200;
-    sf::RenderWindow window(sf::VideoMode(DIM * 4, DIM / 4 - 10), name);
-    sf::Image icon;
-    icon.loadFromFile("assets/images/icon.png");
-    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-
-    sf::Event event;
-    sf::Text text, pth;
-
-    text.setFont(globalFont);
-    text.setFillColor(sf::Color::Black);
-    text.setString("Enter path: ");
-
-    pth.setFont(globalFont);
-    pth.setFillColor(sf::Color::Green);
-    pth.setPosition(200, 0);
-
-    std::string path;
-
-    while (window.isOpen())
-    {
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::KeyPressed)
-            {
-                int key = event.key.code;
-
-                if (key == 58 || key == 36)
-                    window.close();
-
-                break;
-            }
-            if (event.type == sf::Event::TextEntered)
-            {
-                int ch = event.text.unicode;
-
-                if (ch == 8)
-                {
-                    if (path.size())
-                        path.pop_back();
-                }
-                else
-                    path += ch;
-
-                break;
-            }
-        }
-
-        pth.setString(path);
-        window.clear(sf::Color::White);
-        window.draw(text);
-        window.draw(pth);
-        window.display();
-    }
-
-    return path;
-}
 
 std::string Windows::getStringFromUser(std::string name) /// citeste cuvantul pe care vrea user-ul sa-l caute
 {
@@ -172,6 +113,8 @@ void Windows::throwMessage(std::string message)
 
 std::string Windows::saveAS()
 {
+    std::filesystem::path originalDir = std::filesystem::current_path();
+
     OPENFILENAMEA ofn;
     char szFile[260];
     char szFileTitle[260];
@@ -193,17 +136,22 @@ std::string Windows::saveAS()
     if (GetOpenFileNameA(&ofn) == TRUE)
     {
         std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
+        std::filesystem::current_path(originalDir);
         return ofn.lpstrFile;
     }
     else
     {
         std::cout << "Open file dialog canceled or failed." << std::endl;
+        std::filesystem::current_path(originalDir);
         return "";
     }
+
 }
 
 std::string Windows::open()
 {
+    std::filesystem::path originalDir = std::filesystem::current_path();
+
     OPENFILENAMEA ofn;
     char szFile[260];
     char szFileTitle[260];
@@ -222,16 +170,20 @@ std::string Windows::open()
     ofn.lpstrInitialDir = NULL;
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
+
     if (GetOpenFileNameA(&ofn) == TRUE)
     {
         std::cout << "Selected file: " << ofn.lpstrFile << std::endl;
+        std::filesystem::current_path(originalDir);
         return ofn.lpstrFile;
     }
     else
     {
         std::cout << "Open file dialog canceled or failed." << std::endl;
+        std::filesystem::current_path(originalDir);
         return "";
     }
+
 }
 
 int Windows::saveModal()
@@ -239,8 +191,8 @@ int Windows::saveModal()
     int result = MessageBox
     (
         NULL,
-        L"Do you want to save changes?",
-        L"Save Changes",
+        "Do you want to save changes?",
+        "Save Changes",
         MB_YESNOCANCEL | MB_ICONQUESTION
     );
 
