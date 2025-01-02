@@ -344,7 +344,9 @@ int main()
         else if (ctrlS == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
             ctrlS = 1;
-            path = Windows::saveAS();
+
+            if(path.size() == 0)
+                path = Windows::saveAS();
 
             FILE* fptr = fopen(path.c_str(), "w");
 
@@ -642,6 +644,36 @@ int main()
                             {
                                 fileMenu->close();
 
+                                if (fileSaved == 0)
+                                {
+                                    int closeOption = Windows::saveModal();
+
+                                    if (closeOption == IDCANCEL)
+                                        break;
+                                    else if (closeOption == IDYES)
+                                    {
+                                        if (path.size() == 0)
+                                            path = Windows::saveAS();
+
+                                        FILE* fptr = fopen(path.c_str(), "w");
+
+                                        if (fptr == NULL)
+                                        {
+                                            Windows::throwMessage("Wrong Path!");
+                                            break;
+                                        }
+
+                                        String::saveText(fptr, S);
+                                        fileSaved = 1;
+                                        fclose(fptr);
+                                        break;
+                                    }
+                                }
+
+                                String::del(S);
+                                S = new String::Treap(cursorChar, 1);
+                                renderAgain = 1;
+                                flag = 1;
                                 // new file logic
                             }
                             else if (fileMenuButtons[1]->isHovering())
