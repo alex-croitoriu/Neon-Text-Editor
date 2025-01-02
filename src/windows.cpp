@@ -97,7 +97,7 @@ std::string Windows::getStringFromUser(std::string name) /// citeste cuvantul pe
             if (event.type == sf::Event::KeyPressed)
             {
                 int key = event.key.code;
-
+               // std::cerr << key << '\n';
                 if (key == 58 || key == 36)
                 {
                     window.close();
@@ -108,6 +108,10 @@ std::string Windows::getStringFromUser(std::string name) /// citeste cuvantul pe
             if (event.type == sf::Event::TextEntered)
             {
                 int ch = event.text.unicode;
+                std::cerr << ch << '\n';
+
+                if (ch == 6 || ch == 18 || ch == 7)
+                    break;
 
                 if (ch == 8)
                 {
@@ -235,8 +239,8 @@ int Windows::saveModal()
     int result = MessageBox
     (
         NULL,
-        "Do you want to save changes?",
-        "Save Changes",
+        L"Do you want to save changes?",
+        L"Save Changes",
         MB_YESNOCANCEL | MB_ICONQUESTION
     );
 
