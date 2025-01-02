@@ -34,7 +34,6 @@ int main()
 {
     window.create(sf::VideoMode(windowWidth, windowHeight), "Neon - Text Editor");
     window.setFramerateLimit(90);
-
     sf::View view;
     sf::Image icon;
 
@@ -161,7 +160,7 @@ int main()
     bool cursorLineOnScreen = 1;
     bool leftButtonPressed = 0;
     bool selectFlag = 0;
-    bool ctrlX = 0, ctrlV = 0, ctrlC = 0 , ctrlO = 0 , ctrlS = 0 , ctrlF = 0 , ctrlR = 0 , ctrlA = 0 , ctrlL = 0 , ctrlG = 0;
+    bool ctrlX = 0, ctrlV = 0, ctrlC = 0 , ctrlO = 0 , ctrlS = 0 , ctrlF = 0 , ctrlR = 0 , ctrlA = 0 , ctrlL = 0 , ctrlG = 0 , ctrlShiftS = 0;
 
     int posCursorOnHold = -1;
 
@@ -366,9 +365,7 @@ int main()
         else if (ctrlS == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
             ctrlS = 1;
-
-            if (path.size() == 0)
-                path = Windows::saveAS();
+            path = Windows::saveAS();
 
             FILE* fptr = fopen(path.c_str(), "w");
 
@@ -506,6 +503,24 @@ int main()
                 Yoffset = (l - 1) * lineHeight;
                 renderAgain = 1;
                 flag = 1;
+            }
+        }
+        else if (ctrlShiftS == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && sf::Keyboard::isKeyPressed(sf::Keyboard::G))
+        {
+            ctrlShiftS = 1;
+            path = Windows::saveAS();
+
+            FILE* fptr = fopen(path.c_str(), "w");
+
+            if (fptr == NULL)
+            {
+                Windows::throwMessage("Wrong Path!");
+            }
+            else
+            {
+                String::saveText(fptr, S);
+                fileSaved = 1;
+                fclose(fptr);
             }
         }
         else while (window.pollEvent(event))
