@@ -121,7 +121,7 @@ int main()
     bool cursorLineOnScreen = 1;
     bool leftButtonPressed = 0;
     bool selectFlag = 0;
-    bool ctrlX = 0, ctrlV = 0, ctrlC = 0;
+    bool ctrlX = 0, ctrlV = 0, ctrlC = 0 , ctrlO = 0 , ctrlS = 0 , ctrlF = 0 , ctrlR = 0 , ctrlA = 0 , ctrlL = 0 , ctrlG = 0;
 
     int posCursorOnHold = -1;
 
@@ -276,8 +276,10 @@ int main()
             renderAgain = 1;
             selectFlag = 0;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        else if (ctrlA == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
+            ctrlA = 1;
+
             if (String::len(S) > 1)
             {
                 segmSelected = {1, String::len(S) - 1};
@@ -287,8 +289,185 @@ int main()
                 selectFlag = 1;
             }
         }
-        else
-            while (window.pollEvent(event))
+        else if (ctrlO == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::O))
+        {
+            ctrlO = 1;
+
+            path = Windows::open();
+
+            if (path.size() != 0)
+            {
+                start = std::chrono::high_resolution_clock::now();
+
+                fileHandle = CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+
+                if (fileHandle == INVALID_HANDLE_VALUE)
+                {
+                    Windows::throwMessage("Invalid Path");
+                    break;
+                }
+
+                mappingHandle = CreateFileMapping(fileHandle, nullptr, PAGE_READONLY, 0, 0, nullptr);
+                originalData = data = (char*)(MapViewOfFile(mappingHandle, FILE_MAP_READ, 0, 0, 0));
+                fileSize = GetFileSize(fileHandle, nullptr);
+
+                currPosNewFile = 0;
+
+                String::del(S);
+                S = new String::Treap(cursorChar, 1);
+
+                readFileFlag = 1;
+                renderAgain = 1;
+                fileSaved = 1;
+                flag = 1;
+            }
+        }
+        else if (ctrlS == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            ctrlS = 1;
+
+            if (path.size() == 0)
+                path = Windows::saveAS();
+
+            FILE* fptr = fopen(path.c_str(), "w");
+
+            if (fptr == NULL)
+            {
+                Windows::throwMessage("Wrong Path!");
+            }
+            else
+            {
+                String::saveText(fptr, S);
+                fileSaved = 1;
+                fclose(fptr);
+            }
+        }
+        else if (ctrlF == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+        {
+            ctrlF = 1;
+
+            selectFlag = findFlag = replaceFlag = 0;
+
+            /// apelat dupa ce faci setarile cu wholeWord si matchCase
+            word = Windows::getStringFromUser("Find");
+
+            if (word.size() != 0)
+            {
+                string s = String::constructRawString(S);
+
+                if (matchCase == 0)
+                {
+                    for (auto& i : word)
+                        if (i >= 'A' && i <= 'Z')
+                            i = i - 'A' + 'a';
+
+                    for (auto& i : s)
+                        if (i >= 'A' && i <= 'Z')
+                            i = i - 'A' + 'a';
+                }
+
+                Replace::KMP(s, word, positions, wholeWord);
+
+                if (positions.size() == 0)
+                {
+                    Windows::throwMessage("There are 0 matchings!");
+                    renderAgain = 1;
+                    flag = 1;
+                }
+                else
+                {
+                    updateFindReplace = 1;
+                    currentAppearance = 0;
+                    findFlag = 1;
+                    renderAgain = 1;
+                    flag = 1;
+                }
+            }
+        }
+        else if (ctrlR == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+        {
+            ctrlR = 1;
+
+            selectFlag = findFlag = replaceFlag = 0;
+
+            word = Windows::getStringFromUser("word");
+            rword = Windows::getStringFromUser("word");
+
+            if (word.size() != 0)
+            {
+                string s = String::constructRawString(S);
+
+                if (matchCase == 0)
+                {
+                    for (auto& i : word)
+                        if (i >= 'A' && i <= 'Z')
+                            i = i - 'A' + 'a';
+
+                    for (auto& i : s)
+                        if (i >= 'A' && i <= 'Z')
+                            i = i - 'A' + 'a';
+                }
+
+                Replace::KMP(s, word, positions, wholeWord);
+
+                if (positions.size() == 0)
+                {
+                    Windows::throwMessage("There are 0 matchings!");
+                    renderAgain = 1;
+                    flag = 1;
+                }
+                else
+                {
+                    prv.clear();
+                    bit.clear();
+                    nxt.clear();
+                    gone.clear();
+
+                    prv.resize(positions.size(), -1);
+                    nxt.resize(positions.size(), -1);
+                    gone.resize(positions.size(), 0);
+                    bit.resize(positions.size(), 0);
+                    notRemoved.clear();
+
+                    for (int i = 1; i < positions.size(); i++)
+                        prv[i] = i - 1;
+
+                    for (int i = 0; i + 1 < positions.size(); i++)
+                        nxt[i] = i + 1;
+
+                    for (int i = 0; i < positions.size(); i++)
+                        notRemoved.insert(i);
+
+                    currentAppearance = 0;
+                    replaceFlag = 1;
+                    renderAgain = 1;
+                    updateFindReplace = 1;
+                    flag = 1;
+                }
+            }
+        }
+        else if (ctrlL == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::L))
+        {
+            ctrlL = 1;
+            showLineNumbers = !showLineNumbers;
+            optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLineNumbers]);
+            flag = 1;
+            renderAgain = 1;
+        }
+        else if (ctrlG == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::G))
+        {
+            ctrlG = 1;
+            string line = Windows::getStringFromUser("Go to line");
+            if (line != "")
+            {
+                int l = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, stoi(line));
+                Xoffset = 0;
+                Yoffset = (l - 1) * lineHeight;
+                renderAgain = 1;
+                flag = 1;
+            }
+        }
+        else while (window.pollEvent(event))
             {
                 if (event.type == sf::Event::Closed)
                 {
@@ -378,19 +557,14 @@ int main()
                     if (event.key.code == 0)
                         leftButtonPressed = 0;
 
-                    ctrlC = ctrlV = ctrlX = 0;
+                    ctrlC = ctrlV = ctrlX = ctrlF = ctrlR = ctrlA = ctrlO = ctrlS = ctrlG = ctrlL = 0;
                 }
 
                 if (event.type == sf::Event::KeyReleased)
                 {
                     int key = event.key.code;
-
-                    if (key == 23)
-                        ctrlX = 0;
-                    else if (key == 2)
-                        ctrlC = 0;
-                    else if (key == 21)
-                        ctrlV = 0;
+                    cerr << "Key is " << key << '\n';
+                    ctrlC = ctrlV = ctrlX = ctrlF = ctrlR = ctrlA = ctrlO = ctrlS = ctrlG = ctrlL = 0;
 
                     break;
                 }
@@ -751,6 +925,10 @@ int main()
                                 optionsMenu->close();
 
                                 string line = Windows::getStringFromUser("Go to line");
+                                
+                                if (line == "")
+                                    break;
+
                                 int l = min(String::findNumberOfEndlines(1, String::len(S), S) + 1, stoi(line));
                                 Xoffset = 0;
                                 Yoffset = (l - 1) * lineHeight;
@@ -773,7 +951,6 @@ int main()
 
                                     String::del(s2);
                                     String::merge(S, s1, s3);
-                                    renderAgain = 1;
                                 }
 
                                 // TODO: let user customize format via modal
@@ -887,9 +1064,6 @@ int main()
                             cursorTimer = 0;
                         }
 
-                        findFlag = 0;
-                        replaceFlag = 0;
-
                         selectFlag = 0;
 
                         renderAgain = 1;
@@ -920,8 +1094,6 @@ int main()
                             cursorTimer = 0;
                         }
 
-                        findFlag = 0;
-                        replaceFlag = 0;
                         selectFlag = 0;
 
                         renderAgain = 1;
@@ -1098,8 +1270,9 @@ int main()
                 {
                     fileSaved = 0;
                     int ch = event.text.unicode;
+                    cerr << "char is " << ch << '\n';
 
-                    if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1 || replaceFlag == 1 || findFlag == 1)
+                    if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1 || replaceFlag == 1 || findFlag == 1 || ch == 19 || ch == 1 || ch == 6 || ch == 18 || ch == 5 || ch == 7 || ch == 12)
                         break;
 
                     int posCursor = String::findCursorPosition(S);
