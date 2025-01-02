@@ -46,7 +46,7 @@ int main()
     sf::Sprite povesti;
     povesti.setTexture(texture, true);
 
-    globalFont.loadFromFile("assets/fonts/open_sans.ttf");
+    globalFont.loadFromFile("assets/fonts/kanit.ttf");
     textFont.loadFromFile("assets/fonts/raleway.ttf");
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
@@ -213,6 +213,10 @@ int main()
                 if (selectFlag && localPosition.y >= windowHeight - marginBottom)
                 {
                     Yoffset += scrollUnitY;
+
+                    if (Yoffset / lineHeight + 1 > String::findNumberOfEndlines(1, String::len(S), S) + 1)
+                        Yoffset -= scrollUnitY;
+
                     flag = 1;
                     renderAgain = 1;
                 }
@@ -493,7 +497,7 @@ int main()
                                     Windows::throwMessage("Wrong Path!");
                                     break;
                                 }
-
+                                
                                 String::saveText(fptr, S);
                                 fileSaved = 1;
                                 fclose(fptr);
@@ -579,7 +583,7 @@ int main()
                                     flag = 1;
                                     renderAgain = 1;
                                     fileSaved = 0;
-                                    selectFlag = findFlag = 0;
+                                    selectFlag = findFlag = replaceFlag = 0;
                                 }
                             }
                             else if (editMenuButtons[2]->isHovering())
@@ -602,7 +606,7 @@ int main()
                                     String::del(s2);
 
                                     String::merge(S, s1, s3);
-                                    selectFlag = findFlag = 0;
+                                    selectFlag = findFlag = replaceFlag = 0;
                                     fileSaved = 0;
                                     flag = 1;
                                     renderAgain = 1;
@@ -611,6 +615,7 @@ int main()
                             else if (editMenuButtons[3]->isHovering())
                             {
                                 editMenu->close();
+                                selectFlag = findFlag = replaceFlag = 0;
 
                                 /// apelat dupa ce faci setarile cu wholeWord si matchCase
                                 word = Windows::getStringFromUser("Find");
@@ -652,6 +657,7 @@ int main()
                             else if (editMenuButtons[4]->isHovering())
                             {
                                 editMenu->close();
+                                selectFlag = findFlag = replaceFlag = 0;
 
                                 word = Windows::getStringFromUser("word");
                                 rword = Windows::getStringFromUser("word");
@@ -713,6 +719,7 @@ int main()
                             else if (editMenuButtons[5]->isHovering())
                             {
                                 editMenu->close();
+                                selectFlag = findFlag = replaceFlag = 0;
 
                                 if (String::len(S) > 1)
                                 {
@@ -736,6 +743,7 @@ int main()
 
                                 showLineNumbers = !showLineNumbers;
                                 optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLineNumbers]);
+                                flag = 1;
                                 renderAgain = 1;
                             }
                             else if (optionsMenuButtons[1]->isHovering())
@@ -753,6 +761,20 @@ int main()
                             else if (optionsMenuButtons[2]->isHovering())
                             {
                                 optionsMenu->close();
+
+                                if (selectFlag == 1)
+                                {
+                                    int L = segmSelected.first;
+                                    int R = segmSelected.second;
+
+                                    String::Treap* s1 = 0, * s2 = 0, * s3 = 0;
+                                    String::split(S, s2, s3, R);
+                                    String::split(s2, s1, s2, L - 1);
+
+                                    String::del(s2);
+                                    String::merge(S, s1, s3);
+                                    renderAgain = 1;
+                                }
 
                                 // TODO: let user customize format via modal
                                 string data = Helpers::getTime("%I:%M %p %m/%d/%Y");
@@ -831,11 +853,15 @@ int main()
                         {
                             replaceFlag = 0;
                             updateFindReplace = 1;
+                            renderAgain = 1;
+                            flag = 1;
                         }
                         else if (findFlag == 1)
                         {
                             findFlag = 0;
                             updateFindReplace = 1;
+                            renderAgain = 1;
+                            flag = 1;
                         }
                         else
                             window.close();
@@ -844,6 +870,9 @@ int main()
                     }
                     else if (key == 73) /// up arrow
                     {
+                        if (replaceFlag == 1 || findFlag == 1)
+                            break;
+
                         int posCursor = String::findCursorPosition(S);
                         int p1 = String::findPrevEndline(posCursor, S);
 
@@ -873,6 +902,9 @@ int main()
                     }
                     else if (key == 74) /// down arrow
                     {
+                        if (replaceFlag == 1 || findFlag == 1)
+                            break;
+
                         int posCursor = String::findCursorPosition(S);
                         int p1 = String::findNextEndline(posCursor, S);
                         int p0 = String::findPrevEndline(posCursor, S);
@@ -1008,7 +1040,7 @@ int main()
                     }
                     else if (key == 58)
                     {
-                        if (replaceFlag == 0)
+                        if (replaceFlag == 0 || findFlag == 1)
                             break;
 
                         if (currentAppearance == -1)
@@ -1067,7 +1099,7 @@ int main()
                     fileSaved = 0;
                     int ch = event.text.unicode;
 
-                    if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1)
+                    if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1 || replaceFlag == 1 || findFlag == 1)
                         break;
 
                     int posCursor = String::findCursorPosition(S);
