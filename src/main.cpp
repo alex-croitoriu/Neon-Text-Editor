@@ -48,45 +48,45 @@ int main()
     globalFont.loadFromFile("assets/fonts/kanit.ttf");
     textFont.loadFromFile("assets/fonts/kanit.ttf");
 
-    // for (auto x : fontNamesMapping)
-    // {
-    //     cout << x.first << ' ' << x.second << '\n';
-    //     textFont.loadFromFile("assets/fonts/" + x.second + ".ttf");
-    //     text.setFont(textFont);
+    for (auto x : fontNamesMapping)
+    {
+        cout << x.first << ' ' << x.second << '\n';
+        textFont.loadFromFile("assets/fonts/" + x.second + ".ttf");
+        text.setFont(textFont);
 
-    //     string fileName = "fonts/" + x.second + ".txt";
-    //     FILE* fptrr = fopen(fileName.c_str(), "w");
-    //     fprintf(fptrr, "%c", '{');
+        string fileName = "fonts/" + x.second + ".txt";
+        FILE* fptrr = fopen(fileName.c_str(), "w");
+        fprintf(fptrr, "%c", '{');
 
-    //     for (int fnt = 0; fnt <= 100; fnt++)
-    //     {
-    //         text.setCharacterSize(fnt);
+        for (int fnt = 0; fnt <= 100; fnt++)
+        {
+            text.setCharacterSize(fnt);
 
-    //         fprintf(fptrr, "%c", '{');
+            fprintf(fptrr, "%c", '{');
 
-    //         for (int i = 0; i <= 255; i++)
-    //         {
-    //             string st;
+            for (int i = 0; i <= 255; i++)
+            {
+                string st;
 
-    //             for (int it = 1; it <= 30; it++)
-    //                 st += i;
+                for (int it = 1; it <= 50; it++)
+                    st += i;
                 
-    //             text.setString(st);
+                text.setString(st);
 
-    //             int w = ceil(text.getGlobalBounds().width / 30.0);
+                int w = ceil(text.getGlobalBounds().width / 50.0);
 
-    //             if (fnt == 0) w = 0;
-    //             fprintf(fptrr, "%d", w);
-    //             if (i < 255) fprintf(fptrr, "%c", ',');
-    //         }
+                if (fnt == 0) w = 0;
+                fprintf(fptrr, "%d", w);
+                if (i < 255) fprintf(fptrr, "%c", ',');
+            }
 
-    //         fprintf(fptrr, "%c", '}');
-    //         if (fnt < 100) fprintf(fptrr, "%c", ',');
-    //     }
+            fprintf(fptrr, "%c", '}');
+            if (fnt < 100) fprintf(fptrr, "%c", ',');
+        }
 
-    //     fprintf(fptrr, "%c", '}');
-    //     fclose(fptrr);
-    // }
+        fprintf(fptrr, "%c", '}');
+        fclose(fptrr);
+    }
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 

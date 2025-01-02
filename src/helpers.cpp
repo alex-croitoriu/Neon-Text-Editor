@@ -87,7 +87,7 @@ bool Helpers::isAnyButtonPressed()
 
     for (int i = 0; i < 5; i++)
     {
-        if (menus[i]->getToggleButton()->isHovering())
+        if (i <= 2 && menus[i]->getToggleButton()->isHovering())
             return true;
 
         if (menus[i]->getIsOpen())
