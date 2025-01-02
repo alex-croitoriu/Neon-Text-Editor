@@ -34,6 +34,10 @@ int main()
 {
     window.create(sf::VideoMode(windowWidth, windowHeight), "Neon - Text Editor");
     window.setFramerateLimit(90);
+
+    sf::RenderWindow modal;
+    modal.create(sf::VideoMode(200, 200), "asdf");
+
     sf::View view;
     sf::Image icon;
 
@@ -152,6 +156,21 @@ int main()
         bool fontSizeChanged = 0;
         bool renderAgain = 0;
         bool updateFindReplace = 0;
+
+        sf::Event ev;
+
+        while (modal.pollEvent(ev))
+        {
+            if (ev.type == sf::Event::Closed)
+                modal.close();
+
+            if (ev.type == sf::Event::MouseButtonPressed)
+            {
+                sf::Vector2i localPosition = sf::Mouse::getPosition(modal);
+                cerr << localPosition.x << ' ' << localPosition.y << '\n';
+                break;
+            }
+        }
 
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
@@ -1669,6 +1688,7 @@ int main()
         fileNameTextBox->draw();
 
         window.display();
+        modal.display();
     }
 
     return 0;
