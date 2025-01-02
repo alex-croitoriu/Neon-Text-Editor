@@ -7,22 +7,33 @@ float Helpers::getLineHeight(int fnt)
     return fnt * 1.5;
 }
 
-void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Text &content, bool centerX, bool centerY, int paddingTop, int paddingLeft)
+void Helpers::centerContentInsideContainer(sf::RectangleShape &container, sf::Text &content, bool centerX, bool centerY, int paddingTop, int paddingRight, int paddingBottom, int paddingLeft)
 {
-    if (!centerX && centerY)
-    {
-        content.setOrigin(0, int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
-        content.setPosition(int(container.getGlobalBounds().left + paddingLeft), int(container.getPosition().y + container.getSize().y / 2.f));
-    }
-    else if (!centerY && centerX)
+    if (centerX && !centerY)
     {
         content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), 0);
         content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + paddingTop));
+    }
+    else if (!centerX && centerY)
+    {
+        content.setOrigin(0, int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
+        if (paddingLeft && !paddingRight)
+            content.setPosition(int(container.getGlobalBounds().left + paddingLeft), int(container.getPosition().y + container.getSize().y / 2.f));
+        else if (!paddingLeft && paddingRight)
+            content.setPosition(int(container.getGlobalBounds().left + container.getGlobalBounds().getSize().x - content.getGlobalBounds().getSize().x - paddingRight), int(container.getPosition().y + container.getSize().y / 2.f));
     }
     else if (centerX && centerY)
     {
         content.setOrigin(int(content.getGlobalBounds().getSize().x / 2.f + content.getLocalBounds().getPosition().x), int(content.getGlobalBounds().getSize().y / 2.f + content.getLocalBounds().getPosition().y));
         content.setPosition(int(container.getPosition().x + container.getSize().x / 2.f), int(container.getPosition().y + container.getSize().y / 2.f));
+    }
+    else if (!centerX && !centerY)
+    {
+        content.setOrigin(0, 0);
+        if (paddingLeft && !paddingRight)
+            content.setPosition(int(container.getPosition().x + paddingLeft), int(container.getPosition().y + paddingTop));
+        else if (!paddingLeft && paddingRight)
+            content.setPosition(int(container.getGlobalBounds().left + container.getGlobalBounds().getSize().x - content.getGlobalBounds().getSize().x - paddingRight), int(container.getPosition().y + paddingTop));
     }
 }
 

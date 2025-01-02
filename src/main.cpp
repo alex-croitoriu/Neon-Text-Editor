@@ -47,7 +47,7 @@ int main()
     povesti.setTexture(texture, true);
 
     globalFont.loadFromFile("assets/fonts/kanit.ttf");
-    textFont.loadFromFile("assets/fonts/raleway.ttf");
+    textFont.loadFromFile("assets/fonts/roboto_mono.ttf");
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 
@@ -796,7 +796,7 @@ int main()
                                 {
                                     if (themeMenuButtons[i]->isHovering())
                                     {
-                                        Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i]), text, ptext1);
+                                        Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i].first), text, ptext1);
                                         renderAgain = 1;
                                         themeMenu->close();
                                         optionsMenu->close();

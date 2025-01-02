@@ -4,7 +4,7 @@
 #include "config.hpp"
 #include "menu.hpp"
 
-Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position, const bool &_sideMenu)
+Menu::Menu(const std::string &label, const std::vector<std::pair<std::string, std::string>> &buttonLabels, const sf::Vector2f &position, const bool &_sideMenu)
 {
     isOpen = false;
     sideMenu = _sideMenu;
@@ -19,14 +19,14 @@ Menu::Menu(const std::string &label, const std::vector<std::string> &buttonLabel
     for (int i = 0; i < buttonCount; i++)
     {
         sf::Vector2f buttonPosition(position.x, position.y + (properties.size.y - 1) * i);
-        buttons[i] = new Button(buttonLabels[i], buttonPosition, true, ButtonSize::LARGE, false);
+        buttons[i] = new Button(buttonLabels[i].first, buttonLabels[i].second, buttonPosition, true, ButtonSize::LARGE, false, false);
     }
 
     container.setSize(sf::Vector2f(properties.size.x, (properties.size.y - 1) * buttonCount + 1));
     container.setPosition(position);
 }
 
-Menu::Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, const sf::Vector2f &position, const bool &_sideMenu)
+Menu::Menu(Button *_toggleButton, const std::vector<std::pair<std::string, std::string>> &buttonLabels, const sf::Vector2f &position, const bool &_sideMenu)
 {
     isOpen = false;
     sideMenu = _sideMenu;
@@ -40,7 +40,7 @@ Menu::Menu(Button *_toggleButton, const std::vector<std::string> &buttonLabels, 
     for (int i = 0; i < buttonCount; i++)
     {
         sf::Vector2f buttonPosition(position.x + properties.size.x - 1, position.y + (properties.size.y - 1) * i);
-        buttons[i] = new Button(buttonLabels[i], buttonPosition, true, ButtonSize::EXTRA_LARGE, false);
+        buttons[i] = new Button(buttonLabels[i].first, buttonLabels[i].second, buttonPosition, true, ButtonSize::EXTRA_LARGE, false, false);
     }
 
     container.setSize(sf::Vector2f(properties.size.x, (properties.size.y - 1) * buttonCount + 1));
