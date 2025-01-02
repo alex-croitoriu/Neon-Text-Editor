@@ -25,13 +25,13 @@ const float textBoxPaddingY = 5;
 const std::string zoomButtonLabels[] = { "-", "+" };
 const std::string toggleLinesButtonLabels[] = { "Show lines", "Hide lines" };
 const std::string menuLabels[] = { "File", "Edit", "Options" };
-const std::vector<std::string> menuButtonLabels[] =
+const std::vector<std::pair<std::string, std::string>> menuButtonLabels[] =
 {
-    { "Open", "Save", "Save as", "Exit" },
-    { "Copy", "Paste", "Cut", "Find", "Replace", "Select All" },
-    { "Hide lines", "Go to line", "Time & Date", "Change theme", "Change font" },
-    { "Light", "Dark", "Neon Light", "Neon Dark", "Solarized Light", "Solarized Dark", "Midnight", "Obsidian", "Red", "Povesti din folclorul maghiar" },
-    { "Kanit", "Lato", "Inter" }
+    { { "Open", "Ctrl+O" }, { "Save", "Ctrl+S" }, { "Save as", "Ctrl+Shift+S" }, { "Exit", "Esc" } },
+    { { "Copy", "Ctrl+C" }, { "Paste", "Ctrl+V" }, { "Cut", "Ctrl+X" }, { "Find", "Ctrl+F" }, { "Replace", "Ctrl+R" }, { "Select All", "Ctrl+A" } },
+    { { "Hide lines", "Ctrl+L" }, { "Go to line", "Ctrl+G" }, { "Time & Date", "" }, { "Change theme", "" }, { "Change font", ""}  },
+    { { "Light", "" }, { "Dark", "" }, { "Neon Light", "" }, { "Neon Dark", "" }, { "Solarized Light", "" }, { "Solarized Dark", "" }, { "Midnight", "" }, { "Obsidian", "" }, { "Red", "" }, { "Povesti din folclorul maghiar", "" } },
+    { { "Kanit", "" }, { "Lato", "" }, { "Inter", "" } }
 };
 
 enum Theme
@@ -129,7 +129,7 @@ const std::map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(0, 0, 0, 30),          // cursor line highlight
             sf::Color(0, 0, 0, 40),          // select highlight
             sf::Color(237, 237, 237, 255),   // button background
-            sf::Color(150, 150, 150, 255),   // button hover
+            sf::Color(200, 200, 200, 255),   // button hover
             sf::Color(150, 150, 150, 255),   // button outline
             sf::Color(237, 237, 237, 255),   // textbox background
             sf::Color(150, 150, 150, 255),   // textbox outline
@@ -291,7 +291,7 @@ const std::map<ButtonSize, ButtonProperties> buttonSizeMapping =
     {
         ButtonSize::LARGE,
         {
-            sf::Vector2f(140, 30),  // size
+            sf::Vector2f(180, 30),  // size
             14,                     // fontSize
             0.9                     // letterSpacing
         }

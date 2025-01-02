@@ -16,20 +16,20 @@ TextBox::TextBox(const std::string &_content, const sf::Vector2f &position, bool
 
     container.setSize(sf::Vector2f(content.getLocalBounds().getSize().x + 2 * textBoxPaddingX, textBoxHeight));
 
-    Helpers::centerContentInsideContainer(container, content, true, false, textBoxPaddingY, 0);
+    Helpers::centerContentInsideContainer(container, content, true, false, textBoxPaddingY);
 }
 
 void TextBox::setContent(const std::string &_content)
 {
     content.setString(_content);
     container.setSize(sf::Vector2f(content.getLocalBounds().getSize().x + 2 * textBoxPaddingX, textBoxHeight));
-    Helpers::centerContentInsideContainer(container, content, true, false, textBoxPaddingY, 0);
+    Helpers::centerContentInsideContainer(container, content, true, false, textBoxPaddingY);
 }
 
 void TextBox::setPosition(const sf::Vector2f &position)
 {
     container.setPosition(position);
-    Helpers::centerContentInsideContainer(container, content, true, false, textBoxPaddingY, 0);
+    Helpers::centerContentInsideContainer(container, content, true, false, textBoxPaddingY);
 }
 
 sf::Vector2f TextBox::getSize()

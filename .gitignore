@@ -1,3 +1,5 @@
 .vscode
 *.exe
 *.o
+*.txt
+!TODO.txt

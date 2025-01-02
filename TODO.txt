@@ -24,13 +24,16 @@
 - [X] fix theme buttons click goes behind bug
 - [X] name and logo
 
-- [ ] scrollbar
 - [ ] modal for unsaved changes 
 - [ ] modal for find
 - [ ] modal for replace
-- [ ] modal for time and date
 - [ ] modal for error
 - [ ] modal for go to line
 
 - [ ] add additional fonts
+
+- [ ] do something with line count text box (currently triggers epilepsy)
+
+- [ ] shortcuts backend
+- [X] shortcuts frontend
  
