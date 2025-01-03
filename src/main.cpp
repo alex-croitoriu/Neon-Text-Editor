@@ -36,7 +36,7 @@ int main()
     window.setFramerateLimit(90);
 
     sf::RenderWindow modal;
-    modal.create(sf::VideoMode(200, 200), "asdf");
+    modal.create(sf::VideoMode(200, 200), "asdf", sf::Style::Close);
 
     sf::View view;
     sf::Image icon;
@@ -51,6 +51,7 @@ int main()
 
     globalFont.loadFromFile("assets/fonts/kanit.ttf");
     textFont.loadFromFile("assets/fonts/kanit.ttf");
+    checkmarkFont.loadFromFile("assets/fonts/arial_unicode_ms.otf");
 
     vector<sf::Vector2f> toolBarPositions = Helpers::getToolBarPositions(), statusBarPositions = Helpers::getStatusBarPositions();
 
@@ -64,6 +65,8 @@ int main()
     Menu *fileMenu = menus[0], *editMenu = menus[1], *optionsMenu = menus[2], *themeMenu = menus[3], *fontMenu = menus[4];
     Button **fileMenuButtons = fileMenu->getButtons(), **editMenuButtons = editMenu->getButtons(), **optionsMenuButtons = optionsMenu->getButtons(), **themeMenuButtons = themeMenu->getButtons(), **fontMenuButtons = fontMenu->getButtons();
 
+    themeMenuButtons[0]->setIsActive(true);
+    fontMenuButtons[0]->setIsActive(true);
     fileNameTextBox = new TextBox("", toolBarPositions[3], false);
 
     lineCountTextBox = new TextBox("", statusBarPositions[0]);
@@ -149,7 +152,6 @@ int main()
 
     auto start = std::chrono::high_resolution_clock::now();
     
-
     while (window.isOpen())
     {
         bool flag = 0;
@@ -1084,6 +1086,9 @@ int main()
                                 {
                                     if (themeMenuButtons[i]->isHovering())
                                     {
+                                        for (int j = 0; j < themeMenu->getButtonCount(); j++)
+                                            themeMenuButtons[j]->setIsActive(false);
+                                        themeMenuButtons[i]->setIsActive(true);     
                                         Helpers::changeTheme(themeNamesMapping.at(menuButtonLabels[3][i].first), text, ptext1);
                                         renderAgain = 1;
                                         themeMenu->close();
@@ -1096,6 +1101,9 @@ int main()
                                 {
                                     if (fontMenuButtons[i]->isHovering())
                                     {
+                                        for (int j = 0; j < fontMenu->getButtonCount(); j++)
+                                            fontMenuButtons[j]->setIsActive(false);
+                                        fontMenuButtons[i]->setIsActive(true);                               
                                         Helpers::changeFont(fontNamesMapping.at(menuButtonLabels[4][i].first));
                                         fontIndex = i;
                                         String::updateWidth(S);

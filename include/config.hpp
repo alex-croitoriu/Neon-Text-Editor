@@ -314,7 +314,7 @@ const std::unordered_map<ButtonSize, ButtonProperties> buttonSizeMapping =
     {
         ButtonSize::EXTRA_LARGE,
         {
-            sf::Vector2f(220, 30),  // size
+            sf::Vector2f(240, 30),  // size
             14,                     // fontSize
             0.7                     // letterSpacing
         }

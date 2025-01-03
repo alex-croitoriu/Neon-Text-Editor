@@ -3,11 +3,12 @@
 #include "config.hpp"
 #include "button.hpp"
 
-Button::Button(const std::string &label, const sf::Vector2f &position, const bool &outline, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
+Button::Button(const std::string &_label, const sf::Vector2f &position, const bool &outline, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
 {
     size = _size;
     centerX = _centerX;
     centerY = _centerY;
+    label = make_pair(_label, "");
 
     ButtonProperties properties = buttonSizeMapping.at(size);
 
@@ -17,18 +18,19 @@ Button::Button(const std::string &label, const sf::Vector2f &position, const boo
     container.setOutlineColor(currentThemeColors.buttonOutline);
     container.setOutlineThickness(outline ? -1 : 0);
 
-    contentLeft = sf::Text(label, globalFont, properties.fontSize);
+    contentLeft = sf::Text(_label, globalFont, properties.fontSize);
     contentLeft.setFillColor(currentThemeColors.text);
     contentLeft.setLetterSpacing(properties.letterSpacing);
 
     Helpers::centerContentInsideContainer(container, contentLeft, centerX, centerY, 3, 20, 0, 0);
 }
 
-Button::Button(const std::string &left, const std::string &right, const sf::Vector2f &position, const bool &outline, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
+Button::Button(const std::pair<std::string, std::string> &_label, const sf::Vector2f &position, const bool &outline, const ButtonSize &_size, const bool &_centerX, const bool &_centerY)
 {
     size = _size;
     centerX = _centerX;
     centerY = _centerY;
+    label = _label;
 
     ButtonProperties properties = buttonSizeMapping.at(size);
 
@@ -38,8 +40,8 @@ Button::Button(const std::string &left, const std::string &right, const sf::Vect
     container.setOutlineColor(currentThemeColors.buttonOutline);
     container.setOutlineThickness(outline ? -1 : 0);
 
-    contentLeft = sf::Text(left, globalFont, properties.fontSize);
-    contentRight = sf::Text(right, globalFont, properties.fontSize);
+    contentLeft = sf::Text(label.first, globalFont, properties.fontSize);
+    contentRight = sf::Text(label.second, globalFont, properties.fontSize);
     contentLeft.setFillColor(currentThemeColors.text);
     contentLeft.setLetterSpacing(properties.letterSpacing);
     contentRight.setFillColor(currentThemeColors.text);
@@ -55,13 +57,16 @@ bool Button::isHovering()
     return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
-void Button::setLabel(const std::string &label)
+void Button::setLabel(const std::string &_label)
 {
-    contentLeft.setString(label);
+    label = std::make_pair(_label, "");
+    contentLeft.setString(label.first);
+    contentRight.setString(label.second);
 }
 
-void Button::setLabel(const std::pair<std::string, std::string> &label)
+void Button::setLabel(const std::pair<std::string, std::string> &_label)
 {
+    label = _label;
     contentLeft.setString(label.first);
     contentRight.setString(label.second);
 }
@@ -81,6 +86,23 @@ void Button::setPosition(const sf::Vector2f &position)
 void Button::setHoverState(const bool &isHovering)
 {
     container.setFillColor(isHovering ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
+}
+
+void Button::setIsActive(const bool &isActive)
+{
+    const wchar_t text[] = {0x2713, 0};
+    contentRight.setFont(checkmarkFont);
+    contentRight.setCharacterSize(18);
+
+    contentLeft.setString(label.first);
+
+    if (isActive)
+        contentRight.setString(text);
+    else
+        contentRight.setString("");
+
+    Helpers::centerContentInsideContainer(container, contentLeft, centerX, centerY, 5, 0, 0, 20);
+    Helpers::centerContentInsideContainer(container, contentRight, centerX, centerY, 3, 20, 0, 0);
 }
 
 sf::Vector2f Button::getPosition()

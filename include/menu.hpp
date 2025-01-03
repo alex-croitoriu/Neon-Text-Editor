@@ -8,16 +8,15 @@
 
 class Menu 
 {
-    bool isOpen;
-    bool sideMenu;
+    bool isOpen, isSideMenu;
     int buttonCount;
     sf::RectangleShape container;
     Button **buttons;
     Button *toggleButton;
 
 public:
-    Menu(const std::string &label, const std::vector<std::pair<std::string, std::string>> &buttonLabels, const sf::Vector2f &position, const bool &sideMenu = false);
-    Menu(Button *_toggleButton, const std::vector<std::pair<std::string, std::string>> &buttonLabels, const sf::Vector2f &position, const bool &sideMenu = false);
+    Menu(const std::string &label, const std::vector<std::pair<std::string, std::string>> &buttonLabels, const sf::Vector2f &position, const bool &isSideMenu = false);
+    Menu(Button *_toggleButton, const std::vector<std::pair<std::string, std::string>> &buttonLabels, const sf::Vector2f &position, const bool &isSideMenu = false);
     bool isHovering();
     bool getIsOpen();
     sf::Vector2f getPosition();
