@@ -589,7 +589,8 @@ void String::saveText(FILE *fptr, Treap *&T)
     if (getFlagCursor(T) == 0)
     {
         char ch = getCh(T);
-        fprintf(fptr, "%c", ch);
+        if(ch != 13)
+             fprintf(fptr, "%c", ch);
     }
     saveText(fptr, T->R);
 }
