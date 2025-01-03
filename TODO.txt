@@ -26,6 +26,7 @@
 - [X] shortcuts frontend
 - [X] shortcuts backend
 - [X] add additional fonts
+- [X] mark selected theme/font somehow
 
 - [ ] modal for unsaved changes 
 - [ ] modal for find
@@ -34,7 +35,6 @@
 - [ ] modal for go to line
 
 - [ ] do something with line count text box (currently triggers epilepsy)
-- [ ] mark selected theme/font somehow
 - [ ] revise replace/find highlight colors for every theme
 
  

@@ -5,7 +5,7 @@
 #include "config.hpp"
 #include "menu.hpp"
 
-sf::Font globalFont, textFont;
+sf::Font globalFont, textFont, checkmarkFont;
 sf::RenderWindow window;
 sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, toolBarBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
 sf::RenderTexture aboveCurrentLineText, belowCurrentLineText, lineNumbersText;
