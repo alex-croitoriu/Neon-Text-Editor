@@ -34,7 +34,7 @@
 - [ ] modal for error
 - [ ] modal for go to line
 
-- [ ] do something with line count text box (currently triggers epilepsy)
+- [?] do something with line count text box (currently triggers epilepsy)
 - [ ] revise replace/find highlight colors for every theme
 
  

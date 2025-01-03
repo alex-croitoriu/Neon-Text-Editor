@@ -24,8 +24,8 @@ const float textBoxPaddingX = 10;
 const float textBoxPaddingY = 5;
 
 const std::string zoomButtonLabels[] = { "-", "+" };
-const std::string toggleLinesButtonLabels[] = { "Show lines", "Hide lines" };
 const std::string menuLabels[] = { "File", "Edit", "Options" };
+const std::pair<std::string, std::string> toggleLinesButtonLabels[] = { { "Show lines", "Ctrl+L" }, { "Hide lines", "Ctrl+L" } };
 const std::vector<std::pair<std::string, std::string>> menuButtonLabels[] =
 {
     { { "New", "Ctrl+N" }, { "Open", "Ctrl+O" }, { "Save", "Ctrl+S" }, { "Save as", "Ctrl+Shift+S" }, { "Exit", "Esc" } },
@@ -140,7 +140,7 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(150, 150, 150, 255),   // separator
             sf::Color(237, 237, 237, 255),   // bar
             sf::Color(45, 45, 45, 255),      // line numbers text
-            sf::Color(150, 150, 150, 255),   // line numbers background
+            sf::Color(200, 200, 200, 255),   // line numbers background
             sf::Color(0, 0, 0, 30),          // cursor line highlight
             sf::Color(0, 0, 0, 40),          // select highlight
             sf::Color(237, 237, 237, 255),   // button background
