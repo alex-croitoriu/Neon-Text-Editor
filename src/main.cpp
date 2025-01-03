@@ -127,7 +127,7 @@ int main()
     bool cursorLineOnScreen = 1;
     bool leftButtonPressed = 0;
     bool selectFlag = 0;
-    bool ctrlX = 0, ctrlV = 0, ctrlC = 0 , ctrlO = 0 , ctrlS = 0 , ctrlF = 0 , ctrlR = 0 , ctrlA = 0 , ctrlL = 0 , ctrlG = 0 , ctrlShiftS = 0;
+    bool ctrlX = 0, ctrlV = 0, ctrlC = 0 , ctrlO = 0 , ctrlS = 0 , ctrlF = 0 , ctrlR = 0 , ctrlA = 0 , ctrlL = 0 , ctrlG = 0 , ctrlN = 0 , ctrlShiftS = 0;
 
     int posCursorOnHold = -1;
 
@@ -193,6 +193,7 @@ int main()
                         selectFlag = 0;
 
                         String::insert(newPosCursor, S);
+                        Xoffset |= Render::updateViewX(S, Xoffset, scrollUnitX);
                     }
                     else if (newPosCursor != posCursor)
                     {
@@ -488,6 +489,42 @@ int main()
                 flag = 1;
             }
         }
+        else if (ctrlN == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::N))
+        {
+            ctrlN = 1;
+
+            if (fileSaved == 0)
+            {
+                int closeOption = Windows::saveModal();
+
+                if (closeOption == IDCANCEL)
+                    break;
+                else if (closeOption == IDYES)
+                {
+                    if (path.size() == 0)
+                        path = Windows::saveAS();
+
+                    FILE* fptr = fopen(path.c_str(), "w");
+
+                    if (fptr == NULL)
+                    {
+                        Windows::throwMessage("Wrong Path!");
+                        break;
+                    }
+
+                    String::saveText(fptr, S);
+                    fileSaved = 1;
+                    fclose(fptr);
+                    break;
+                }
+            }
+
+            String::del(S);
+            S = new String::Treap(cursorChar, 1);
+            renderAgain = 1;
+            flag = 1;
+            fileSaved = 1;
+        }
         else if (ctrlShiftS == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && sf::Keyboard::isKeyPressed(sf::Keyboard::G))
         {
             ctrlShiftS = 1;
@@ -596,14 +633,14 @@ int main()
                     if (event.key.code == 0)
                         leftButtonPressed = 0;
 
-                    ctrlC = ctrlV = ctrlX = ctrlF = ctrlR = ctrlA = ctrlO = ctrlS = ctrlG = ctrlL = 0;
+                    ctrlC = ctrlV = ctrlX = ctrlF = ctrlR = ctrlA = ctrlO = ctrlS = ctrlG = ctrlL = ctrlN = 0;
                 }
 
                 if (event.type == sf::Event::KeyReleased)
                 {
                     int key = event.key.code;
                     cerr << "Key is " << key << '\n';
-                    ctrlC = ctrlV = ctrlX = ctrlF = ctrlR = ctrlA = ctrlO = ctrlS = ctrlG = ctrlL = 0;
+                    ctrlC = ctrlV = ctrlX = ctrlF = ctrlR = ctrlA = ctrlO = ctrlS = ctrlG = ctrlL = ctrlN = 0;
 
                     break;
                 }
@@ -676,6 +713,7 @@ int main()
                                 S = new String::Treap(cursorChar, 1);
                                 renderAgain = 1;
                                 flag = 1;
+                                fileSaved = 1;
                                 // new file logic
                             }
                             else if (fileMenuButtons[1]->isHovering())
@@ -1127,7 +1165,41 @@ int main()
                             flag = 1;
                         }
                         else
-                            window.close();
+                        {
+                            if (fileSaved == 1)
+                            {
+                                window.close();
+                                break;
+                            }
+
+                            int closeOption = Windows::saveModal();
+
+                            if (closeOption == IDCANCEL)
+                                break;
+                            else if (closeOption == IDYES)
+                            {
+                                if (path.size() == 0)
+                                    path = Windows::saveAS();
+
+                                FILE* fptr = fopen(path.c_str(), "w");
+
+                                if (fptr == NULL)
+                                {
+                                    Windows::throwMessage("Wrong Path!");
+                                    break;
+                                }
+
+                                String::saveText(fptr, S);
+                                fileSaved = 1;
+                                fclose(fptr);
+                                break;
+                            }
+                            else if (closeOption == IDNO)
+                            {
+                                window.close();
+                                break;
+                            }
+                        }
 
                         break;
                     }
