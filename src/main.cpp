@@ -379,7 +379,7 @@ int main()
                     }
                     else
                     {
-                        errorWindow::open("Invalid keyword!");
+                        errorWindow::open("Invalid keyword(s)!");
                     }
                 }
                 else if (replaceWindow::nextButton->isHovering(replaceWindow::window))
@@ -545,7 +545,7 @@ int main()
                 }
                 else
                 {
-                    errorWindow::open("Invalid keyword!");
+                    errorWindow::open("Invalid keyword(s)!");
                 }
             }
             else

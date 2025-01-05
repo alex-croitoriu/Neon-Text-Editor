@@ -92,6 +92,27 @@ void Helpers::changeTheme(Theme _theme, sf::Text &t1, sf::Text &t2)
     findWindow::matchCaseText.setFillColor(currentThemeColors.text);
     findWindow::wholeWordText.setFillColor(currentThemeColors.text);
     findWindow::matchCountText.setFillColor(currentThemeColors.text);
+
+    replaceWindow::findButton->updateThemeColors();
+    replaceWindow::replaceButton->updateThemeColors();
+    replaceWindow::nextButton->updateThemeColors();
+    replaceWindow::prevButton->updateThemeColors();
+    replaceWindow::replaceAllButton->updateThemeColors();
+
+    replaceWindow::cancelButton->updateThemeColors();
+
+    replaceWindow::findInputBox->updateThemeColors();
+    replaceWindow::replaceInputBox->updateThemeColors();
+
+    replaceWindow::matchCaseCheckBox->updateThemeColors();
+    replaceWindow::wholeWordCheckBox->updateThemeColors();
+
+    replaceWindow::text1.setFillColor(currentThemeColors.text);
+    replaceWindow::text2.setFillColor(currentThemeColors.text);
+
+    replaceWindow::matchCaseText.setFillColor(currentThemeColors.text);
+    replaceWindow::wholeWordText.setFillColor(currentThemeColors.text);
+    replaceWindow::matchCountText.setFillColor(currentThemeColors.text);
 }
 
 void Helpers::changeFont(const std::string& font)

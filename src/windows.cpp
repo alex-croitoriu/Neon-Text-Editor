@@ -141,14 +141,14 @@ void goToLineWindow::initialize()
     goToLineWindow::text.setFillColor(currentThemeColors.text);
     goToLineWindow::text.setPosition(40, 14);
 
-    goToLineWindow::inputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(150, 24));
-    goToLineWindow::cancelButton = new Button("Cancel", sf::Vector2f(40, 68), true);
-    goToLineWindow::goToLineButton = new Button("Go to line", sf::Vector2f(120, 68), true);
+    goToLineWindow::inputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(162, 24));
+    goToLineWindow::goToLineButton = new Button("Go to line", sf::Vector2f(40, 68), true);
+    goToLineWindow::cancelButton = new Button("Cancel", sf::Vector2f(126, 68), true);
 }
 
 void goToLineWindow::open()
 {
-    goToLineWindow::window.create(sf::VideoMode(230, 112), "Go to line", sf::Style::Titlebar || sf::Style::Close);
+    goToLineWindow::window.create(sf::VideoMode(242, 112), "Go to line", sf::Style::Titlebar || sf::Style::Close);
     goToLineWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     goToLineWindow::inputBox->setContent("");
     goToLineWindow::inputBox->setIsActive(true);
@@ -246,11 +246,11 @@ void findWindow::initialize()
     findWindow::matchCountText.setFillColor(currentThemeColors.text);
 
     findWindow::text.setPosition(40, 14);
-    findWindow::inputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(310, 24));
+    findWindow::inputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(334, 24));
     findWindow::findButton = new Button("Find", sf::Vector2f(40, 112), true);
-    findWindow::nextButton = new Button("Next", sf::Vector2f(120, 112), true);
-    findWindow::prevButton = new Button("Previous", sf::Vector2f(200, 112), true);
-    findWindow::cancelButton = new Button("Cancel", sf::Vector2f(280, 112), true);
+    findWindow::nextButton = new Button("Next", sf::Vector2f(126, 112), true);
+    findWindow::prevButton = new Button("Previous", sf::Vector2f(212, 112), true);
+    findWindow::cancelButton = new Button("Cancel", sf::Vector2f(298, 112), true);
 
     findWindow::matchCaseCheckBox = new CheckBox(sf::Vector2f(40, 68));
     findWindow::wholeWordCheckBox = new CheckBox(sf::Vector2f(40, 88));
@@ -262,7 +262,7 @@ void findWindow::initialize()
 
 void findWindow::open()
 {
-    findWindow::window.create(sf::VideoMode(390, 176), "Find", sf::Style::Titlebar || sf::Style::Close);
+    findWindow::window.create(sf::VideoMode(414, 176), "Find", sf::Style::Titlebar || sf::Style::Close);
     findWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     findWindow::inputBox->setContent("");
     findWindow::inputBox->setIsActive(true);
@@ -337,15 +337,15 @@ void replaceWindow::initialize()
 
     replaceWindow::text1.setPosition(40, 14);
     replaceWindow::text2.setPosition(40, 68);
-    replaceWindow::findInputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(310, 24));
-    replaceWindow::replaceInputBox = new InputBox("", sf::Vector2f(40, 88), sf::Vector2f(310, 24));
+    replaceWindow::findInputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(334, 24));
+    replaceWindow::replaceInputBox = new InputBox("", sf::Vector2f(40, 88), sf::Vector2f(334, 24));
 
     replaceWindow::findButton = new Button("Find", sf::Vector2f(40, 166), true);
-    replaceWindow::replaceButton = new Button("Replace", sf::Vector2f(120, 166), true);
-    replaceWindow::nextButton = new Button("Next", sf::Vector2f(200, 166), true);
-    replaceWindow::prevButton = new Button("Previous", sf::Vector2f(280, 166), true);
+    replaceWindow::replaceButton = new Button("Replace", sf::Vector2f(126, 166), true);
+    replaceWindow::nextButton = new Button("Next", sf::Vector2f(212, 166), true);
+    replaceWindow::prevButton = new Button("Previous", sf::Vector2f(298, 166), true);
     replaceWindow::replaceAllButton = new Button("Replace all", sf::Vector2f(40, 200), true);
-    replaceWindow::cancelButton = new Button("Cancel", sf::Vector2f(120, 200), true);
+    replaceWindow::cancelButton = new Button("Cancel", sf::Vector2f(126, 200), true);
 
     replaceWindow::matchCaseCheckBox = new CheckBox(sf::Vector2f(40, 122));
     replaceWindow::wholeWordCheckBox = new CheckBox(sf::Vector2f(40, 142));
@@ -357,7 +357,7 @@ void replaceWindow::initialize()
 
 void replaceWindow::open()
 {
-    replaceWindow::window.create(sf::VideoMode(390, 300), "Replace", sf::Style::Titlebar || sf::Style::Close);
+    replaceWindow::window.create(sf::VideoMode(414, 266), "Replace", sf::Style::Titlebar || sf::Style::Close);
     replaceWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     replaceWindow::findInputBox->setContent("");
     replaceWindow::findInputBox->setIsActive(true);
