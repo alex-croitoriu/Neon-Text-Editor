@@ -27,12 +27,18 @@
 - [X] shortcuts backend
 - [X] add additional fonts
 - [X] mark selected theme/font somehow
+- [X] modal for find
+- [X] modal for error
+- [X] modal for go to line
+- [X] modal for replace
 
 - [ ] modal for unsaved changes 
-- [ ] modal for find
-- [ ] modal for replace
-- [ ] modal for error
-- [ ] modal for go to line
+
+- [ ] refine modals ui
+- [ ] improve inputbox feedback
+- [ ] fix main window not focused but still clickable bug
+- [ ] fix replace modal bugs (replace, next, prev)
+
 
 - [?] do something with line count text box (currently triggers epilepsy)
 - [ ] revise replace/find highlight colors for every theme

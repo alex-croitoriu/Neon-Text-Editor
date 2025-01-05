@@ -7,11 +7,12 @@
 #include "config.hpp"
 #include "menu.hpp"
 
-extern sf::Font globalFont, textFont, checkmarkFont;
+extern sf::Font globalFont, textFont, checkmarkFont, lineNumbersTextFont;
 extern sf::RenderWindow window;
 extern sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, toolBarBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
 extern sf::RenderTexture aboveCurrentLineText, belowCurrentLineText, lineNumbersText;
 extern sf::Sprite aboveCurrentLineSprite, belowCurrentLineSprite, lineNumbersSprite;
+extern sf::Image icon;
 
 extern bool fileSaved;
 extern int fontIndex;
@@ -31,3 +32,9 @@ extern std::vector<std::string> renderLines;
 extern int sizeRLines;
 
 extern std::string path;
+extern std::string findKeyword, replaceKeyword;
+
+extern int goToLineNumber;
+extern int currentAppearance;
+
+extern std::vector<int> positions;

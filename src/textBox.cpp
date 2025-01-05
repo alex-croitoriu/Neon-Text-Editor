@@ -3,7 +3,7 @@
 #include "textBox.hpp"
 #include "config.hpp"
 
-TextBox::TextBox(const std::string &_content, const sf::Vector2f &position, bool outline)
+TextBox::TextBox(const std::string &_content, const sf::Vector2f &position, const bool &outline)
 {
     container.setPosition(position);
     container.setFillColor(currentThemeColors.textBoxBackground);
@@ -47,6 +47,12 @@ void TextBox::updateThemeColors()
 }
 
 void TextBox::draw()
+{
+    window.draw(container);
+    window.draw(content);
+}
+
+void TextBox::draw(sf::RenderWindow &window)
 {
     window.draw(container);
     window.draw(content);

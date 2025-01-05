@@ -57,6 +57,12 @@ bool Button::isHovering()
     return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
+bool Button::isHovering(sf::RenderWindow &window)
+{
+    sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+    return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
+}
+
 void Button::setLabel(const std::string &_label)
 {
     label = std::make_pair(_label, "");
@@ -119,6 +125,13 @@ void Button::updateThemeColors()
 }
 
 void Button::draw()
+{
+    window.draw(container);
+    window.draw(contentLeft);
+    window.draw(contentRight);
+}
+
+void Button::draw(sf::RenderWindow &window)
 {
     window.draw(container);
     window.draw(contentLeft);

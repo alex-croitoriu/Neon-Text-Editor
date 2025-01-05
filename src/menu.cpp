@@ -53,6 +53,12 @@ bool Menu::isHovering()
     return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
 }
 
+bool Menu::isHovering(sf::RenderWindow &window)
+{
+    sf::Vector2i localPosition = sf::Mouse::getPosition(window);
+    return container.getGlobalBounds().contains(window.mapPixelToCoords(localPosition));
+}
+
 bool Menu::getIsOpen()
 {
     return isOpen;
@@ -114,13 +120,29 @@ void Menu::draw()
     if (!isOpen)
     {
         if (!isSideMenu)
-            toggleButton->draw();
+            toggleButton->draw(window);
     }
     else
     {
-        toggleButton->draw();
+        toggleButton->draw(window);
         window.draw(container);
         for (int i = 0; i < buttonCount; i++)
-            buttons[i]->draw();
+            buttons[i]->draw(window);
+    }
+}
+
+void Menu::draw(sf::RenderWindow &window)
+{
+    if (!isOpen)
+    {
+        if (!isSideMenu)
+            toggleButton->draw(window);
+    }
+    else
+    {
+        toggleButton->draw(window);
+        window.draw(container);
+        for (int i = 0; i < buttonCount; i++)
+            buttons[i]->draw(window);
     }
 }

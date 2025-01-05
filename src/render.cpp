@@ -95,7 +95,7 @@ void Render::updateSmartRender(sf::Text &text, int l1, int l2, int cursorLine, i
     text.setCharacterSize(fontSize);
     text.setLetterSpacing(0.8);
     text.setFillColor(currentThemeColors.lineNumbersText);
-    text.setFont(globalFont);
+    text.setFont(lineNumbersTextFont);
 
     aboveCurrentLineText.clear(sf::Color(0, 0, 0, 0));
     belowCurrentLineText.clear(sf::Color(0, 0, 0, 0));

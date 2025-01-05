@@ -291,32 +291,32 @@ const std::unordered_map<ButtonSize, ButtonProperties> buttonSizeMapping =
         ButtonSize::SMALL,
         {
             sf::Vector2f(36, 24),   // size
-            11,                     // fontSize
-            1                       // letterSpacing
+            11,                     // font size
+            1                       // letter spacing
         }
     },
     {
         ButtonSize::MEDIUM,
         {
-            sf::Vector2f(70, 24),   // size
-            14,                     // fontSize
-            0.9                     // letterSpacing
+            sf::Vector2f(76, 24),   // size
+            14,                     // font size
+            0.9                     // letter spacing
         }
     },
     {
         ButtonSize::LARGE,
         {
             sf::Vector2f(180, 30),  // size
-            14,                     // fontSize
-            0.9                     // letterSpacing
+            14,                     // font size
+            0.9                     // letter spacing
         }
     },
     {
         ButtonSize::EXTRA_LARGE,
         {
             sf::Vector2f(240, 30),  // size
-            14,                     // fontSize
-            0.7                     // letterSpacing
+            14,                     // font size
+            0.7                     // letter spacing
         }
     }
 };

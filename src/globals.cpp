@@ -5,11 +5,12 @@
 #include "config.hpp"
 #include "menu.hpp"
 
-sf::Font globalFont, textFont, checkmarkFont;
+sf::Font globalFont, textFont, checkmarkFont, lineNumbersTextFont;
 sf::RenderWindow window;
 sf::RectangleShape topSeparator, bottomSeparator, lineNumbersBackground, toolBarBackground, statusBarBackground, cursorBox, cursorLineHighlight, box;
 sf::RenderTexture aboveCurrentLineText, belowCurrentLineText, lineNumbersText;
 sf::Sprite aboveCurrentLineSprite, belowCurrentLineSprite, lineNumbersSprite;
+sf::Image icon;
 
 ThemeColors currentThemeColors = themeColorsMapping.at(theme);
 
@@ -31,6 +32,12 @@ std::vector<std::string> renderLines(maxRows);
 int sizeRLines = 0;
 
 std::string path = "";
+std::string findKeyword = "", replaceKeyword = "";
+
+int goToLineNumber = -1;
+int currentAppearance = 0;
+
+std::vector<int> positions;
 
 String::Treap *S = new String::Treap(cursorChar, 1);
 

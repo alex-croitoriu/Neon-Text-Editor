@@ -24,6 +24,7 @@ public:
     Button(const std::pair<std::string, std::string> &_label, const sf::Vector2f &position, const bool &outline = false, const ButtonSize &_size = ButtonSize::MEDIUM, const bool &centerX = true, const bool &centerY = true);
 
     bool isHovering();
+    bool isHovering(sf::RenderWindow &window);
     void setLabel(const std::string &_label);
     void setLabel(const std::pair<std::string, std::string> &_label);
     void setOutline(const bool &outline);
@@ -33,6 +34,7 @@ public:
     sf::Vector2f getPosition();
     void updateThemeColors();
     void draw();
+    void draw(sf::RenderWindow &window);
 };
 
 extern Button *zoomOutButton, *zoomInButton;

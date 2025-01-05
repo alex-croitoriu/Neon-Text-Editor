@@ -1,6 +1,7 @@
 #include "helpers.hpp"
 #include "config.hpp"
 #include "string.hpp"
+#include "windows.hpp"
 
 float Helpers::getLineHeight(int fnt)
 {
@@ -73,6 +74,24 @@ void Helpers::changeTheme(Theme _theme, sf::Text &t1, sf::Text &t2)
     bottomSeparator.setFillColor(currentThemeColors.separator);
 
     cursorLineHighlight.setFillColor(currentThemeColors.cursorLineHighlight);
+
+    goToLineWindow::cancelButton->updateThemeColors();
+    goToLineWindow::goToLineButton->updateThemeColors();
+    goToLineWindow::inputBox->updateThemeColors();
+    goToLineWindow::text.setFillColor(currentThemeColors.text);
+
+    findWindow::cancelButton->updateThemeColors();
+    findWindow::findButton->updateThemeColors();
+    findWindow::nextButton->updateThemeColors();
+    findWindow::prevButton->updateThemeColors();
+    findWindow::inputBox->updateThemeColors();
+    findWindow::matchCaseCheckBox->updateThemeColors();
+    findWindow::wholeWordCheckBox->updateThemeColors();
+
+    findWindow::text.setFillColor(currentThemeColors.text);
+    findWindow::matchCaseText.setFillColor(currentThemeColors.text);
+    findWindow::wholeWordText.setFillColor(currentThemeColors.text);
+    findWindow::matchCountText.setFillColor(currentThemeColors.text);
 }
 
 void Helpers::changeFont(const std::string& font)
@@ -190,4 +209,14 @@ std::string Helpers::getFileName()
         return path.substr(pos + 1);
 
     return path;
+}
+
+void Helpers::updateFindMatchCount()
+{
+    findWindow::matchCountText.setString((positions.size() ? (std::to_string(currentAppearance + 1) + " of ") : "") + std::to_string(positions.size()) + (positions.size() == 1 ? " match" : " matches"));
+}
+
+void Helpers::updateReplaceMatchCount()
+{
+    replaceWindow::matchCountText.setString((positions.size() ? (std::to_string(currentAppearance + 1) + " of ") : "") + std::to_string(positions.size()) + (positions.size() == 1 ? " match" : " matches"));
 }

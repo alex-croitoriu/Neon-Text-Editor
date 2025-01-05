@@ -19,4 +19,6 @@ namespace Helpers
     void updateStatusBarPositions();
     void updateStatusBarInfo();
     std::string getFileName();
+    void updateFindMatchCount();
+    void updateReplaceMatchCount();
 }
