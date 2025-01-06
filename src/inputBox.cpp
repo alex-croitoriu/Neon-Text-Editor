@@ -2,9 +2,12 @@
 #include "globals.hpp"
 #include "inputBox.hpp"
 #include "config.hpp"
+#include "windows.hpp"
 
 InputBox::InputBox(const std::string &_content, const sf::Vector2f &position, const sf::Vector2f &size, const bool &outline)
 {
+    cursorTimer = 0;
+
     container.setPosition(position);
     container.setFillColor(currentThemeColors.textBoxBackground);
     container.setOutlineColor(currentThemeColors.textBoxOutline);
@@ -15,6 +18,8 @@ InputBox::InputBox(const std::string &_content, const sf::Vector2f &position, co
     content.setLetterSpacing(textBoxLetterSpacing);
 
     container.setSize(size);
+    cursorBox.setSize(sf::Vector2f(1, 16));
+    cursorBox.setPosition(container.getPosition() + sf::Vector2f(textBoxPaddingX + content.getGlobalBounds().getSize().x, textBoxPaddingY - 1));
 
     Helpers::centerContentInsideContainer(container, content, false, false, textBoxPaddingY, 0, 0, textBoxPaddingX);
 }
@@ -39,7 +44,13 @@ void InputBox::setContent(const std::string &_content)
 void InputBox::setIsActive(const bool &_isActive)
 {
     isActive = _isActive;
-    container.setFillColor(isActive ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
+    cursorTimer = 0;
+    container.setFillColor((isActive || isHovering(goToLineWindow::window) || isHovering(findWindow::window) || isHovering(replaceWindow::window)) ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
+}
+
+void InputBox::setHoverState(const bool &isHovering)
+{
+    container.setFillColor(isHovering || isActive ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
 }
 
 std::string InputBox::getContent()
@@ -57,18 +68,6 @@ void InputBox::updateThemeColors()
     container.setFillColor(currentThemeColors.textBoxBackground);
     container.setOutlineColor(currentThemeColors.textBoxOutline);
     content.setFillColor(currentThemeColors.text);
-}
-
-void InputBox::draw()
-{
-    window.draw(container);
-    window.draw(content);
-}
-
-void InputBox::draw(sf::RenderWindow &window)
-{
-    window.draw(container);
-    window.draw(content);
 }
 
 void InputBox::handleInput(sf::RenderWindow &window, sf::Event event, const bool &digitsOnly)
@@ -99,4 +98,32 @@ void InputBox::handleInput(sf::RenderWindow &window, sf::Event event, const bool
     }
 
     setContent(text);
+    cursorBox.setPosition(container.getPosition() + sf::Vector2f(textBoxPaddingX + content.getGlobalBounds().getSize().x, textBoxPaddingY - 1));
+}
+
+void InputBox::updateCursorTimer()
+{
+    cursorTimer++;
+    cursorTimer %= timeUnit * 2;
+
+    if (cursorTimer % (timeUnit * 2) <= timeUnit)
+        cursorBox.setFillColor(currentThemeColors.text);
+    else if (cursorTimer % (timeUnit * 2) != 0)
+        cursorBox.setFillColor(currentThemeColors.buttonHover);
+}
+
+void InputBox::draw()
+{
+    window.draw(container);
+    window.draw(content);
+    if (isActive)
+        window.draw(cursorBox);
+}
+
+void InputBox::draw(sf::RenderWindow &window)
+{
+    window.draw(container);
+    window.draw(content);
+    if (isActive)
+        window.draw(cursorBox);
 }

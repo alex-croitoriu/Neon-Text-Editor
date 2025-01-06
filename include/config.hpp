@@ -78,6 +78,8 @@ struct ThemeColors
     sf::Color buttonOutline;
     sf::Color textBoxBackground;
     sf::Color textBoxOutline;
+    sf::Color findReplaceHighlight;
+    sf::Color findReplaceCurrentHighlight;
 };
 
 const std::unordered_map<std::string, Theme> themeNamesMapping = 
@@ -112,6 +114,8 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(192, 192, 192, 255),   // button outline
             sf::Color(227, 230, 232, 255),   // textbox background
             sf::Color(192, 192, 192, 255),   // textbox outline
+            sf::Color(0, 0, 0, 40),          // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     },
     {
@@ -129,7 +133,9 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(81, 90, 102, 255),     // button hover  
             sf::Color(33, 36, 43, 255),      // button outline  
             sf::Color(40, 44, 52, 255),      // textbox background  
-            sf::Color(40, 44, 52, 255)       // textbox outline  
+            sf::Color(40, 44, 52, 255),      // textbox outline  
+            sf::Color(255, 255, 255, 40),    // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     },
     {
@@ -148,6 +154,8 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(150, 150, 150, 255),   // button outline
             sf::Color(237, 237, 237, 255),   // textbox background
             sf::Color(150, 150, 150, 255),   // textbox outline
+            sf::Color(0, 0, 0, 40),          // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     },
     {
@@ -166,6 +174,8 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(0, 0, 0, 255),         // button outline
             sf::Color(8, 8, 8, 255),         // textbox background
             sf::Color(8, 8, 8, 255),         // textbox outline
+            sf::Color(255, 255, 255, 40),    // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     },
     { 
@@ -183,7 +193,9 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(181, 137, 0, 255),     // button hover
             sf::Color(131, 148, 150, 255),   // button outline
             sf::Color(238, 232, 213, 255),   // textbox background
-            sf::Color(147, 161, 161, 255)    // textbox outline
+            sf::Color(147, 161, 161, 255),   // textbox outline
+            sf::Color(0, 43, 54, 40),        // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     },
     { 
@@ -201,7 +213,9 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(0, 43, 54, 255),       // button hover
             sf::Color(88, 110, 117, 255),    // button outline
             sf::Color(7, 54, 66, 255),       // textbox background
-            sf::Color(7, 54, 66, 255)        // textbox outline
+            sf::Color(7, 54, 66, 255),       // textbox outline
+            sf::Color(255, 255, 255, 40),    // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     },
     {
@@ -220,6 +234,8 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(15, 28, 48, 255),      // button outline
             sf::Color(20, 33, 54, 255),      // textbox background
             sf::Color(20, 33, 54, 255),      // textbox outline
+            sf::Color(255, 255, 255, 40),    // find replace highlight
+            sf::Color(53, 115, 204, 255),    // find replace current highlight
         }
     },
     { 
@@ -237,7 +253,9 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(138, 43, 226, 255),    // button hover
             sf::Color(35, 30, 45, 255),      // button outline
             sf::Color(50, 45, 65, 255),      // textbox background
-            sf::Color(50, 45, 65, 255)       // textbox outline
+            sf::Color(50, 45, 65, 255),      // textbox outline
+            sf::Color(255, 255, 255, 40),    // find replace highlight
+            sf::Color(138, 43, 226, 255),    // find replace current highlight
         }
     },
     {
@@ -255,7 +273,9 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(150, 50, 50, 255),     // button hover  
             sf::Color(200, 100, 100, 255),   // button outline  
             sf::Color(100, 0, 0, 255),       // textbox background  
-            sf::Color(200, 100, 100, 255)    // textbox outline  
+            sf::Color(200, 100, 100, 255),   // textbox outline  
+            sf::Color(255, 255, 255, 40),    // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     },
     {
@@ -273,7 +293,9 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(255, 200, 50, 255),    // button hover
             sf::Color(204, 14, 14),          // button outline
             sf::Color(255, 211, 63, 255),    // textbox background
-            sf::Color(204, 14, 14)           // textbox outline
+            sf::Color(204, 14, 14),          // textbox outline
+            sf::Color(0, 0, 0, 40),          // find replace highlight
+            sf::Color(255, 187, 0, 128),     // find replace current highlight
         }
     }
 };

@@ -1,8 +1,8 @@
-#include "replace.hpp"
+#include "findReplace.hpp"
 #include "globals.hpp"
 #include "bit.hpp"
 
-void Replace::KMP(std::string &s, std::string &word, std::vector<int> &positions, bool &wholeWord)
+void FindReplace::KMP(std::string &s, std::string &word, std::vector<int> &positions, bool &wholeWord)
 {
     std::vector<int> PI(word.size());
     std::vector<int> pi(s.size());
@@ -39,7 +39,7 @@ void Replace::KMP(std::string &s, std::string &word, std::vector<int> &positions
     }
 }
 
-bool Replace::isApOnScreen(int ap, int sz)
+bool FindReplace::isApOnScreen(int ap, int sz)
 {
     for (int i = 0; i < sizeRLines; i++)
     {
@@ -56,12 +56,12 @@ bool Replace::isApOnScreen(int ap, int sz)
     return 0;
 }
 
-bool Replace::isValid(char ch)
+bool FindReplace::isValid(char ch)
 {
     return ch != 10 && ch != ' ';
 }
 
-void Replace::delAp(int idx, std::vector<int> &prv, std::vector<int> &nxt, std::vector<int> &bit, std::vector<int> &gone, std::set<int> &notRemoved, int vl)
+void FindReplace::delAp(int idx, std::vector<int> &prv, std::vector<int> &nxt, std::vector<int> &bit, std::vector<int> &gone, std::set<int> &notRemoved, int vl)
 {
     Bit::upd(idx, vl, bit);
 
@@ -77,7 +77,7 @@ void Replace::delAp(int idx, std::vector<int> &prv, std::vector<int> &nxt, std::
         prv[N] = P;
 }
 
-int Replace::findLastReplace(int idx, std::vector<int> &bit)
+int FindReplace::findLastReplace(int idx, std::vector<int> &bit)
 {
     int l = 0, r = idx - 1, ans = -1, mid = 0;
     int value = Bit::get(idx, bit);
@@ -98,7 +98,7 @@ int Replace::findLastReplace(int idx, std::vector<int> &bit)
     return ans;
 }
 
-int Replace::findNextReplace(int idx, std::vector<int> &bit)
+int FindReplace::findNextReplace(int idx, std::vector<int> &bit)
 {
     int l = idx + 1, r = bit.size() - 1, mid = 0, ans = -1;
     int value = Bit::get(idx, bit) + 1;
@@ -116,7 +116,7 @@ int Replace::findNextReplace(int idx, std::vector<int> &bit)
     return ans;
 }
 
-bool Replace::canReplace(int idx, std::vector<int> &bit, std::vector<int> &positions, std::vector<int> &gone, std::string &rword, std::string &word)
+bool FindReplace::canReplace(int idx, std::vector<int> &bit, std::vector<int> &positions, std::vector<int> &gone, std::string &rword, std::string &word)
 {
     if (gone[idx])
         return 0;
@@ -139,7 +139,7 @@ bool Replace::canReplace(int idx, std::vector<int> &bit, std::vector<int> &posit
     return 1;
 }
 
-int Replace::findNextValidAppearance(int idx, std::vector<int> &bit, std::vector<int> &positions, std::vector<int> &gone, std::string &rword, std::string &word, std::vector<int> &prv, std::vector<int> &nxt, std::set<int> &notRemoved)
+int FindReplace::findNextValidAppearance(int idx, std::vector<int> &bit, std::vector<int> &positions, std::vector<int> &gone, std::string &rword, std::string &word, std::vector<int> &prv, std::vector<int> &nxt, std::set<int> &notRemoved)
 {
     int x = nxt[idx];
 
@@ -153,7 +153,7 @@ int Replace::findNextValidAppearance(int idx, std::vector<int> &bit, std::vector
     return x;
 }
 
-int Replace::findPrevValidAppearance(int idx, std::vector<int> &bit, std::vector<int> &positions, std::vector<int> &gone, std::string &rword, std::string &word, std::vector<int> &prv, std::vector<int> &nxt, std::set<int> &notRemoved)
+int FindReplace::findPrevValidAppearance(int idx, std::vector<int> &bit, std::vector<int> &positions, std::vector<int> &gone, std::string &rword, std::string &word, std::vector<int> &prv, std::vector<int> &nxt, std::set<int> &notRemoved)
 {
     int x = prv[idx];
 
@@ -167,13 +167,13 @@ int Replace::findPrevValidAppearance(int idx, std::vector<int> &bit, std::vector
     return x;
 }
 
-int Replace::findRealPosition(int idx, std::vector<int> &positions, std::vector<int> &bit, std::string &word, std::string &rword)
+int FindReplace::findRealPosition(int idx, std::vector<int> &positions, std::vector<int> &bit, std::string &word, std::string &rword)
 {
     int sub = Bit::get(idx, bit);
     return positions[idx] - sub * word.size() + sub * rword.size();
 }
 
-int Replace::traceFirstApToRender(int idx, std::vector<int> &positions, std::vector<int> &bit, std::set<int> &notRemoved, std::string &word, std::string &rword)
+int FindReplace::traceFirstApToRender(int idx, std::vector<int> &positions, std::vector<int> &bit, std::set<int> &notRemoved, std::string &word, std::string &rword)
 {
     int l = 0, r = positions.size() - 1, mid = 0, ans = -1;
 

@@ -41,7 +41,7 @@ bool CheckBox::getIsChecked()
 void CheckBox::toggle()
 {
     isChecked = !isChecked;
-    container.setFillColor(isChecked || isHovering(findWindow::window) ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
+    container.setFillColor(isChecked || isHovering(findWindow::window) || isHovering(replaceWindow::window) ? currentThemeColors.buttonHover : currentThemeColors.buttonBackground);
     const wchar_t text[] = {0x2713, 0};
     if (isChecked)
         content.setString(text);

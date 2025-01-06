@@ -6,13 +6,6 @@
 #include "button.hpp"
 #include "checkbox.hpp"
 
-namespace Windows
-{
-    std::string saveAS();
-    std::string open();
-    int saveModal();
-}
-
 namespace goToLineWindow
 {
     extern sf::RenderWindow window;
@@ -57,7 +50,10 @@ namespace replaceWindow
     void handleEvent(const sf::Event &event);
 }
 
-namespace errorWindow
+namespace Windows
 {
-    void open(const std::string &message);
+    std::string saveAsWindow();
+    std::string openFileWindow();
+    void errorWindow(const std::string &message);
+    int saveWindow();
 }

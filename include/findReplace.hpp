@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 
-namespace Replace
+namespace FindReplace
 {
     void KMP(std::string &s, std::string &word, std::vector<int> &positions, bool &wholeWord);
     bool isApOnScreen(int ap, int sz);

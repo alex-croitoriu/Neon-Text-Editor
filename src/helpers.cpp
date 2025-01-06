@@ -241,3 +241,12 @@ void Helpers::updateReplaceMatchCount()
 {
     replaceWindow::matchCountText.setString((positions.size() ? (std::to_string(currentAppearance + 1) + " of ") : "") + std::to_string(positions.size()) + (positions.size() == 1 ? " match" : " matches"));
 }
+
+void Helpers::resetFindMatchCount()
+{
+    findWindow::matchCountText.setString("");
+}
+void Helpers::resetReplaceMatchCount()
+{
+    replaceWindow::matchCountText.setString("");
+}

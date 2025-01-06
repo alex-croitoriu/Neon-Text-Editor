@@ -21,4 +21,6 @@ namespace Helpers
     std::string getFileName();
     void updateFindMatchCount();
     void updateReplaceMatchCount();
+    void resetFindMatchCount();
+    void resetReplaceMatchCount();
 }

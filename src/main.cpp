@@ -12,7 +12,7 @@
 #include <bitset>
 
 #include "helpers.hpp"
-#include "replace.hpp"
+#include "findReplace.hpp"
 #include "windows.hpp"
 #include "globals.hpp"
 #include "render.hpp"
@@ -45,6 +45,7 @@ int main()
     texture.loadFromFile("assets/images/povesti.png");
     sf::Sprite povesti;
     povesti.setTexture(texture, true);
+    povesti.setPosition(300, 0);
 
     globalFont.loadFromFile("assets/fonts/kanit.ttf");
     textFont.loadFromFile("assets/fonts/kanit.ttf");
@@ -194,11 +195,11 @@ int main()
                                     i = i - 'A' + 'a';
                         }
 
-                        Replace::KMP(s, findKeyword, positions, wholeWord);
+                        FindReplace::KMP(s, findKeyword, positions, wholeWord);
 
                         if (positions.size() == 0)
                         {
-                            // errorWindow::open("There are 0 matches!");
+                            // Windows::errorWindow("There are 0 matches!");
                             renderAgain = 1;
                             flag = 1;
                         }
@@ -215,10 +216,10 @@ int main()
                     }
                     else
                     {
-                        errorWindow::open("Invalid keyword!");
+                        Windows::errorWindow("Invalid keyword!");
                     }
                 }
-                else if (findWindow::nextButton->isHovering(findWindow::window))
+                else if (findWindow::nextButton->isHovering(findWindow::window) && findFlag)
                 {
                     currentAppearance++;
                     currentAppearance = min((int)positions.size() - 1, currentAppearance);
@@ -230,10 +231,9 @@ int main()
                     replaceFlag = 0;
                     updateFindReplace = 1;
 
-                    if (findFlag)
-                        Helpers::updateFindMatchCount();
+                    Helpers::updateFindMatchCount();
                 }
-                else if (findWindow::prevButton->isHovering(findWindow::window))
+                else if (findWindow::prevButton->isHovering(findWindow::window) && findFlag)
                 {
                     currentAppearance--;
                     currentAppearance = max(0, currentAppearance);
@@ -245,8 +245,7 @@ int main()
                     replaceFlag = 0;
                     updateFindReplace = 1;
 
-                    if (findFlag)
-                        Helpers::updateFindMatchCount();
+                    Helpers::updateFindMatchCount();
                 }
                 else if (findWindow::matchCaseCheckBox->isHovering(findWindow::window))
                     findWindow::matchCaseCheckBox->toggle();
@@ -279,7 +278,7 @@ int main()
                                 i = i - 'A' + 'a';
                     }
 
-                    Replace::KMP(s, findKeyword, positions, wholeWord);
+                    FindReplace::KMP(s, findKeyword, positions, wholeWord);
 
                     if (positions.size() == 0)
                     {
@@ -299,7 +298,7 @@ int main()
                 }
                 else
                 {
-                    errorWindow::open("Invalid keyword!");
+                    Windows::errorWindow("Invalid keyword!");
                 }
             }
             else
@@ -339,7 +338,7 @@ int main()
                                     i = i - 'A' + 'a';
                         }
 
-                        Replace::KMP(s, findKeyword, positions, wholeWord);
+                        FindReplace::KMP(s, findKeyword, positions, wholeWord);
 
                         if (positions.size() == 0)
                         {
@@ -379,12 +378,12 @@ int main()
                     }
                     else
                     {
-                        errorWindow::open("Invalid keyword(s)!");
+                        Windows::errorWindow("Invalid keyword(s)!");
                     }
                 }
-                else if (replaceWindow::nextButton->isHovering(replaceWindow::window))
+                else if (replaceWindow::nextButton->isHovering(replaceWindow::window) && replaceFlag)
                 {
-                    int nap = Replace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                    int nap = FindReplace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
                     if (nap != -1)
                         currentAppearance = nap;
                     else
@@ -399,9 +398,9 @@ int main()
 
                     Helpers::updateReplaceMatchCount();
                 }
-                else if (replaceWindow::prevButton->isHovering(replaceWindow::window))
+                else if (replaceWindow::prevButton->isHovering(replaceWindow::window) && replaceFlag)
                 {
-                    int pap = Replace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                    int pap = FindReplace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
 
                     if (pap != -1)
                         currentAppearance = pap;
@@ -417,7 +416,7 @@ int main()
 
                     Helpers::updateReplaceMatchCount();
                 }
-                else if (replaceWindow::replaceButton->isHovering(replaceWindow::window))
+                else if (replaceWindow::replaceButton->isHovering(replaceWindow::window) && replaceFlag)
                 {
                     if (currentAppearance == -1)
                     {
@@ -427,22 +426,20 @@ int main()
                         gone.clear();
                         notRemoved.clear();
 
-                        errorWindow::open("There are no more matches!");
+                        Windows::errorWindow("There are no more matches!");
                         
                         renderAgain = 1;
                         flag = 1;
                         replaceFlag = 0;
 
-                        Helpers::updateReplaceMatchCount();
-
                         break;
                     }
 
-                    int L = Replace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
+                    int L = FindReplace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
                     String::replace(L, L + findKeyword.size() - 1, replaceKeyword, S);
-                    Replace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
-                    int nxtAppearance = Replace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
-                    int prvAppearance = Replace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                    FindReplace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                    int nxtAppearance = FindReplace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                    int prvAppearance = FindReplace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
 
                     nxt[currentAppearance] = prv[currentAppearance] = -1;
                     currentAppearance = max(nxtAppearance, prvAppearance);
@@ -462,18 +459,20 @@ int main()
 
                     for (auto currentAppearance : snapshot)
                     {
-                        if (Replace::canReplace(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword) == 0)
+                        if (FindReplace::canReplace(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword) == 0)
                             continue;
 
-                        int L = Replace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
+                        int L = FindReplace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
                         String::replace(L, L + findKeyword.size() - 1, replaceKeyword, S);
-                        Replace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                        FindReplace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
                     }
 
                     fileSaved = 0;
                     renderAgain = 1;
                     flag = 1;
                     updateFindReplace = 1;
+
+                    Helpers::resetReplaceMatchCount();
                 }
                 else if (replaceWindow::matchCaseCheckBox->isHovering(replaceWindow::window))
                     replaceWindow::matchCaseCheckBox->toggle();
@@ -505,7 +504,7 @@ int main()
                                 i = i - 'A' + 'a';
                     }
 
-                    Replace::KMP(s, findKeyword, positions, wholeWord);
+                    FindReplace::KMP(s, findKeyword, positions, wholeWord);
 
                     if (positions.size() == 0)
                     {
@@ -545,7 +544,7 @@ int main()
                 }
                 else
                 {
-                    errorWindow::open("Invalid keyword(s)!");
+                    Windows::errorWindow("Invalid keyword(s)!");
                 }
             }
             else
@@ -566,7 +565,7 @@ int main()
         {
             sf::Vector2i localPosition = sf::Mouse::getPosition(window);
 
-            if (!Helpers::isAnyButtonPressed())
+            if (!Helpers::isAnyButtonPressed() && window.hasFocus())
             {
                 if (localPosition.x >= marginLeft && localPosition.y >= marginTop && localPosition.x < windowWidth && localPosition.y < windowHeight - marginBottom)
                 {
@@ -578,8 +577,9 @@ int main()
                     {
                         String::del(posCursor, S);
                         leftButtonPressed = 1;
-                        selectFlag = 0;
-
+                        selectFlag = replaceFlag = findFlag = 0;
+                        Helpers::resetFindMatchCount();
+                        Helpers::resetReplaceMatchCount();
                         String::insert(newPosCursor, S);
                         Xoffset |= Render::updateViewX(S, Xoffset, scrollUnitX);
                     }
@@ -703,7 +703,7 @@ int main()
         {
             ctrlO = 1;
 
-            path = Windows::open();
+            path = Windows::openFileWindow();
 
             if (path.size() != 0)
             {
@@ -713,7 +713,7 @@ int main()
 
                 if (fileHandle == INVALID_HANDLE_VALUE)
                 {
-                    errorWindow::open("Invalid Path");
+                    Windows::errorWindow("Invalid Path");
                     break;
                 }
 
@@ -737,7 +737,7 @@ int main()
             ctrlS = 1;
 
             if(path.size() == 0)
-                path = Windows::saveAS();
+                path = Windows::saveAsWindow();
 
             FILE* fptr = fopen(path.c_str(), "w");
 
@@ -777,14 +777,14 @@ int main()
 
             if (fileSaved == 0)
             {
-                int closeOption = Windows::saveModal();
+                int closeOption = Windows::saveWindow();
 
                 if (closeOption == IDCANCEL)
                     break;
                 else if (closeOption == IDYES)
                 {
                     if (path.size() == 0)
-                        path = Windows::saveAS();
+                        path = Windows::saveAsWindow();
 
                     FILE* fptr = fopen(path.c_str(), "w");
 
@@ -807,13 +807,13 @@ int main()
         else if (ctrlShiftS == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && sf::Keyboard::isKeyPressed(sf::Keyboard::G))
         {
             ctrlShiftS = 1;
-            path = Windows::saveAS();
+            path = Windows::saveAsWindow();
 
             FILE* fptr = fopen(path.c_str(), "w");
 
             if (fptr == NULL)
             {
-                errorWindow::open("Wrong Path!");
+                Windows::errorWindow("Wrong path!");
             }
             else
             {
@@ -832,20 +832,20 @@ int main()
                     break;
                 }
 
-                int closeOption = Windows::saveModal();
+                int closeOption = Windows::saveWindow();
 
                 if (closeOption == IDCANCEL)
                     break;
                 else if (closeOption == IDYES)
                 {
                     if (path.size() == 0)
-                        path = Windows::saveAS();
+                        path = Windows::saveAsWindow();
 
                     FILE* fptr = fopen(path.c_str(), "w");
 
                     if (fptr == NULL)
                     {
-                        errorWindow::open("Wrong Path!");
+                        Windows::errorWindow("Wrong path!");
                         break;
                     }
 
@@ -963,20 +963,20 @@ int main()
 
                             if (fileSaved == 0)
                             {
-                                int closeOption = Windows::saveModal();
+                                int closeOption = Windows::saveWindow();
 
                                 if (closeOption == IDCANCEL)
                                     break;
                                 else if (closeOption == IDYES)
                                 {
                                     if (path.size() == 0)
-                                        path = Windows::saveAS();
+                                        path = Windows::saveAsWindow();
 
                                     FILE* fptr = fopen(path.c_str(), "w");
 
                                     if (fptr == NULL)
                                     {
-                                        errorWindow::open("Wrong Path!");
+                                        Windows::errorWindow("Wrong path!");
                                         break;
                                     }
 
@@ -997,7 +997,7 @@ int main()
                         {
                             fileMenu->close();
 
-                            path = Windows::open();
+                            path = Windows::openFileWindow();
 
                             if (path.size() == 0)
                                 break;
@@ -1008,7 +1008,7 @@ int main()
 
                             if (fileHandle == INVALID_HANDLE_VALUE)
                             {
-                                errorWindow::open("Invalid Path");
+                                Windows::errorWindow("Invalid Path");
                                 break;
                             }
 
@@ -1031,13 +1031,13 @@ int main()
                             fileMenu->close();
 
                             if (path.size() == 0)
-                                path = Windows::saveAS();
+                                path = Windows::saveAsWindow();
 
                             FILE *fptr = fopen(path.c_str(), "w");
 
                             if (fptr == NULL)
                             {
-                                errorWindow::open("Wrong Path!");
+                                Windows::errorWindow("Wrong path!");
                                 break;
                             }
 
@@ -1049,7 +1049,7 @@ int main()
                         {
                             fileMenu->close();
 
-                            path = Windows::saveAS();
+                            path = Windows::saveAsWindow();
 
                             if (path.size() == 0)
                                 break;
@@ -1058,7 +1058,7 @@ int main()
 
                             if (fptr == NULL)
                             {
-                                errorWindow::open("Wrong Path!");
+                                Windows::errorWindow("Wrong path!");
                                 break;
                             }
                             
@@ -1075,20 +1075,20 @@ int main()
                                 break;
                             }
 
-                            int closeOption = Windows::saveModal();
+                            int closeOption = Windows::saveWindow();
 
                             if (closeOption == IDCANCEL)
                                 break;
                             else if (closeOption == IDYES)
                             {
                                 if (path.size() == 0)
-                                    path = Windows::saveAS();
+                                    path = Windows::saveAsWindow();
 
                                 FILE* fptr = fopen(path.c_str(), "w");
 
                                 if (fptr == NULL)
                                 {
-                                    errorWindow::open("Wrong Path!");
+                                    Windows::errorWindow("Wrong path!");
                                     break;
                                 }
 
@@ -1310,6 +1310,9 @@ int main()
 
                 selectFlag = findFlag = 0;
 
+                Helpers::resetFindMatchCount();
+                Helpers::resetReplaceMatchCount();
+
                 renderAgain |= Render::updateViewX(S, Xoffset, scrollUnitX);
                 renderAgain |= Render::updateViewY(S, Yoffset, scrollUnitY);
 
@@ -1344,20 +1347,20 @@ int main()
                             break;
                         }
 
-                        int closeOption = Windows::saveModal();
+                        int closeOption = Windows::saveWindow();
 
                         if (closeOption == IDCANCEL)
                             break;
                         else if (closeOption == IDYES)
                         {
                             if (path.size() == 0)
-                                path = Windows::saveAS();
+                                path = Windows::saveAsWindow();
 
                             FILE* fptr = fopen(path.c_str(), "w");
 
                             if (fptr == NULL)
                             {
-                                errorWindow::open("Wrong Path!");
+                                Windows::errorWindow("Wrong path!");
                                 break;
                             }
 
@@ -1438,7 +1441,7 @@ int main()
                 {
                     if (replaceFlag == 1)
                     {
-                        int pap = Replace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                        int pap = FindReplace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
 
                         if (pap != -1)
                             currentAppearance = pap;
@@ -1453,7 +1456,6 @@ int main()
                         findFlag = 0;
 
                         Helpers::updateReplaceMatchCount();
-
 
                         break;
                     }
@@ -1497,7 +1499,7 @@ int main()
                 {
                     if (replaceFlag == 1)
                     {
-                        int nap = Replace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                        int nap = FindReplace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
                         if (nap != -1)
                             currentAppearance = nap;
                         else
@@ -1556,18 +1558,18 @@ int main()
 
                     if (currentAppearance == -1)
                     {
-                        errorWindow::open("There are no more matches!");
+                        Windows::errorWindow("There are no more matches!");
                         renderAgain = 1;
                         flag = 1;
                         replaceFlag = 0;
                         break;
                     }
 
-                    int L = Replace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
+                    int L = FindReplace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
                     String::replace(L, L + findKeyword.size() - 1, replaceKeyword, S);
-                    Replace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
-                    int nxtAppearance = Replace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
-                    int prvAppearance = Replace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                    FindReplace::delAp(currentAppearance, prv, nxt, bit, gone, notRemoved);
+                    int nxtAppearance = FindReplace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                    int prvAppearance = FindReplace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
 
                     nxt[currentAppearance] = prv[currentAppearance] = -1;
                     currentAppearance = max(nxtAppearance, prvAppearance);
@@ -1588,7 +1590,7 @@ int main()
             {
                 fileSaved = 0;
                 int ch = event.text.unicode;
-                if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1 || replaceFlag == 1 || findFlag == 1 || ch == 19 || ch == 1 || ch == 6 || ch == 18 || ch == 5 || ch == 7 || ch == 12)
+                if (ch == 27 || ch == 24 || ch == 3 || ch == 1 || ch == 22 || ch == 13 && replaceFlag == 1 || findFlag == 1 || ch == 19 || ch == 1 || ch == 6 || ch == 18 || ch == 5 || ch == 7 || ch == 12)
                     break;
 
                 int posCursor = String::findCursorPosition(S);
@@ -1717,6 +1719,11 @@ int main()
         else if (cursorTimer % (timeUnit * 2) != 0)
             cursorBox.setFillColor(currentThemeColors.background);
 
+        goToLineWindow::inputBox->updateCursorTimer();
+        findWindow::inputBox->updateCursorTimer();
+        replaceWindow::findInputBox->updateCursorTimer();
+        replaceWindow::replaceInputBox->updateCursorTimer();
+
         if (flag || firstExec)
         {
             scrollUnitX = charWidth[fontIndex][fontSize][0], scrollUnitY = Helpers::getLineHeight();
@@ -1745,7 +1752,7 @@ int main()
 
             if (findFlag == 1 && updateFindReplace == 1)
             {
-                if (currentAppearance < positions.size() && !Replace::isApOnScreen(positions[currentAppearance], findKeyword.size()))
+                if (currentAppearance < positions.size() && !FindReplace::isApOnScreen(positions[currentAppearance], findKeyword.size()))
                 {
                     int P = positions[currentAppearance];
                     int L = String::findNumberOfEndlines(1, P, S) + 1;
@@ -1762,9 +1769,9 @@ int main()
 
                 Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
 
-                if (currentAppearance != -1 && currentAppearance < positions.size() && !Replace::isApOnScreen(Replace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword), findKeyword.size()))
+                if (currentAppearance != -1 && currentAppearance < positions.size() && !FindReplace::isApOnScreen(FindReplace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword), findKeyword.size()))
                 {
-                    int P = Replace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
+                    int P = FindReplace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword);
                     int L = String::findNumberOfEndlines(1, P, S) + 1;
                     int F = String::findKthLine(L, S);
                     Yoffset = (L - 1) * lineHeight;
@@ -1860,9 +1867,9 @@ int main()
                         box.setPosition(marginLeft + w + paddingLeft, y);
                         box.setSize(sf::Vector2f(W, lineHeight));
                         if (p != currentAppearance)
-                            box.setFillColor(sf::Color(255, 255, 0, 128));
+                            box.setFillColor(currentThemeColors.findReplaceHighlight);
                         else
-                            box.setFillColor(sf::Color(255, 187, 0, 128));
+                            box.setFillColor(currentThemeColors.findReplaceCurrentHighlight);
                         selectedBoxes.push_back(box);
                         p++;
                     }
@@ -1879,12 +1886,12 @@ int main()
                     if (l == -1)
                         continue;
 
-                    int p = Replace::traceFirstApToRender(l, positions, bit, notRemoved, findKeyword, replaceKeyword);
+                    int p = FindReplace::traceFirstApToRender(l, positions, bit, notRemoved, findKeyword, replaceKeyword);
                     int y = i * lineHeight + marginTop;
 
-                    while (p != -1 && p < positions.size() && Replace::findRealPosition(p, positions, bit, findKeyword, replaceKeyword) <= r)
+                    while (p != -1 && p < positions.size() && FindReplace::findRealPosition(p, positions, bit, findKeyword, replaceKeyword) <= r)
                     {
-                        int P = Replace::findRealPosition(p, positions, bit, findKeyword, replaceKeyword);
+                        int P = FindReplace::findRealPosition(p, positions, bit, findKeyword, replaceKeyword);
                         int w = String::findWidth(l, P - 1, S);
                         int W = String::findWidth(P, P + findKeyword.size() - 1, S);
 
@@ -1895,7 +1902,7 @@ int main()
                         else
                             box.setFillColor(sf::Color(255, 187, 0, 128));
                         selectedBoxes.push_back(box);
-                        p = Replace::findNextValidAppearance(p, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                        p = FindReplace::findNextValidAppearance(p, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
                     }
                 }
             }

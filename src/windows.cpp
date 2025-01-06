@@ -11,7 +11,7 @@
 #include "inputBox.hpp"
 #include "string.hpp"
 
-std::string Windows::saveAS()
+std::string Windows::saveAsWindow()
 {
     std::filesystem::path originalDir = std::filesystem::current_path();
 
@@ -45,10 +45,9 @@ std::string Windows::saveAS()
         std::filesystem::current_path(originalDir);
         return "";
     }
-
 }
 
-std::string Windows::open()
+std::string Windows::openFileWindow()
 {
     std::filesystem::path originalDir = std::filesystem::current_path();
 
@@ -85,22 +84,73 @@ std::string Windows::open()
     }
 }
 
-
-int Windows::saveModal()
+int Windows::saveWindow()
 {
-    int result = MessageBox
-    (
-        NULL,
-        "Do you want to save changes?",
-        "Save Changes",
-        MB_YESNOCANCEL | MB_ICONQUESTION
-    );
+    sf::Event event;
+    sf::Text text("Do you want to save changes?", globalFont, 14);
 
-    return result;
+    sf::RenderWindow window(sf::VideoMode(328, 88), "Save changes", sf::Style::Titlebar);
+    window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
+
+    Button *yesButton = new Button("Yes", sf::Vector2f(40, 44), true);
+    Button *noButton = new Button("No", sf::Vector2f(126, 44), true);
+    Button *cancelButton = new Button("Cancel", sf::Vector2f(212, 44), true);
+
+    text.setFillColor(currentThemeColors.text);
+    text.setPosition(67, 14);
+
+    while (window.isOpen())
+    {
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+                return IDCANCEL;
+            }
+            else if (event.type == sf::Event::KeyPressed && event.key.code == 36)
+            {
+                window.close();
+                return IDCANCEL;
+            }
+            else if (event.type == sf::Event::MouseButtonPressed && event.key.code == 0)
+            {
+                if (yesButton->isHovering(window))
+                {
+                    window.close();
+                    return IDYES;
+                }
+                else if (noButton->isHovering(window))
+                {
+                    window.close();
+                    return IDNO;
+                }
+                else if (cancelButton->isHovering(window))
+                {
+                    window.close();
+                    return IDCANCEL;
+                }
+            }
+            else if (event.type == sf::Event::MouseMoved)
+            {
+                yesButton->setHoverState(yesButton->isHovering(window));
+                noButton->setHoverState(noButton->isHovering(window));
+                cancelButton->setHoverState(cancelButton->isHovering(window));
+            }
+        }
+
+        window.clear(currentThemeColors.background);
+        window.draw(text);
+        yesButton->draw(window);
+        noButton->draw(window);
+        cancelButton->draw(window);
+        window.display();
+    }
+
+    return IDCANCEL;
 }
 
-
-void errorWindow::open(const std::string &message)
+void Windows::errorWindow(const std::string &message)
 {
     sf::Event event;
     sf::Text text;
@@ -113,7 +163,7 @@ void errorWindow::open(const std::string &message)
 
     sf::Vector2f size = text.getGlobalBounds().getSize();
 
-    sf::RenderWindow window(sf::VideoMode(size.x + 80, size.y + 44), "Error", sf::Style::Titlebar || sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode(size.x + 80, size.y + 44), "Error", sf::Style::Titlebar);
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 
     while (window.isOpen())
@@ -148,7 +198,7 @@ void goToLineWindow::initialize()
 
 void goToLineWindow::open()
 {
-    goToLineWindow::window.create(sf::VideoMode(242, 112), "Go to line", sf::Style::Titlebar || sf::Style::Close);
+    goToLineWindow::window.create(sf::VideoMode(242, 112), "Go to line", sf::Style::Titlebar);
     goToLineWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     goToLineWindow::inputBox->setContent("");
     goToLineWindow::inputBox->setIsActive(true);
@@ -170,6 +220,7 @@ void goToLineWindow::handleEvent(const sf::Event &event)
     {
         goToLineWindow::cancelButton->setHoverState(goToLineWindow::cancelButton->isHovering(goToLineWindow::window));
         goToLineWindow::goToLineButton->setHoverState(goToLineWindow::goToLineButton->isHovering(goToLineWindow::window));
+        goToLineWindow::inputBox->setHoverState(goToLineWindow::inputBox->isHovering(goToLineWindow::window));
     }
     else if (event.type == sf::Event::MouseButtonPressed)
     {
@@ -190,7 +241,7 @@ void goToLineWindow::handleEvent(const sf::Event &event)
                 }
                 catch(std::exception &err)
                 {
-                    errorWindow::open("Invalid number!");
+                    Windows::errorWindow("Invalid number!");
                 }
         }
     }
@@ -212,7 +263,7 @@ void goToLineWindow::handleEvent(const sf::Event &event)
             }
             catch(std::exception &err)
             {
-                errorWindow::open("Invalid number!");
+                Windows::errorWindow("Invalid number!");
             }
         }
     }
@@ -262,7 +313,7 @@ void findWindow::initialize()
 
 void findWindow::open()
 {
-    findWindow::window.create(sf::VideoMode(414, 176), "Find", sf::Style::Titlebar || sf::Style::Close);
+    findWindow::window.create(sf::VideoMode(414, 176), "Find", sf::Style::Titlebar);
     findWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     findWindow::inputBox->setContent("");
     findWindow::inputBox->setIsActive(true);
@@ -288,6 +339,7 @@ void findWindow::handleEvent(const sf::Event &event)
         findWindow::prevButton->setHoverState(findWindow::prevButton->isHovering(findWindow::window));
         findWindow::matchCaseCheckBox->setHoverState(findWindow::matchCaseCheckBox->isHovering(findWindow::window) || findWindow::matchCaseCheckBox->getIsChecked());
         findWindow::wholeWordCheckBox->setHoverState(findWindow::wholeWordCheckBox->isHovering(findWindow::window) || findWindow::wholeWordCheckBox->getIsChecked());
+        findWindow::inputBox->setHoverState(findWindow::inputBox->isHovering(findWindow::window));
     }
     else if (event.type == sf::Event::KeyPressed)
     {
@@ -357,7 +409,7 @@ void replaceWindow::initialize()
 
 void replaceWindow::open()
 {
-    replaceWindow::window.create(sf::VideoMode(414, 266), "Replace", sf::Style::Titlebar || sf::Style::Close);
+    replaceWindow::window.create(sf::VideoMode(414, 266), "Replace", sf::Style::Titlebar);
     replaceWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     replaceWindow::findInputBox->setContent("");
     replaceWindow::findInputBox->setIsActive(true);
@@ -387,9 +439,10 @@ void replaceWindow::handleEvent(const sf::Event &event)
         replaceWindow::prevButton->setHoverState(replaceWindow::prevButton->isHovering(replaceWindow::window));
         replaceWindow::replaceAllButton->setHoverState(replaceWindow::replaceAllButton->isHovering(replaceWindow::window));
         replaceWindow::cancelButton->setHoverState(replaceWindow::cancelButton->isHovering(replaceWindow::window));
-
         replaceWindow::matchCaseCheckBox->setHoverState(replaceWindow::matchCaseCheckBox->isHovering(replaceWindow::window) || replaceWindow::matchCaseCheckBox->getIsChecked());
         replaceWindow::wholeWordCheckBox->setHoverState(replaceWindow::wholeWordCheckBox->isHovering(replaceWindow::window) || replaceWindow::wholeWordCheckBox->getIsChecked());
+        replaceWindow::findInputBox->setHoverState(replaceWindow::findInputBox->isHovering(replaceWindow::window));
+        replaceWindow::replaceInputBox->setHoverState(replaceWindow::replaceInputBox->isHovering(replaceWindow::window));
     }
     else if (event.type == sf::Event::KeyPressed)
     {
