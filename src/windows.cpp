@@ -182,7 +182,7 @@ void Windows::errorWindow(const std::string &message)
 }
 
 sf::RenderWindow goToLineWindow::window;
-sf::Text goToLineWindow::text("Line number", globalFont, 12);
+sf::Text goToLineWindow::text("Line number", globalFont, 14);
 InputBox *goToLineWindow::inputBox;
 Button *goToLineWindow::cancelButton, *goToLineWindow::goToLineButton;
 
@@ -284,7 +284,7 @@ void goToLineWindow::draw()
 
 
 sf::RenderWindow findWindow::window;
-sf::Text findWindow::text("Find keyword", globalFont, 12), findWindow::matchCaseText("Match case", globalFont, 12), findWindow::wholeWordText("Whole word", globalFont, 12), findWindow::matchCountText("", globalFont, 12);
+sf::Text findWindow::text("Find keyword", globalFont, 14), findWindow::matchCaseText("Match case", globalFont, 14), findWindow::wholeWordText("Whole word", globalFont, 14), findWindow::matchCountText("", globalFont, 14);
 InputBox *findWindow::inputBox;
 Button *findWindow::cancelButton, *findWindow::findButton, *findWindow::nextButton, *findWindow::prevButton;
 CheckBox *findWindow::matchCaseCheckBox, *findWindow::wholeWordCheckBox;
@@ -298,22 +298,22 @@ void findWindow::initialize()
 
     findWindow::text.setPosition(40, 14);
     findWindow::inputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(334, 24));
-    findWindow::findButton = new Button("Find", sf::Vector2f(40, 112), true);
-    findWindow::nextButton = new Button("Next", sf::Vector2f(126, 112), true);
-    findWindow::prevButton = new Button("Previous", sf::Vector2f(212, 112), true);
-    findWindow::cancelButton = new Button("Cancel", sf::Vector2f(298, 112), true);
+    findWindow::findButton = new Button("Find", sf::Vector2f(40, 116), true);
+    findWindow::nextButton = new Button("Next", sf::Vector2f(126, 116), true);
+    findWindow::prevButton = new Button("Previous", sf::Vector2f(212, 116), true);
+    findWindow::cancelButton = new Button("Cancel", sf::Vector2f(298, 116), true);
 
     findWindow::matchCaseCheckBox = new CheckBox(sf::Vector2f(40, 68));
-    findWindow::wholeWordCheckBox = new CheckBox(sf::Vector2f(40, 88));
-    findWindow::matchCaseText.setPosition(60, 67);
-    findWindow::wholeWordText.setPosition(60, 87);
+    findWindow::wholeWordCheckBox = new CheckBox(sf::Vector2f(40, 92));
+    findWindow::matchCaseText.setPosition(60, 66);
+    findWindow::wholeWordText.setPosition(60, 90);
 
-    findWindow::matchCountText.setPosition(40, 146);
+    findWindow::matchCountText.setPosition(40, 150);
 }
 
 void findWindow::open()
 {
-    findWindow::window.create(sf::VideoMode(414, 176), "Find", sf::Style::Titlebar);
+    findWindow::window.create(sf::VideoMode(414, 180), "Find", sf::Style::Titlebar);
     findWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     findWindow::inputBox->setContent("");
     findWindow::inputBox->setIsActive(true);
@@ -374,7 +374,7 @@ void findWindow::draw()
 
 
 sf::RenderWindow replaceWindow::window;
-sf::Text replaceWindow::text1("Find keyword", globalFont, 12), replaceWindow::text2("Replace keyword", globalFont, 12), replaceWindow::matchCaseText("Match case", globalFont, 12), replaceWindow::wholeWordText("Whole word", globalFont, 12), replaceWindow::matchCountText("", globalFont, 12);
+sf::Text replaceWindow::text1("Find keyword", globalFont, 14), replaceWindow::text2("Replace keyword", globalFont, 14), replaceWindow::matchCaseText("Match case", globalFont, 14), replaceWindow::wholeWordText("Whole word", globalFont, 14), replaceWindow::matchCountText("", globalFont, 14);
 InputBox *replaceWindow::findInputBox, *replaceWindow::replaceInputBox;
 Button *replaceWindow::cancelButton, *replaceWindow::findButton, *replaceWindow::nextButton, *replaceWindow::prevButton, *replaceWindow::replaceButton, *replaceWindow::replaceAllButton;
 CheckBox *replaceWindow::matchCaseCheckBox, *replaceWindow::wholeWordCheckBox;
@@ -392,24 +392,24 @@ void replaceWindow::initialize()
     replaceWindow::findInputBox = new InputBox("", sf::Vector2f(40, 34), sf::Vector2f(334, 24));
     replaceWindow::replaceInputBox = new InputBox("", sf::Vector2f(40, 88), sf::Vector2f(334, 24));
 
-    replaceWindow::findButton = new Button("Find", sf::Vector2f(40, 166), true);
-    replaceWindow::replaceButton = new Button("Replace", sf::Vector2f(126, 166), true);
-    replaceWindow::nextButton = new Button("Next", sf::Vector2f(212, 166), true);
-    replaceWindow::prevButton = new Button("Previous", sf::Vector2f(298, 166), true);
-    replaceWindow::replaceAllButton = new Button("Replace all", sf::Vector2f(40, 200), true);
-    replaceWindow::cancelButton = new Button("Cancel", sf::Vector2f(126, 200), true);
+    replaceWindow::findButton = new Button("Find", sf::Vector2f(40, 170), true);
+    replaceWindow::replaceButton = new Button("Replace", sf::Vector2f(126, 170), true);
+    replaceWindow::nextButton = new Button("Next", sf::Vector2f(212, 170), true);
+    replaceWindow::prevButton = new Button("Previous", sf::Vector2f(298, 170), true);
+    replaceWindow::replaceAllButton = new Button("Replace all", sf::Vector2f(40, 204), true);
+    replaceWindow::cancelButton = new Button("Cancel", sf::Vector2f(126, 204), true);
 
     replaceWindow::matchCaseCheckBox = new CheckBox(sf::Vector2f(40, 122));
-    replaceWindow::wholeWordCheckBox = new CheckBox(sf::Vector2f(40, 142));
-    replaceWindow::matchCaseText.setPosition(60, 121);
-    replaceWindow::wholeWordText.setPosition(60, 141);
+    replaceWindow::wholeWordCheckBox = new CheckBox(sf::Vector2f(40, 146));
+    replaceWindow::matchCaseText.setPosition(60, 120);
+    replaceWindow::wholeWordText.setPosition(60, 144);
 
-    replaceWindow::matchCountText.setPosition(40, 236);
+    replaceWindow::matchCountText.setPosition(40, 240);
 }
 
 void replaceWindow::open()
 {
-    replaceWindow::window.create(sf::VideoMode(414, 266), "Replace", sf::Style::Titlebar);
+    replaceWindow::window.create(sf::VideoMode(414, 270), "Replace", sf::Style::Titlebar);
     replaceWindow::window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     replaceWindow::findInputBox->setContent("");
     replaceWindow::findInputBox->setIsActive(true);

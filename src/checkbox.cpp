@@ -7,7 +7,7 @@ CheckBox::CheckBox(const sf::Vector2f &position)
 {
     isChecked = false;
     container.setPosition(position);
-    container.setSize(sf::Vector2f(14, 14));
+    container.setSize(sf::Vector2f(16, 16));
     container.setFillColor(currentThemeColors.buttonBackground);
     container.setOutlineColor(currentThemeColors.buttonOutline);
     container.setOutlineThickness(-1);
