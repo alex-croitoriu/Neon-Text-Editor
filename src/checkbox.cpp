@@ -12,7 +12,7 @@ CheckBox::CheckBox(const sf::Vector2f &position)
     container.setOutlineColor(currentThemeColors.buttonOutline);
     container.setOutlineThickness(-1);
 
-    content = sf::Text("", checkmarkFont, 10);
+    content = sf::Text("", checkmarkFont, 12);
     content.setFillColor(currentThemeColors.text);
 }
 
