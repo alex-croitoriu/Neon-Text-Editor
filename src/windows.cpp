@@ -233,7 +233,15 @@ void goToLineWindow::handleEvent(const sf::Event &event)
             else if (goToLineWindow::goToLineButton->isHovering(goToLineWindow::window))
                 try
                 {
-                    int lineNumber = stoi(goToLineWindow::inputBox->getContent());
+                    int lineNumber = -1;
+                    try 
+                    {
+                        lineNumber = stoi(goToLineWindow::inputBox->getContent());
+                    }
+                    catch (std::exception &err)
+                    {
+                        throw std::invalid_argument("Invalid number!");
+                    }
                     if (!lineNumber)
                         throw std::invalid_argument("Invalid number!");
                     else if (lineNumber > String::findNumberOfEndlines(1, String::len(S), S) + 1)
@@ -257,7 +265,15 @@ void goToLineWindow::handleEvent(const sf::Event &event)
         {
             try
             {
-                int lineNumber = stoi(goToLineWindow::inputBox->getContent());
+                int lineNumber = -1;
+                try 
+                {
+                    lineNumber = stoi(goToLineWindow::inputBox->getContent());
+                }
+                catch (std::exception &err)
+                {
+                    throw std::invalid_argument("Invalid number!");
+                }
                 if (!lineNumber)
                     throw std::invalid_argument("Invalid number!");
                 else if (lineNumber > String::findNumberOfEndlines(1, String::len(S), S) + 1)
