@@ -6,6 +6,8 @@
 class InputBox
 {
     sf::RectangleShape container, cursorBox;
+    sf::RenderTexture texture;
+    sf::Sprite sprite;
     sf::Text content;
     bool isActive;
     int cursorTimer;

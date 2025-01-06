@@ -21,7 +21,11 @@ InputBox::InputBox(const std::string &_content, const sf::Vector2f &position, co
     cursorBox.setSize(sf::Vector2f(1, 18));
     cursorBox.setPosition(container.getPosition() + sf::Vector2f(8 + content.getGlobalBounds().getSize().x, 3));
 
-    Helpers::centerContentInsideContainer(container, content, false, false, 2, 0, 0, 7);
+    texture.create(size.x - 14, size.y);
+    texture.clear(sf::Color(0, 0, 0, 0));
+    sprite.setPosition(container.getPosition() + sf::Vector2f(7, 0));
+
+    content.setPosition(0, 3);
 }
 
 bool InputBox::isHovering()
@@ -39,6 +43,16 @@ bool InputBox::isHovering(sf::RenderWindow &window)
 void InputBox::setContent(const std::string &_content)
 {
     content.setString(_content);
+    if (content.getGlobalBounds().getSize().x <= container.getGlobalBounds().getSize().x - 14)
+    {
+        content.setPosition(0, 3);
+        cursorBox.setPosition(container.getPosition() + sf::Vector2f(8 + content.getGlobalBounds().getSize().x, 3));
+    }
+    else
+    {
+        content.setPosition(container.getGlobalBounds().getSize().x - 15 - content.getGlobalBounds().getSize().x, 3);
+        cursorBox.setPosition(container.getGlobalBounds().left + container.getGlobalBounds().getSize().x - 6, container.getPosition().y + 3);
+    }
 }
 
 void InputBox::setIsActive(const bool &_isActive)
@@ -98,7 +112,6 @@ void InputBox::handleInput(sf::RenderWindow &window, sf::Event event, const bool
     }
 
     setContent(text);
-    cursorBox.setPosition(container.getPosition() + sf::Vector2f(8 + content.getGlobalBounds().getSize().x, 3));
 }
 
 void InputBox::updateCursorTimer()
@@ -115,7 +128,11 @@ void InputBox::updateCursorTimer()
 void InputBox::draw()
 {
     window.draw(container);
-    window.draw(content);
+    texture.clear(sf::Color(0, 0, 0, 0));
+    texture.draw(content);
+    texture.display();
+    sprite.setTexture(texture.getTexture());
+    window.draw(sprite);
     if (isActive)
         window.draw(cursorBox);
 }
@@ -123,7 +140,11 @@ void InputBox::draw()
 void InputBox::draw(sf::RenderWindow &window)
 {
     window.draw(container);
-    window.draw(content);
+    texture.clear(sf::Color(0, 0, 0, 0));
+    texture.draw(content);
+    texture.display();
+    sprite.setTexture(texture.getTexture());
+    window.draw(sprite);
     if (isActive)
         window.draw(cursorBox);
 }

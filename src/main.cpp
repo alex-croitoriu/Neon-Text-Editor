@@ -448,6 +448,8 @@ int main()
                 }
                 else if (replaceWindow::replaceButton->isHovering(replaceWindow::window) && replaceFlag)
                 {
+                    replaceKeyword = replaceWindow::replaceInputBox->getContent();
+
                     if (currentAppearance == -1)
                     {
                         prv.clear();
@@ -483,6 +485,8 @@ int main()
                 }
                 else if (replaceWindow::replaceAllButton->isHovering(replaceWindow::window))
                 {
+                    replaceKeyword = replaceWindow::replaceInputBox->getContent();
+
                     replaceAllFlag = 1;
 
                     set<int> snapshot = notRemoved;

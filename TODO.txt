@@ -11,15 +11,15 @@
 - [X] select all
 - [X] fullscreeen
 - [X] fix blurry buttons
-- [X] options menu: hide lines, go to line, time and date, switch dark/light mode
+- [X] options menu: hide lines, go to line, time and date, change theme, change font
 - [X] should not prompt for path when saving after opening a file
 - [X] change background for margin left
 - [X] add separator between buttons
 - [X] add navbar separator
 - [X] add padding to the left
 - [X] move zoom in/out buttons to the bottom
-- [X] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
-- [X] dark/light mode 
+- [X] status bar (total line count, current cursor position - line and column, current zoom level, selected characters)
+- [X] themes
 - [X] current file name top right
 - [X] fix theme buttons click bug
 - [X] name and logo
@@ -27,15 +27,16 @@
 - [X] shortcuts backend
 - [X] add additional fonts
 - [X] mark selected theme/font somehow
-- [X] modal for find
-- [X] modal for error
-- [X] modal for go to line
-- [X] modal for replace
-- [X] modal for unsaved changes
-- [X] refine modals ui
+- [X] window for find
+- [X] window for error
+- [X] window for go to line
+- [X] window for replace
+- [X] window for unsaved changes
+- [X] refine windows ui
 - [X] fix main window not focused but still clickable bug
-- [X] fix replace modal bugs (replace, next, prev)
+- [X] fix replace window bugs (replace, next, prev)
 - [X] improve inputbox feedback
 - [X] revise replace/find highlight colors for every theme
+- [X] fix long text going off inputbox
 
 - [?] do something with line count text box (currently triggers epilepsy)
