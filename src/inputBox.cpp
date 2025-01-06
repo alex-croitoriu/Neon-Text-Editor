@@ -101,11 +101,9 @@ void InputBox::handleInput(sf::RenderWindow &window, sf::Event event, const bool
         {
             if (digitsOnly)
             {
-                // digits only
                 if (ch >= 48 && ch <= 57)
                     text += ch;
             }
-            // printable ascii characters only
             else if (ch >= 32 && ch <= 126)
                 text += ch;
         }

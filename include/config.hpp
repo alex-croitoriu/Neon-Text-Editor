@@ -295,7 +295,7 @@ const std::unordered_map<Theme, ThemeColors> themeColorsMapping =
             sf::Color(255, 211, 63, 255),    // textbox background
             sf::Color(204, 14, 14),          // textbox outline
             sf::Color(0, 0, 0, 40),          // find replace highlight
-            sf::Color(255, 187, 0, 128),     // find replace current highlight
+            sf::Color(255, 0, 0, 128),       // find replace current highlight
         }
     }
 };

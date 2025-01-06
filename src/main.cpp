@@ -1025,7 +1025,6 @@ int main()
                         if (fileMenuButtons[0]->isHovering())
                         {
                             fileMenu->close();
-
                             if (fileSaved == 0)
                             {
                                 int closeOption = Windows::saveWindow();
@@ -1058,7 +1057,6 @@ int main()
                         else if (fileMenuButtons[1]->isHovering())
                         {
                             fileMenu->close();
-
                             path = Windows::openFileWindow();
 
                             if (path.size() == 0)
@@ -1091,7 +1089,6 @@ int main()
                         else if (fileMenuButtons[2]->isHovering())
                         {
                             fileMenu->close();
-
                             if (path.size() == 0)
                                 path = Windows::saveAsWindow();
 
@@ -1107,7 +1104,6 @@ int main()
                         else if (fileMenuButtons[3]->isHovering())
                         {
                             fileMenu->close();
-
                             path = Windows::saveAsWindow();
 
                             if (path.size() == 0)
@@ -1164,7 +1160,6 @@ int main()
                         if (editMenuButtons[0]->isHovering())
                         {
                             editMenu->close();
-
                             if (selectFlag && ctrlC == 0)
                             {
                                 ctrlC = 1;
@@ -1185,7 +1180,6 @@ int main()
                         else if (editMenuButtons[1]->isHovering())
                         {
                             editMenu->close();
-
                             if (ctrlV == 0)
                             {
                                 int posCursor = String::findCursorPosition(S);
@@ -1208,7 +1202,6 @@ int main()
                         else if (editMenuButtons[2]->isHovering())
                         {
                             editMenu->close();
-
                             if (selectFlag && ctrlX == 0)
                             {
                                 ctrlX = 1;
@@ -1261,12 +1254,12 @@ int main()
                         else
                             editMenu->close();
                     }
+
                     else if (optionsMenu->getIsOpen())
                     {
                         if (optionsMenuButtons[0]->isHovering())
                         {
                             optionsMenu->close();
-
                             showLineNumbers = !showLineNumbers;
                             optionsMenuButtons[0]->setLabel(toggleLinesButtonLabels[showLineNumbers]);
                             flag = 1;
@@ -1281,7 +1274,6 @@ int main()
                         else if (optionsMenuButtons[2]->isHovering())
                         {
                             optionsMenu->close();
-
                             if (selectFlag == 1)
                             {
                                 int L = segmSelected.first;
@@ -1378,7 +1370,7 @@ int main()
             {
                 int key = event.key.code;
 
-                if (key == 36) /// escape
+                if (key == 36) // escape
                 {
                     if (replaceFlag == 1)
                     {
@@ -1432,7 +1424,7 @@ int main()
 
                     break;
                 }
-                else if (key == 73) /// up arrow
+                else if (key == 73) // up arrow
                 {
                     if (replaceFlag == 1 || findFlag == 1)
                         break;
@@ -1461,7 +1453,7 @@ int main()
 
                     break;
                 }
-                else if (key == 74) /// down arrow
+                else if (key == 74) // down arrow
                 {
                     if (replaceFlag == 1 || findFlag == 1)
                         break;
@@ -1491,7 +1483,7 @@ int main()
 
                     break;
                 }
-                else if (key == 71) /// left arrow
+                else if (key == 71) // left arrow
                 {
                     if (replaceFlag == 1)
                     {
@@ -1549,7 +1541,7 @@ int main()
 
                     break;
                 }
-                else if (key == 72) /// right arrow
+                else if (key == 72) // right arrow
                 {
                     if (replaceFlag == 1)
                     {
@@ -1692,7 +1684,7 @@ int main()
                 break;
             }
 
-            if (event.type == sf::Event::MouseWheelMoved) /// scroll up and down
+            if (event.type == sf::Event::MouseWheelMoved) // scroll up and down
             {
                 int direction = event.mouseWheel.delta;
 
@@ -1718,6 +1710,7 @@ int main()
                 window.setView(sf::View(visibleArea));
                 renderAgain = 1;
                 flag = 1;
+
                 windowWidth = event.size.width;
                 windowHeight = event.size.height;
 
@@ -1725,15 +1718,12 @@ int main()
                 bottomSeparator.setPosition(0, windowHeight - marginBottom);
                 topSeparator.setSize(sf::Vector2f(windowWidth, 1));
                 topSeparator.setPosition(sf::Vector2f(0, marginTop));
-
                 lineNumbersBackground.setSize(sf::Vector2f(marginLeft, windowHeight));
                 lineNumbersBackground.setPosition(0, marginTop);
                 statusBarBackground.setSize(sf::Vector2f(windowWidth, marginBottom));
                 statusBarBackground.setPosition(sf::Vector2f(0, windowHeight - marginBottom));
                 toolBarBackground.setPosition(0, 0);
                 toolBarBackground.setSize(sf::Vector2f(windowWidth, marginTop));
-
-                break;
             }
         } 
 
@@ -1820,7 +1810,6 @@ int main()
 
             if (replaceFlag == 1 && updateFindReplace == 1)
             {
-
                 Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
 
                 if (currentAppearance != -1 && currentAppearance < positions.size() && !FindReplace::isApOnScreen(FindReplace::findRealPosition(currentAppearance, positions, bit, findKeyword, replaceKeyword), findKeyword.size()))
@@ -1837,17 +1826,14 @@ int main()
 
             if (renderAgain == 1)
                 Render::render(l1, l2, S, Yoffset, Xoffset, cursorLine, text, scrollUnitY);
-            else
+            else if (cursorLine >= l1 && cursorLine <= l2)
             {
-                if (cursorLine >= l1 && cursorLine <= l2)
-                {
-                    Render::updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset, cursorLine - l1));
-                    text.setString(renderLines[cursorLine - l1]);
-                }
+                Render::updateTextLine(cursorLine - l1, renderLines, String::constructRenderedLine(cursorLine, S, Xoffset, cursorLine - l1));
+                text.setString(renderLines[cursorLine - l1]);
             }
 
-                string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
-                float cw = Render::splitCursorLine(text, ptext1, cursorTextLine, posCursor - fp + 1, fp);
+            string cursorTextLine = (cursorLine >= l1 && cursorLine <= l2 ? renderLines[cursorLine - l1] : "");
+            float cw = Render::splitCursorLine(text, ptext1, cursorTextLine, posCursor - fp + 1, fp);
 
             if (cursorLine >= l1 && cursorLine <= l2)
                 cursorLineOnScreen = 1;
