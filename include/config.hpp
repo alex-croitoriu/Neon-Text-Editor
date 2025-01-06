@@ -17,11 +17,11 @@ const int fontUnit = 2;
 const int timeUnit = 50;
 const int bucketSize = 100000;
 
-const float textBoxFontSize = 12;
+const float textBoxFontSize = 14;
 const float textBoxLetterSpacing = 1;
 const float textBoxHeight = 24;
 const float textBoxPaddingX = 10;
-const float textBoxPaddingY = 5;
+const float textBoxPaddingY = 4;
 
 const std::string zoomButtonLabels[] = { "-", "+" };
 const std::string menuLabels[] = { "File", "Edit", "Options" };

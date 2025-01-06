@@ -403,7 +403,6 @@ void replaceWindow::initialize()
     replaceWindow::wholeWordCheckBox = new CheckBox(sf::Vector2f(40, 146));
     replaceWindow::matchCaseText.setPosition(60, 120);
     replaceWindow::wholeWordText.setPosition(60, 144);
-
     replaceWindow::matchCountText.setPosition(40, 240);
 }
 
