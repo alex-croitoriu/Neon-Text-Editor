@@ -811,11 +811,7 @@ int main()
 
             FILE* fptr = fopen(path.c_str(), "w");
 
-            if (fptr == NULL)
-            {
-                Windows::errorWindow("Wrong path!");
-            }
-            else
+            if (fptr != NULL)
             {
                 String::saveText(fptr, S);
                 fileSaved = 1;
@@ -843,16 +839,13 @@ int main()
 
                     FILE* fptr = fopen(path.c_str(), "w");
 
-                    if (fptr == NULL)
+                    if (fptr != NULL)
                     {
-                        Windows::errorWindow("Wrong path!");
+                        String::saveText(fptr, S);
+                        fileSaved = 1;
+                        fclose(fptr);
                         break;
                     }
-
-                    String::saveText(fptr, S);
-                    fileSaved = 1;
-                    fclose(fptr);
-                    break;
                 }
                 else if (closeOption == IDNO)
                 {
@@ -974,16 +967,13 @@ int main()
 
                                     FILE* fptr = fopen(path.c_str(), "w");
 
-                                    if (fptr == NULL)
+                                    if (fptr != NULL)
                                     {
-                                        Windows::errorWindow("Wrong path!");
+                                        String::saveText(fptr, S);
+                                        fileSaved = 1;
+                                        fclose(fptr);
                                         break;
                                     }
-
-                                    String::saveText(fptr, S);
-                                    fileSaved = 1;
-                                    fclose(fptr);
-                                    break;
                                 }
                             }
 
@@ -1035,15 +1025,12 @@ int main()
 
                             FILE *fptr = fopen(path.c_str(), "w");
 
-                            if (fptr == NULL)
+                            if (fptr != NULL)
                             {
-                                Windows::errorWindow("Wrong path!");
-                                break;
+                                String::saveText(fptr, S);
+                                fileSaved = 1;
+                                fclose(fptr);
                             }
-
-                            String::saveText(fptr, S);
-                            fileSaved = 1;
-                            fclose(fptr);
                         }
                         else if (fileMenuButtons[3]->isHovering())
                         {
@@ -1056,15 +1043,12 @@ int main()
 
                             FILE *fptr = fopen(path.c_str(), "w");
 
-                            if (fptr == NULL)
+                            if (fptr != NULL)
                             {
-                                Windows::errorWindow("Wrong path!");
-                                break;
+                                String::saveText(fptr, S);
+                                fileSaved = 1;
+                                fclose(fptr);
                             }
-                            
-                            String::saveText(fptr, S);
-                            fileSaved = 1;
-                            fclose(fptr);
                         }
                         else if (fileMenuButtons[4]->isHovering())
                         {
@@ -1086,16 +1070,13 @@ int main()
 
                                 FILE* fptr = fopen(path.c_str(), "w");
 
-                                if (fptr == NULL)
+                                if (fptr != NULL)
                                 {
-                                    Windows::errorWindow("Wrong path!");
+                                    String::saveText(fptr, S);
+                                    fileSaved = 1;
+                                    fclose(fptr);
                                     break;
                                 }
-
-                                String::saveText(fptr, S);
-                                fileSaved = 1;
-                                fclose(fptr);
-                                break;
                             }
                             else if (closeOption == IDNO)
                             {
@@ -1358,16 +1339,13 @@ int main()
 
                             FILE* fptr = fopen(path.c_str(), "w");
 
-                            if (fptr == NULL)
+                            if (fptr != NULL)
                             {
-                                Windows::errorWindow("Wrong path!");
+                                String::saveText(fptr, S);
+                                fileSaved = 1;
+                                fclose(fptr);
                                 break;
                             }
-
-                            String::saveText(fptr, S);
-                            fileSaved = 1;
-                            fclose(fptr);
-                            break;
                         }
                         else if (closeOption == IDNO)
                         {
@@ -1898,9 +1876,9 @@ int main()
                         box.setPosition(marginLeft + w + paddingLeft, y);
                         box.setSize(sf::Vector2f(W, lineHeight));
                         if (p != currentAppearance)
-                            box.setFillColor(sf::Color(255, 255, 0, 128));
+                            box.setFillColor(currentThemeColors.findReplaceHighlight);
                         else
-                            box.setFillColor(sf::Color(255, 187, 0, 128));
+                            box.setFillColor(currentThemeColors.findReplaceCurrentHighlight);
                         selectedBoxes.push_back(box);
                         p = FindReplace::findNextValidAppearance(p, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
                     }
@@ -1913,7 +1891,7 @@ int main()
             int highlighted = 0;
 
             for (int i = 0; i < selectedBoxes.size(); i++)
-                if (selectedBoxes[i].getFillColor() == sf::Color(255, 187, 0, 128))
+                if (selectedBoxes[i].getFillColor() == currentThemeColors.findReplaceCurrentHighlight)
                     highlighted = i;
 
             for (int i = 0; i < highlighted; i++)

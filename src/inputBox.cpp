@@ -13,15 +13,15 @@ InputBox::InputBox(const std::string &_content, const sf::Vector2f &position, co
     container.setOutlineColor(currentThemeColors.textBoxOutline);
     container.setOutlineThickness(outline ? -1 : 0);
 
-    content = sf::Text(_content, globalFont, textBoxFontSize);
+    content = sf::Text(_content, globalFont, 16);
     content.setFillColor(currentThemeColors.text);
     content.setLetterSpacing(textBoxLetterSpacing);
 
     container.setSize(size);
-    cursorBox.setSize(sf::Vector2f(1, 16));
-    cursorBox.setPosition(container.getPosition() + sf::Vector2f(textBoxPaddingX + content.getGlobalBounds().getSize().x, textBoxPaddingY - 1));
+    cursorBox.setSize(sf::Vector2f(1, 18));
+    cursorBox.setPosition(container.getPosition() + sf::Vector2f(7 + content.getGlobalBounds().getSize().x, 3));
 
-    Helpers::centerContentInsideContainer(container, content, false, false, textBoxPaddingY, 0, 0, textBoxPaddingX);
+    Helpers::centerContentInsideContainer(container, content, false, false, 2, 0, 0, 7);
 }
 
 bool InputBox::isHovering()
@@ -98,7 +98,7 @@ void InputBox::handleInput(sf::RenderWindow &window, sf::Event event, const bool
     }
 
     setContent(text);
-    cursorBox.setPosition(container.getPosition() + sf::Vector2f(textBoxPaddingX + content.getGlobalBounds().getSize().x, textBoxPaddingY - 1));
+    cursorBox.setPosition(container.getPosition() + sf::Vector2f(7 + content.getGlobalBounds().getSize().x, 3));
 }
 
 void InputBox::updateCursorTimer()

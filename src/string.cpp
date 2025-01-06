@@ -19,7 +19,7 @@ String::Treap::Treap(char ch, bool cursor)
     flagCursor = sumCursor = cursor;
 
     this->sumEndline = (ch == 10);
-    this->sumWidth = getDim(ch) * (1 - cursor);
+    this->sumWidth = getDim(ch);
     cnt = 1;
     priority = rng();
 }
