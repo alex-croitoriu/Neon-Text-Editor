@@ -234,14 +234,16 @@ void goToLineWindow::handleEvent(const sf::Event &event)
                 try
                 {
                     int lineNumber = stoi(goToLineWindow::inputBox->getContent());
-                    if (!lineNumber || lineNumber > String::findNumberOfEndlines(1, String::len(S), S) + 1)
+                    if (!lineNumber)
                         throw std::invalid_argument("Invalid number!");
+                    else if (lineNumber > String::findNumberOfEndlines(1, String::len(S), S) + 1)
+                        throw std::invalid_argument("Number exceeds total number of lines!");
                     goToLineWindow::close();
                     goToLineNumber = lineNumber;
                 }
                 catch(std::exception &err)
                 {
-                    Windows::errorWindow("Invalid number!");
+                    Windows::errorWindow(err.what());
                 }
         }
     }
@@ -256,14 +258,16 @@ void goToLineWindow::handleEvent(const sf::Event &event)
             try
             {
                 int lineNumber = stoi(goToLineWindow::inputBox->getContent());
-                if (!lineNumber || lineNumber > String::findNumberOfEndlines(1, String::len(S), S) + 1)
+                if (!lineNumber)
                     throw std::invalid_argument("Invalid number!");
+                else if (lineNumber > String::findNumberOfEndlines(1, String::len(S), S) + 1)
+                    throw std::invalid_argument("Number exceeds total number of lines!");
                 goToLineWindow::close();
                 goToLineNumber = lineNumber;
             }
             catch(std::exception &err)
             {
-                Windows::errorWindow("Invalid number!");
+                Windows::errorWindow(err.what());
             }
         }
     }
