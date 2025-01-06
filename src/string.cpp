@@ -621,8 +621,6 @@ void String::copyTextToClipboard(const char *text)
     SetClipboardData(CF_TEXT, hMem);
 
     CloseClipboard();
-
-    std::cout << "Text copied to clipboard: " << text << std::endl;
 }
 
 std::string String::getTextFromClipboard()
@@ -656,8 +654,6 @@ std::string String::getTextFromClipboard()
     {
         clipboardText += pszText[i];
     }
-
-    std::cout << "Clipboard contains: " << pszText << std::endl;
 
     GlobalUnlock(hData);
     CloseClipboard();

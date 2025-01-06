@@ -48,7 +48,7 @@ int main()
     povesti.setPosition(300, 0);
 
     globalFont.loadFromFile("assets/fonts/kanit.ttf");
-    textFont.loadFromFile("assets/fonts/kanit.ttf");
+    textFont.loadFromFile("assets/fonts/jetbrains_mono.ttf");
     checkmarkFont.loadFromFile("assets/fonts/arial_unicode_ms.otf");
     lineNumbersTextFont.loadFromFile("assets/fonts/jetbrains_mono.ttf");
 
@@ -215,6 +215,7 @@ int main()
                     }
                     else
                     {
+                        Helpers::resetFindMatchCount();
                         Windows::errorWindow("Invalid keyword!");
                     }
                 }
@@ -297,6 +298,7 @@ int main()
                 }
                 else
                 {
+                    Helpers::resetFindMatchCount();
                     Windows::errorWindow("Invalid keyword!");
                 }
             }
@@ -405,6 +407,7 @@ int main()
                     }
                     else
                     {
+                        Helpers::resetReplaceMatchCount();
                         Windows::errorWindow("Invalid keyword(s)!");
                     }
                 }
@@ -571,6 +574,7 @@ int main()
                 }
                 else
                 {
+                    Helpers::resetReplaceMatchCount();
                     Windows::errorWindow("Invalid keyword(s)!");
                 }
             }
@@ -855,7 +859,6 @@ int main()
                         String::saveText(fptr, S);
                         fileSaved = 1;
                         fclose(fptr);
-                        break;
                     }
                 }
             }
@@ -865,6 +868,7 @@ int main()
             renderAgain = 1;
             flag = 1;
             fileSaved = 1;
+            path = "";
         }
         else if (ctrlShiftS == 0 && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && sf::Keyboard::isKeyPressed(sf::Keyboard::G))
         {
@@ -906,8 +910,10 @@ int main()
                         String::saveText(fptr, S);
                         fileSaved = 1;
                         fclose(fptr);
-                        break;
                     }
+
+                    window.close();
+                    break;
                 }
                 else if (closeOption == IDNO)
                 {
@@ -1034,11 +1040,11 @@ int main()
                                         String::saveText(fptr, S);
                                         fileSaved = 1;
                                         fclose(fptr);
-                                        break;
                                     }
                                 }
                             }
 
+                            path = "";
                             String::del(S);
                             S = new String::Treap(cursorChar, 1);
                             renderAgain = 1;
@@ -1137,8 +1143,10 @@ int main()
                                     String::saveText(fptr, S);
                                     fileSaved = 1;
                                     fclose(fptr);
-                                    break;
                                 }
+
+                                window.close();
+                                break;
                             }
                             else if (closeOption == IDNO)
                             {
@@ -1406,8 +1414,10 @@ int main()
                                 String::saveText(fptr, S);
                                 fileSaved = 1;
                                 fclose(fptr);
-                                break;
                             }
+
+                            window.close();
+                            break;
                         }
                         else if (closeOption == IDNO)
                         {
@@ -1969,10 +1979,6 @@ int main()
                 }
         }
 
-        if (selectFlag | findFlag | replaceFlag)
-            for (auto box : selectedBoxes)
-                window.draw(box);
-
         window.draw(lineNumbersBackground);
         if (showLineNumbers)
             window.draw(lineNumbersSprite);
@@ -1981,6 +1987,10 @@ int main()
             window.draw(cursorBox);
         if (cursorLineOnScreen && selectFlag == 0 && findFlag == 0 && replaceFlag == 0)
             window.draw(cursorLineHighlight);
+
+        if (selectFlag | findFlag | replaceFlag)
+            for (auto box : selectedBoxes)
+                window.draw(box);
 
         window.draw(aboveCurrentLineSprite);
         window.draw(ptext1);
