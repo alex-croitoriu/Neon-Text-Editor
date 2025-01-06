@@ -301,6 +301,34 @@ int main()
                     Windows::errorWindow("Invalid keyword!");
                 }
             }
+            else if (event.type == sf::Event::KeyPressed && event.key.code == 71)
+            {
+                currentAppearance--;
+                currentAppearance = max(0, currentAppearance);
+
+                renderAgain = 1;
+                flag = 1;
+
+                selectFlag = 0;
+                replaceFlag = 0;
+                updateFindReplace = 1;
+
+                Helpers::updateFindMatchCount();
+            }
+            else if (event.type == sf::Event::KeyPressed && event.key.code == 72)
+            {
+                currentAppearance++;
+                currentAppearance = min((int)positions.size() - 1, currentAppearance);
+
+                renderAgain = 1;
+                flag = 1;
+
+                selectFlag = 0;
+                replaceFlag = 0;
+                updateFindReplace = 1;
+
+                Helpers::updateFindMatchCount();
+            }
             else
                 findWindow::handleEvent(event);
         }
@@ -546,6 +574,41 @@ int main()
                 {
                     Windows::errorWindow("Invalid keyword(s)!");
                 }
+            }
+            else if (event.type == sf::Event::KeyPressed && event.key.code == 71)
+            {
+                int pap = FindReplace::findPrevValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+
+                if (pap != -1)
+                    currentAppearance = pap;
+                else
+                    break;
+
+                renderAgain = 1;
+                flag = 1;
+
+                updateFindReplace = 1;
+                selectFlag = 0;
+                findFlag = 0;
+
+                Helpers::updateReplaceMatchCount();
+            }
+            else if (event.type == sf::Event::KeyPressed && event.key.code == 72)
+            {
+                int nap = FindReplace::findNextValidAppearance(currentAppearance, bit, positions, gone, replaceKeyword, findKeyword, prv, nxt, notRemoved);
+                if (nap != -1)
+                    currentAppearance = nap;
+                else
+                    break;
+
+                renderAgain = 1;
+                flag = 1;
+
+                selectFlag = 0;
+                findFlag = 0;
+                updateFindReplace = 1;
+
+                Helpers::updateReplaceMatchCount();
             }
             else
                 replaceWindow::handleEvent(event);

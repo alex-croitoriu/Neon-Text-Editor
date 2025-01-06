@@ -9,7 +9,7 @@
 - [X] right click
 - [X] improve find functionality
 - [X] select all
-- [X] fullscreeen legit
+- [X] fullscreeen
 - [X] fix blurry buttons
 - [X] options menu: hide lines, go to line, time and date, switch dark/light mode
 - [X] should not prompt for path when saving after opening a file
@@ -21,7 +21,7 @@
 - [X] status bar (current cursor position - line and column, current zoom level, font size, selected characters)
 - [X] dark/light mode 
 - [X] current file name top right
-- [X] fix theme buttons click goes behind bug
+- [X] fix theme buttons click bug
 - [X] name and logo
 - [X] shortcuts frontend
 - [X] shortcuts backend
@@ -31,11 +31,11 @@
 - [X] modal for error
 - [X] modal for go to line
 - [X] modal for replace
+- [X] modal for unsaved changes
 - [X] refine modals ui
 - [X] fix main window not focused but still clickable bug
 - [X] fix replace modal bugs (replace, next, prev)
-- [X] modal for unsaved changes 
 - [X] improve inputbox feedback
+- [X] revise replace/find highlight colors for every theme
 
 - [?] do something with line count text box (currently triggers epilepsy)
-- [ ] revise replace/find highlight colors for every theme
