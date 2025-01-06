@@ -19,7 +19,7 @@ InputBox::InputBox(const std::string &_content, const sf::Vector2f &position, co
 
     container.setSize(size);
     cursorBox.setSize(sf::Vector2f(1, 18));
-    cursorBox.setPosition(container.getPosition() + sf::Vector2f(7 + content.getGlobalBounds().getSize().x, 3));
+    cursorBox.setPosition(container.getPosition() + sf::Vector2f(8 + content.getGlobalBounds().getSize().x, 3));
 
     Helpers::centerContentInsideContainer(container, content, false, false, 2, 0, 0, 7);
 }
@@ -98,7 +98,7 @@ void InputBox::handleInput(sf::RenderWindow &window, sf::Event event, const bool
     }
 
     setContent(text);
-    cursorBox.setPosition(container.getPosition() + sf::Vector2f(7 + content.getGlobalBounds().getSize().x, 3));
+    cursorBox.setPosition(container.getPosition() + sf::Vector2f(8 + content.getGlobalBounds().getSize().x, 3));
 }
 
 void InputBox::updateCursorTimer()

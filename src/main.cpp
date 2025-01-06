@@ -199,7 +199,6 @@ int main()
 
                         if (positions.size() == 0)
                         {
-                            // Windows::errorWindow("There are 0 matches!");
                             renderAgain = 1;
                             flag = 1;
                         }
@@ -1627,7 +1626,7 @@ int main()
                 break;
             }
 
-            if (event.type == sf::Event::TextEntered) /// ce scrie user-ul
+            if (event.type == sf::Event::TextEntered)
             {
                 fileSaved = 0;
                 int ch = event.text.unicode;
@@ -1989,7 +1988,6 @@ int main()
         
         Helpers::updateStatusBarInfo();
         Helpers::updateStatusBarPositions();
-
         Helpers::updateToolBarInfo();
         Helpers::updateToolBarPositions();
     
@@ -1998,8 +1996,10 @@ int main()
         
         lineCountTextBox->draw();
         lineColumnTextBox->draw();
+
         if (selectedBoxes.size())
             selectedCharacterCountTextBox->draw();
+            
         zoomOutButton->draw();
         zoomLevelTextBox->draw();
         zoomInButton->draw();
